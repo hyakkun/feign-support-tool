@@ -1,0 +1,46 @@
+:root {
+  color: #1f2933;
+  font-family: system-ui, sans-serif;
+}
+
+body {
+  margin: 1rem;
+}
+
+#status {
+  color: #52606d;
+}
+
+.players {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+  gap: 0.75rem;
+}
+
+.player {
+  border: 2px solid var(--player-color);
+  border-radius: 0.5rem;
+  box-shadow: inset 0 0.35rem 0 var(--player-color);
+  cursor: grab;
+  min-height: 7rem;
+  padding: 0.75rem;
+}
+
+.player.dragging {
+  opacity: 0.5;
+}
+
+.player h2 {
+  font-size: 1.1rem;
+  margin: 0 0 0.5rem;
+}
+
+.player p {
+  font-size: 0.9rem;
+  margin: 0.25rem 0;
+  overflow-wrap: anywhere;
+}
+
+.player p span {
+  color: #52606d;
+}

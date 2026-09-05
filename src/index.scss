@@ -1,13 +1,18 @@
 html {
+    line-height:1.5rem;
     transform-origin: top left;
     transform: scale(0.9);
     overflow: scroll;
 }
+body {
+    margin: 8px;
+}
 
 body * {
-    -ms-overflow-style: none; /* IE, Edge ‘Î‰ž */
-    scrollbar-width: none; /* Firefox ‘Î‰ž */
+    -ms-overflow-style: none;
+    scrollbar-width: none;
 }
+
 .role {
     display: inline-block;
     margin: 1px;
@@ -36,8 +41,38 @@ body * {
     &.sane {
         background-color: #8ff;
     }
-
 }
+
+.roleButton {
+    display: inline-block;
+    margin: 0.05rem;
+    border-radius: 0.2rem;
+    font-size: 1rem;
+    &.unknown {
+        background-color: #eee;
+    }
+
+    &.crew {
+        background-color: #8f8;
+    }
+
+    &.imp {
+        background-color: #f88;
+    }
+
+    &.neutral {
+        background-color: #88f;
+    }
+
+    &.insane {
+        background-color: #ff8;
+    }
+
+    &.sane {
+        background-color: #8ff;
+    }
+}
+
 
 .name {
     display: block;
@@ -57,11 +92,29 @@ th:nth-child(2n), td:nth-child(2n) {
     border-left: 2px dashed #e0e0e0;
 }
 
+.tableCell {
+    position:relative;
+    display: inline-block;
+    width: 100%;
+    height: 100%;
+}
+
+.moveItem {
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: inline-block;
+    width: 100%;
+    height: 100%;
+    transition: transform 1s;
+    transition-timing-function: ease-in-out;
+}
+
 .InsaneResult {
     background-color: #ff0;
     width: 100%;
     height: 100%;
-    display: flex;
+    display: inline-block;
     align-items: center;
 }
 
@@ -69,23 +122,37 @@ th:nth-child(2n), td:nth-child(2n) {
     background-color: #0ff;
     width: 100%;
     height: 100%;
-    display: flex;
+    display: inline-block;
     align-items: center;
 }
 
 .Important {
     border: 1.5px solid #000;
-    margin: -1px;
-    box-sizing: border-box;
+    margin: -1.5px;
     height: 100%;
-    display: flex;
+    width: 100%;
+    display: inline-block;
     align-items: center;
 }
 
 img {
-    vertical-align: bottom;
+    vertical-align: middle;
     width: 1.5rem;
     height: 1.5rem;
+}
+.roleImg {
+    vertical-align: middle;
+    width: 2rem;
+    height: 2rem;
+}
+
+.roleOption {
+    text-align: center;
+    vertical-align: middle;
+    display: inline-block;
+    width: 2rem;
+    height: 2rem;
+    line-height: 2rem;
 }
 
 .selectImg {
@@ -93,6 +160,8 @@ img {
     width: 100%;
     text-align: center;
 }
+
+
 
 .might {
     display: inline-block;
@@ -123,7 +192,7 @@ img {
 .iconTextContainer {
     position: absolute;
     display: inline-block;
-    top: 0.5rem;
+    top: 0.55rem;
     left: -1.85rem;
     width: 5.2rem;
     transform: scale(0.4);
