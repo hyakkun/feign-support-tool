@@ -5,7 +5,6 @@ import {
   actionItemsForRoleLabels,
   createLegacyRoleOptions,
   findRoleByLabel,
-  supportsResultCodeForRoleLabels,
 } from "./roleCatalog";
 
 describe("role catalog", () => {
@@ -30,8 +29,6 @@ describe("role catalog", () => {
     });
     expect(findRoleByLabel("魔術師")).toMatchObject({ factions: [FACTION.NEUTRAL] });
     expect(findRoleByLabel("ゴースト")).toMatchObject({ id: "haunter", label: "ホーンター" });
-    expect(supportsResultCodeForRoleLabels(["トラッカー"], "zero-people")).toBe(true);
-    expect(supportsResultCodeForRoleLabels(["ルック"], "zero-people")).toBe(false);
   });
 
   test("keeps the legacy selector representation for existing roles", () => {

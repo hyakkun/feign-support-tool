@@ -40,8 +40,7 @@ type ResultCode =
   | "trapped"
   | "at-home"
   | "visitor"
-  | "revive"
-  | "zero-people";
+  | "revive";
 type AlignmentNote = { label: string };
 type RoleAssignment = { roleId: RoleId; faction: DisplayFaction };
 
@@ -260,11 +259,11 @@ type Interaction =
 
 | ID | 表示名 | 陣営 | `interaction` |
 | --- | --- | --- | --- |
-| `tracker` | トラッカー | `crew`, `imp` | `actionItems: ["player", "result"]`。結果なしは`{ kind: "result", result: "zero-people" }`、人物ありは既存の`{ kind: "player" }`で記録する |
+| `tracker` | トラッカー | `crew`, `imp` | `actionItems: ["player", "result"]`。対象者の行き先は既存の`{ kind: "player" }`で記録し、対象者が在宅などで人物が見えない場合は既存の`×`結果を使う |
 | `magician` | 魔術師 | `neutral` | `actionItems: ["player", "role", "result"]`。対象・予想役職・成功／失敗を既存のセル種別で記録し、結果と自爆は利用者が行動欄・`自爆`行へ記録する |
 | `haunter` | ホーンター | `neutral` | `actionItems: ["player", "result"]`。ろうそく設置は対象人物と任意メモで記録し、道連れは利用者が`道連れ`行へ対象人物だけを記録する。`legacyLabels: ["ゴースト"]` |
 
-トラッカーと魔術師には新しいセル種別は不要である。必要な追加は、トラッカー用の結果コード`zero-people`と、魔術師用の役職定義である。
+トラッカーと魔術師には新しいセル種別・結果コードは不要である。既存の人物選択と`×`結果で表現できる。
 
 ホーンターのために新しいセル種別や人物間の関連データは追加しない。前日の`追放`行と当日の`道連れ`行を盤面上で見比べて考察する。
 
@@ -321,7 +320,7 @@ type DisplaySnapshot = {
 
 - 公開版のチュートリアル盤面を変換・再表示できる。
 - 追放・殺害による死亡役の反映を維持できる。
-- トラッカーは「対象」と「0人または1人の結果」を別の入力として保持できる。
+- トラッカーは「対象」と、行き先の人物または既存の`×`結果を別の入力として保持できる。
 - 魔術師の役職予想と結果を記録でき、`自爆`行へ対象人物を記録できる。
 - ホーンターのろうそく対象を任意メモで記録でき、`道連れ`行へ対象人物を記録できる。
 - 自爆・道連れの対象が、補助表示ウィンドウの該当プレイヤーカードに表示される。

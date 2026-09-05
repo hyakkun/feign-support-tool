@@ -37,7 +37,6 @@ const roleDefinitions = [
     label: "トラッカー",
     factions: [FACTION.CREW, FACTION.IMP],
     actionItems: [ACTION_ITEM.PLAYER, ACTION_ITEM.RESULT],
-    resultCodes: ["zero-people"],
     interaction: { kind: "observe-visit", target: "player", result: "zero-or-one-player" },
   },
   {
@@ -80,11 +79,6 @@ export const actionItemsForRoleLabels = (labels) => {
     });
   });
   return actionItems.length ? actionItems : [...ALL_ACTION_ITEMS];
-};
-
-export const supportsResultCodeForRoleLabels = (labels, resultCode) => {
-  if (!labels.length || labels.includes("？")) return true;
-  return labels.some((label) => findRoleByLabel(label)?.resultCodes?.includes(resultCode));
 };
 
 export const createLegacyRoleOptions = (actionType) => [{

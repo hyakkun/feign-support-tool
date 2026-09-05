@@ -11,7 +11,6 @@ import {
     actionItemsForRoleLabels,
     createLegacyRoleOptions,
     createRoleImageMap,
-    supportsResultCodeForRoleLabels,
 } from "./roleCatalog";
 import {
     createLegacyEventRows,
@@ -140,7 +139,6 @@ FeignTool.actionResult = [
     { id: 108, name: "来客", roletype: [true, true, true, true, false], actionType: FeignTool.actionType.action },
     { id: 109, name: "蘇生", roletype: [true, false, false, false, false], actionType: FeignTool.actionType.action },
     { id: 110, name: "重要結果", roletype: [true, false, false, false, false], actionType: FeignTool.actionType.option },];
-FeignTool.zeroPeopleResult = { id: 112, name: "0人", roletype: [true, false, false, false, false], actionType: FeignTool.actionType.action };
 FeignTool.actionRevive = { id: 111, name: "蘇生", roletype: [true, false, false, false, false], actionType: FeignTool.actionType.option };
 FeignTool.reviveImage = process.env.PUBLIC_URL + "/image/Revive.png";
 
@@ -296,9 +294,7 @@ FeignTool.action_day = {
         const optionsByActionItem = {
             [ACTION_ITEM.ROLE]: FeignTool.role,
             [ACTION_ITEM.PLAYER]: FeignTool_nameList,
-            [ACTION_ITEM.RESULT]: supportsResultCodeForRoleLabels(allrole, "zero-people")
-                ? FeignTool.actionResult.concat(FeignTool.zeroPeopleResult)
-                : FeignTool.actionResult,
+            [ACTION_ITEM.RESULT]: FeignTool.actionResult,
         };
         const newOptions = actionItemsForRoleLabels(allrole).flatMap((actionItem, index) => [
             ...(index ? [FeignTool.hr] : []),
