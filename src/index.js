@@ -12,6 +12,11 @@ import {
     createLegacyRoleOptions,
     createRoleImageMap,
 } from "./roleCatalog";
+import {
+    createLegacyEventRows,
+    isDeathEventLabel,
+    isSelfDestructLabel,
+} from "./eventRows";
 import './index.scss';
 
 
@@ -121,7 +126,10 @@ FeignTool.role = createLegacyRoleOptions(FeignTool.actionType).concat({
     roletype: [true, true, true, true, true],
     actionType: FeignTool.actionType.role,
 });
-FeignTool.roleImage = createRoleImageMap(process.env.PUBLIC_URL);
+FeignTool.roleImage = {
+    ...createRoleImageMap(process.env.PUBLIC_URL),
+    "自爆": process.env.PUBLIC_URL + "/image/Dead.png",
+};
 FeignTool.actionResult = [
     { id: 100, name: "成功", roletype: [true, false, false, false, false], actionType: FeignTool.actionType.action },
     { id: 101, name: "失敗", roletype: [true, false, false, false, false], actionType: FeignTool.actionType.action },
@@ -140,13 +148,7 @@ FeignTool.reviveImage = process.env.PUBLIC_URL + "/image/Revive.png";
 FeignTool.otheActions = ["追放", "キル", "爆発", "CO", "不明"];
 FeignTool.hr = { id: -3, name: "hr", roletype: [false, false, false, false, false], actionType: FeignTool.actionType.option };
 FeignTool.br = { id: -4, name: "br", roletype: [false, false, false, false, false], actionType: FeignTool.actionType.option };
-FeignTool.ActionsNameList = [
-    { keyid: -1, id: -1, name: ["追放", 19] },
-    { keyid: -2, id: -2, name: ["殺害", 19] },
-    { keyid: -3, id: -3, name: ["爆発", 19], role: [["ボマー", 3, FeignTool.actionType.role]]},
-    { keyid: -4, id: -4, name: ["医者", 19], role: [["医者", 1, FeignTool.actionType.role]] },
-    { keyid: -5, id: -5, name: ["対立", 19] },
-    { keyid: -6, id: -6, name: ["ﾗｲﾝ", 19] },];
+FeignTool.ActionsNameList = createLegacyEventRows(FeignTool.actionType);
 FeignTool.column_template = {
     sort: true,
     sortFunc: (a, b, order, dataField, rowA, rowB) => {
@@ -209,7 +211,7 @@ FeignTool.formatter_templete = (dataField) => ((cell, row) => {
     return <div className="tableCell" id={dataField + "_tableid_" + row.id}>{roles}</div>;
 });
 FeignTool.dead_formatter = (dataField) => ((cell, row) => {
-    if (dataField in row && (row.name[0] === "殺害" || row.name[0] === "追放")) {
+    if (dataField in row && isDeathEventLabel(row.name[0])) {
         const items = row[dataField];
         const moveItems = [];
         for (let i = items.length - 1; i >= 0; i--) {
@@ -251,7 +253,7 @@ FeignTool.target_day = {
         if (!(column.dataField in row)) row[column.dataField] = [];
         let options = FeignTool_nameList;
         if (row.id < 0) {
-            if (row.name[0] === "殺害" || row.name[0] === "追放")
+            if (isDeathEventLabel(row.name[0]))
                 return (
                     <DeadSelect {...editorProps} value={value} row={row} options={FeignTool_nameList.concat(FeignTool.actionRevive)} dataField={column.dataField} text={column.text} />
                 );
@@ -268,7 +270,7 @@ FeignTool.action_day = {
     editorRenderer: (editorProps, value, row, column, rowIndex, columnIndex) => {
         if (!(column.dataField in row)) row[column.dataField] = [];
         let allrole = [];
-        if (row.id < 0 && (row.name[0] === "殺害" || row.name[0] === "追放"))
+        if (row.id < 0 && isDeathEventLabel(row.name[0]))
             return (
                 <DeadSelect {...editorProps} value={value} row={row} options={FeignTool_nameList.concat(FeignTool.actionRevive)} dataField={column.dataField} text={column.text} />
             );
@@ -862,6 +864,17 @@ class DeadSelect extends React.Component {
                     FeignTool_tableData.forEach((item) => {
                         if (item.name[0] === newItem[0] && item.id >= 0) {
                             roleExist = item.deadRole && item.deadRole.length > 0;
+                            if (isSelfDestructLabel(this.props.row.name[0])) {
+                                const selfDestructMarker = ["自爆", 0, FeignTool.actionType.option];
+                                if (item.deadRole?.some((deadRole) => deadRole[0] === "自爆")) {
+                                    // The marker was already recorded for this player.
+                                } else if (item.deadRole) {
+                                    item.deadRole.push(selfDestructMarker);
+                                } else {
+                                    item.deadRole = [selfDestructMarker];
+                                }
+                                item.keyid = item.id + ((item.keyid * 10) % 5 + 1) * 0.1;
+                            }
                         }
                     });
                     return roleExist;

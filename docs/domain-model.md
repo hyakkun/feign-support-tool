@@ -179,10 +179,12 @@ const existingEventRows = [
   { id: "doctor", label: "医者", editor: "player-or-revive" },
   { id: "conflict", label: "対立", editor: "freeform" },
   { id: "line", label: "ライン", editor: "freeform" },
+  { id: "self-destruct", label: "自爆", editor: "player-then-optional-dead-role" },
+  { id: "chain-death", label: "道連れ", editor: "player-then-optional-dead-role" },
 ];
 ```
 
-これは公開版の`DeadSelect`に相当する。`追放`または`殺害`で人物、続けて死亡役職を入力すると、その人物行の死亡役欄へ役職を表示する。ツールはその主張の真偽を判定しない。
+これは公開版の`DeadSelect`に相当する。`追放`、`殺害`、`自爆`、`道連れ`で人物、続けて死亡役職を入力すると、その人物行の死亡役欄へ役職を表示する。`自爆`では既存の死亡マーカーを追加して専用の死体表示とする。ツールはその主張の真偽を判定しない。
 
 ### 既存役職だけの盤面例
 

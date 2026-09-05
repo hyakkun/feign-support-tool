@@ -8,7 +8,7 @@
   const cellText = (cell) => {
     if (!Array.isArray(cell)) return "";
     return cell
-      .filter((item) => Array.isArray(item) && item[0] && item[2] !== 4)
+      .filter((item) => Array.isArray(item) && item[0] && (item[2] !== 4 || item[0] === "自爆"))
       .map((item) => item[0])
       .join(" / ");
   };
