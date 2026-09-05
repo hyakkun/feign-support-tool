@@ -44,9 +44,9 @@
       [
         ["役職", cellText(player.role)],
         ["死亡役職", cellText(player.deadRole)],
-        ["対象", cellText(player[`target_day${day}`])],
-        ["行動", cellText(player[`action_day${day}`])],
-      ].forEach(([label, value]) => {
+      ["対象", cellText(player[`target_day${day}`])],
+      ["行動", cellText(player[`action_day${day}`])],
+    ].forEach(([label, value]) => {
         if (!value) return;
         const row = document.createElement("p");
         const labelElement = document.createElement("span");
@@ -54,6 +54,15 @@
         row.append(labelElement, value);
         card.append(row);
       });
+
+      const events = snapshot.playerEvents?.[player.name?.[0]] || [];
+      if (events.length) {
+        const row = document.createElement("p");
+        const labelElement = document.createElement("span");
+        labelElement.textContent = "イベント: ";
+        row.append(labelElement, events.join(" / "));
+        card.append(row);
+      }
 
       card.addEventListener("dragstart", () => {
         draggingId = player.id;
