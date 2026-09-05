@@ -27,15 +27,6 @@ const roleDefinitions = [
   { id: "police", label: "ポリス", factions: [FACTION.CREW, FACTION.IMP], actionItems: [ACTION_ITEM.RESULT], image: "Police.png" },
   { id: "trapper", label: "トラッパ", factions: [FACTION.CREW, FACTION.IMP], actionItems: [ACTION_ITEM.RESULT, ACTION_ITEM.PLAYER], image: "Trapper.png" },
   { id: "lookout", label: "ルック", factions: [FACTION.CREW, FACTION.IMP], actionItems: [ACTION_ITEM.PLAYER, ACTION_ITEM.RESULT], image: "Lookout.png" },
-  { id: "provoker", label: "プロボカ", legacyLabels: ["挑発"], factions: [FACTION.CREW, FACTION.IMP], actionItems: [ACTION_ITEM.RESULT], image: "Provoker.png" },
-  { id: "doctor", label: "医者", factions: [FACTION.CREW], actionItems: [ACTION_ITEM.RESULT], image: "Doctor.png" },
-  { id: "insane", label: "バカ", factions: [FACTION.CREW], actionItems: [ACTION_ITEM.RESULT], image: "Insane.png" },
-  { id: "blamer", label: "ブレイマ", factions: [FACTION.IMP], actionItems: [ACTION_ITEM.RESULT], image: "Blamer.png" },
-  { id: "cleaner", label: "クリーナ", factions: [FACTION.IMP], actionItems: [ACTION_ITEM.RESULT], image: "Cleaner.png" },
-  { id: "serial-killer", label: "シリアル", factions: [FACTION.NEUTRAL], actionItems: [ACTION_ITEM.RESULT], image: "SerialKiller.png" },
-  { id: "bomber", label: "ボマー", factions: [FACTION.NEUTRAL], actionItems: [ACTION_ITEM.RESULT], image: "Bomber.png" },
-  { id: "thief", label: "シーフ", factions: [FACTION.NEUTRAL], actionItems: [ACTION_ITEM.ROLE, ACTION_ITEM.PLAYER, ACTION_ITEM.RESULT], image: "Thief.png" },
-  { id: "survivor", label: "サバイバ", factions: [FACTION.NEUTRAL], actionItems: [ACTION_ITEM.RESULT], image: "Survivor.png" },
   {
     id: "tracker",
     label: "トラッカ",
@@ -45,6 +36,15 @@ const roleDefinitions = [
     interaction: { kind: "observe-visit", target: "player", result: "zero-or-one-player" },
     image: "Tracker.png",
   },
+  { id: "provoker", label: "プロボカ", legacyLabels: ["挑発"], factions: [FACTION.CREW, FACTION.IMP], actionItems: [ACTION_ITEM.RESULT], image: "Provoker.png" },
+  { id: "doctor", label: "医者", factions: [FACTION.CREW], actionItems: [ACTION_ITEM.RESULT], image: "Doctor.png" },
+  { id: "insane", label: "バカ", factions: [FACTION.CREW], actionItems: [ACTION_ITEM.RESULT], image: "Insane.png" },
+  { id: "blamer", label: "ブレイマ", factions: [FACTION.IMP], actionItems: [ACTION_ITEM.RESULT], image: "Blamer.png" },
+  { id: "cleaner", label: "クリーナ", factions: [FACTION.IMP], actionItems: [ACTION_ITEM.RESULT], image: "Cleaner.png" },
+  { id: "serial-killer", label: "シリアル", factions: [FACTION.NEUTRAL], actionItems: [ACTION_ITEM.RESULT], image: "SerialKiller.png" },
+  { id: "bomber", label: "ボマー", factions: [FACTION.NEUTRAL], actionItems: [ACTION_ITEM.RESULT], image: "Bomber.png" },
+  { id: "thief", label: "シーフ", factions: [FACTION.NEUTRAL], actionItems: [ACTION_ITEM.ROLE, ACTION_ITEM.PLAYER, ACTION_ITEM.RESULT], image: "Thief.png" },
+  { id: "survivor", label: "サバイバ", factions: [FACTION.NEUTRAL], actionItems: [ACTION_ITEM.RESULT], image: "Survivor.png" },
   {
     id: "magician",
     label: "魔術師",
@@ -63,6 +63,26 @@ const roleDefinitions = [
     image: "Haunter.png",
   },
 ];
+
+const legacyRoleIds = {
+  snitch: 0,
+  investigator: 1,
+  police: 2,
+  trapper: 3,
+  lookout: 4,
+  provoker: 5,
+  doctor: 6,
+  insane: 7,
+  blamer: 8,
+  cleaner: 9,
+  "serial-killer": 10,
+  bomber: 11,
+  thief: 12,
+  survivor: 13,
+  tracker: 14,
+  magician: 15,
+  haunter: 16,
+};
 
 export const ROLE_CATALOG = Object.freeze(roleDefinitions.map((role) => Object.freeze({ ...role })));
 
@@ -100,7 +120,7 @@ export const createLegacyRoleOptions = (actionType) => [{
   name: LEGACY_SELECTOR.FACTION,
   roletype: [false, false, false, false, false],
   actionType: actionType.option,
-}, ...ROLE_CATALOG.map((role, index) => {
+}, ...ROLE_CATALOG.map((role) => {
   const legacy = role.factions.length === 2
     ? flexibleFactionLegacy
     : role.factions[0] === FACTION.CREW
@@ -110,7 +130,7 @@ export const createLegacyRoleOptions = (actionType) => [{
         : { roletype: [true, false, false, true, false], defaultRoletype1: 3, defaultRoletype2: 3, defaultRoletype3: 3 };
 
   return {
-    id: index,
+    id: legacyRoleIds[role.id],
     name: role.label,
     ...legacy,
     actionType: actionType.role,
