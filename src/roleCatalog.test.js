@@ -22,6 +22,7 @@ describe("role catalog", () => {
   test("keeps the legacy selector representation for existing roles", () => {
     const actionType = { role: 1 };
     const options = createLegacyRoleOptions(actionType);
+    expect(options[0]).toMatchObject({ id: -2, name: "Hoge" });
     expect(options.find((option) => option.name === "医者")).toMatchObject({
       id: 6,
       roletype: [true, true, false, false, true],

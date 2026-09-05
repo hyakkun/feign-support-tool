@@ -57,7 +57,12 @@ export const actionItemsForRoleLabels = (labels) => {
   return actionItems.length ? actionItems : [...ALL_ACTION_ITEMS];
 };
 
-export const createLegacyRoleOptions = (actionType) => ROLE_CATALOG.map((role, index) => {
+export const createLegacyRoleOptions = (actionType) => [{
+  id: -2,
+  name: "Hoge",
+  roletype: [false, false, false, false, false],
+  actionType: actionType.option,
+}, ...ROLE_CATALOG.map((role, index) => {
   const legacy = role.factions.length === 2
     ? flexibleFactionLegacy
     : role.factions[0] === FACTION.CREW
@@ -72,7 +77,7 @@ export const createLegacyRoleOptions = (actionType) => ROLE_CATALOG.map((role, i
     ...legacy,
     actionType: actionType.role,
   };
-});
+})];
 
 export const createRoleImageMap = (publicUrl) => ROLE_CATALOG.reduce((images, role) => ({
   ...images,
