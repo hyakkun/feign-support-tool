@@ -68,6 +68,8 @@ export const findRoleByLabel = (label) => ROLE_CATALOG.find((role) => (
   role.label === label || role.legacyLabels?.includes(label)
 ));
 
+export const findRoleById = (id) => ROLE_CATALOG.find((role) => role.id === id);
+
 export const actionItemsForRoleLabels = (labels) => {
   if (!labels.length || labels.includes("？")) return [...ALL_ACTION_ITEMS];
 
@@ -102,6 +104,13 @@ export const createLegacyRoleOptions = (actionType) => [{
     actionType: actionType.role,
   };
 })];
+
+export const createLegacyRoleToken = (roleId, actionType) => {
+  const role = findRoleById(roleId);
+  const legacyRole = createLegacyRoleOptions(actionType).find((option) => option.name === role?.label);
+  if (!role || !legacyRole) return undefined;
+  return [role.label, legacyRole.defaultRoletype2 ?? 0, actionType.role];
+};
 
 export const createRoleImageMap = (publicUrl) => ROLE_CATALOG.reduce((images, role) => {
   if (!role.image) return images;

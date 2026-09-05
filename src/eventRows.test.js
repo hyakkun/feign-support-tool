@@ -1,6 +1,7 @@
 import {
   EVENT_ROWS,
   createLegacyEventRows,
+  fixedDeathRoleIdForEventLabel,
   isDeathEventLabel,
   popupEventsByPlayerName,
 } from "./eventRows";
@@ -12,6 +13,8 @@ describe("event rows", () => {
     ]);
     expect(isDeathEventLabel("自爆")).toBe(true);
     expect(isDeathEventLabel("道連れ")).toBe(true);
+    expect(fixedDeathRoleIdForEventLabel("自爆")).toBe("magician");
+    expect(fixedDeathRoleIdForEventLabel("道連れ")).toBeUndefined();
   });
 
   test("keeps legacy rows compatible with the current table", () => {

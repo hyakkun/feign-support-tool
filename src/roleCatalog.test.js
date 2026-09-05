@@ -4,6 +4,7 @@ import {
   ROLE_CATALOG,
   actionItemsForRoleLabels,
   createLegacyRoleOptions,
+  createLegacyRoleToken,
   findRoleByLabel,
 } from "./roleCatalog";
 
@@ -40,5 +41,9 @@ describe("role catalog", () => {
       roletype: [true, true, false, false, true],
       actionType: 1,
     });
+  });
+
+  test("creates a neutral legacy token for the magician", () => {
+    expect(createLegacyRoleToken("magician", { role: 1, option: 4 })).toEqual(["魔術師", 3, 1]);
   });
 });

@@ -120,11 +120,11 @@ const eventRows = [
   { id: "exile", label: "追放", editor: "player-then-optional-dead-role" },
   { id: "kill", label: "殺害", editor: "player-then-optional-dead-role" },
   { id: "chain-death", label: "道連れ", editor: "player-then-optional-dead-role" },
-  { id: "self-destruct", label: "自爆", editor: "player-then-optional-dead-role" },
+  { id: "self-destruct", label: "自爆", editor: "player-with-fixed-dead-role", fixedDeadRole: "magician" },
 ];
 ```
 
-役職が判明していない場合は人物だけを記録できる。死亡役職を追記したい場合だけ、追放・殺害と同様に人物行の死亡役欄へ反映する。自爆・道連れのための専用死体マーカーや人物間の関連データは持たない。補助表示ウィンドウでは、当日分の自爆・道連れ行に入力された対象人物をイベント要約として表示する。
+追放・殺害・道連れでは、役職が判明していない場合は人物だけを記録でき、必要な場合だけ死亡役職を追記する。自爆は魔術師固有のため、人物を選択した時点で死亡役欄へ魔術師を自動記録し、役職を追加選択する手順は設けない。自爆・道連れのための専用死体マーカーや人物間の関連データは持たない。補助表示ウィンドウでは、当日分の自爆・道連れ行に入力された対象人物をイベント要約として表示する。
 
 ## 役職カタログ
 
@@ -176,14 +176,14 @@ const existingEventRows = [
   { id: "kill", label: "殺害", editor: "player-then-optional-dead-role" },
   { id: "explosion", label: "爆発", editor: "player-or-revive" },
   { id: "chain-death", label: "道連れ", editor: "player-then-optional-dead-role" },
-  { id: "self-destruct", label: "自爆", editor: "player-then-optional-dead-role" },
+  { id: "self-destruct", label: "自爆", editor: "player-with-fixed-dead-role", fixedDeadRole: "magician" },
   { id: "doctor", label: "医者", editor: "player-or-revive" },
   { id: "conflict", label: "対立", editor: "freeform" },
   { id: "line", label: "ライン", editor: "freeform" },
 ];
 ```
 
-これは公開版の`DeadSelect`に相当する。`追放`、`殺害`、`自爆`、`道連れ`で人物、続けて死亡役職を入力すると、その人物行の死亡役欄へ役職を表示する。ツールはその主張の真偽を判定しない。
+これは公開版の`DeadSelect`に相当する。`追放`、`殺害`、`道連れ`では人物、続けて任意の死亡役職を入力すると、その人物行の死亡役欄へ役職を表示する。`自爆`では人物の選択だけで魔術師を死亡役欄へ記録する。ツールはその主張の真偽を判定しない。
 
 ### 既存役職だけの盤面例
 
@@ -321,7 +321,7 @@ type DisplaySnapshot = {
 - 公開版のチュートリアル盤面を変換・再表示できる。
 - 追放・殺害による死亡役の反映を維持できる。
 - トラッカーは「対象」と、行き先の人物または既存の`×`結果を別の入力として保持できる。
-- 魔術師の役職予想と結果を記録でき、`自爆`行へ対象人物を記録できる。
+- 魔術師の役職予想と結果を記録でき、`自爆`行で人物を選ぶと死亡役欄へ魔術師を自動記録できる。
 - ホーンターのろうそく対象を任意メモで記録でき、`道連れ`行へ対象人物を記録できる。
 - 自爆・道連れの対象が、補助表示ウィンドウの該当プレイヤーカードに表示される。
 - 入力内容からキル・自爆・道連れを自動実行または真偽判定しない。

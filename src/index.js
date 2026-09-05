@@ -10,10 +10,12 @@ import {
     ACTION_ITEM,
     actionItemsForRoleLabels,
     createLegacyRoleOptions,
+    createLegacyRoleToken,
     createRoleImageMap,
 } from "./roleCatalog";
 import {
     createLegacyEventRows,
+    fixedDeathRoleIdForEventLabel,
     isDeathEventLabel,
     popupEventsByPlayerName,
 } from "./eventRows";
@@ -146,6 +148,10 @@ FeignTool.otheActions = ["追放", "キル", "爆発", "CO", "不明"];
 FeignTool.hr = { id: -3, name: "hr", roletype: [false, false, false, false, false], actionType: FeignTool.actionType.option };
 FeignTool.br = { id: -4, name: "br", roletype: [false, false, false, false, false], actionType: FeignTool.actionType.option };
 FeignTool.ActionsNameList = createLegacyEventRows(FeignTool.actionType);
+FeignTool.fixedDeathRoleForEvent = (eventLabel) => {
+    const roleId = fixedDeathRoleIdForEventLabel(eventLabel);
+    return roleId ? createLegacyRoleToken(roleId, FeignTool.actionType) : undefined;
+};
 const tutorialEventsByLabel = new Map(FeignTool.tutorialData
     .filter((row) => row.id < 0)
     .map((row) => [row.name[0], row]));
@@ -262,7 +268,7 @@ FeignTool.target_day = {
         if (row.id < 0) {
             if (isDeathEventLabel(row.name[0]))
                 return (
-                    <DeadSelect {...editorProps} value={value} row={row} options={FeignTool_nameList.concat(FeignTool.actionRevive)} dataField={column.dataField} text={column.text} />
+                    <DeadSelect {...editorProps} value={value} row={row} options={FeignTool_nameList.concat(FeignTool.actionRevive)} fixedDeathRole={FeignTool.fixedDeathRoleForEvent(row.name[0])} dataField={column.dataField} text={column.text} />
                 );
             if (row.name[0] === "医者" || row.name[0] === "爆発") options = options.concat(FeignTool.actionRevive);
         }
@@ -279,7 +285,7 @@ FeignTool.action_day = {
         let allrole = [];
         if (row.id < 0 && isDeathEventLabel(row.name[0]))
             return (
-                <DeadSelect {...editorProps} value={value} row={row} options={FeignTool_nameList.concat(FeignTool.actionRevive)} dataField={column.dataField} text={column.text} />
+                <DeadSelect {...editorProps} value={value} row={row} options={FeignTool_nameList.concat(FeignTool.actionRevive)} fixedDeathRole={FeignTool.fixedDeathRoleForEvent(row.name[0])} dataField={column.dataField} text={column.text} />
             );
         if (row.id < 0 && (row.name[0] === "医者" || row.name[0] === "爆発")) {
             const newOptions = FeignTool_nameList.concat(FeignTool.actionRevive);
@@ -866,6 +872,19 @@ class DeadSelect extends React.Component {
                         }
                     });
                 } else if (!this.state.nameSelected && newItem[2] === FeignTool.actionType.name) {
+                    if (this.props.fixedDeathRole) {
+                        FeignTool_tableData.forEach((item) => {
+                            if (item.name[0] === newItem[0] && item.id >= 0) {
+                                const fixedRole = [...this.props.fixedDeathRole];
+                                if (item.deadRole?.some((deadRole) => deadRole[0] === fixedRole[0])) return;
+                                if (item.deadRole) item.deadRole.push(fixedRole);
+                                else item.deadRole = [fixedRole];
+                                item.keyid = item.id + ((item.keyid * 10) % 5 + 1) * 0.1;
+                            }
+                        });
+                        this.setState({ value: this.newValue, nameSelected: false });
+                        return true;
+                    }
                     this.setState({ value: this.newValue, nameSelected: newItem[0] });
                     let roleExist = false;
                     FeignTool_tableData.forEach((item) => {
