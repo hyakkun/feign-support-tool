@@ -15,7 +15,6 @@ import {
 import {
     createLegacyEventRows,
     isDeathEventLabel,
-    isSelfDestructLabel,
 } from "./eventRows";
 import './index.scss';
 
@@ -126,10 +125,7 @@ FeignTool.role = createLegacyRoleOptions(FeignTool.actionType).concat({
     roletype: [true, true, true, true, true],
     actionType: FeignTool.actionType.role,
 });
-FeignTool.roleImage = {
-    ...createRoleImageMap(process.env.PUBLIC_URL),
-    "自爆": process.env.PUBLIC_URL + "/image/Dead.png",
-};
+FeignTool.roleImage = createRoleImageMap(process.env.PUBLIC_URL);
 FeignTool.actionResult = [
     { id: 100, name: "成功", roletype: [true, false, false, false, false], actionType: FeignTool.actionType.action },
     { id: 101, name: "失敗", roletype: [true, false, false, false, false], actionType: FeignTool.actionType.action },
@@ -149,14 +145,16 @@ FeignTool.otheActions = ["追放", "キル", "爆発", "CO", "不明"];
 FeignTool.hr = { id: -3, name: "hr", roletype: [false, false, false, false, false], actionType: FeignTool.actionType.option };
 FeignTool.br = { id: -4, name: "br", roletype: [false, false, false, false, false], actionType: FeignTool.actionType.option };
 FeignTool.ActionsNameList = createLegacyEventRows(FeignTool.actionType);
-const tutorialEventLabels = new Set(FeignTool.tutorialData
+const tutorialEventsByLabel = new Map(FeignTool.tutorialData
     .filter((row) => row.id < 0)
-    .map((row) => row.name[0]));
-FeignTool.tutorialData = FeignTool.tutorialData.concat(
-    FeignTool.ActionsNameList
-        .filter((row) => !tutorialEventLabels.has(row.name[0]))
-        .map((row) => Object.assign({}, row))
-);
+    .map((row) => [row.name[0], row]));
+FeignTool.tutorialData = FeignTool.tutorialData
+    .filter((row) => row.id >= 0)
+    .concat(FeignTool.ActionsNameList.map((eventRow) => ({
+        ...(tutorialEventsByLabel.get(eventRow.name[0]) || eventRow),
+        keyid: eventRow.keyid,
+        id: eventRow.id,
+    })));
 FeignTool.column_template = {
     sort: true,
     sortFunc: (a, b, order, dataField, rowA, rowB) => {
@@ -872,17 +870,6 @@ class DeadSelect extends React.Component {
                     FeignTool_tableData.forEach((item) => {
                         if (item.name[0] === newItem[0] && item.id >= 0) {
                             roleExist = item.deadRole && item.deadRole.length > 0;
-                            if (isSelfDestructLabel(this.props.row.name[0])) {
-                                const selfDestructMarker = ["自爆", 0, FeignTool.actionType.option];
-                                if (item.deadRole?.some((deadRole) => deadRole[0] === "自爆")) {
-                                    // The marker was already recorded for this player.
-                                } else if (item.deadRole) {
-                                    item.deadRole.push(selfDestructMarker);
-                                } else {
-                                    item.deadRole = [selfDestructMarker];
-                                }
-                                item.keyid = item.id + ((item.keyid * 10) % 5 + 1) * 0.1;
-                            }
                         }
                     });
                     return roleExist;
