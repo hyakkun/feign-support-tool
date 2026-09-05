@@ -6,6 +6,12 @@ import { Container } from 'reactstrap';
 import Select, { components } from "react-select";
 import CreatableSelect from 'react-select/creatable';
 import { Transition } from "react-transition-group";
+import {
+    ACTION_ITEM,
+    actionItemsForRoleLabels,
+    createLegacyRoleOptions,
+    createRoleImageMap,
+} from "./roleCatalog";
 import './index.scss';
 
 
@@ -109,43 +115,13 @@ FeignTool.roletypeColor = ["#ddd", "#8f8", "#f88", "#88f", "#ff8", "#8ff", "#888
 
 
 FeignTool.actionType = { action: 0, role: 1, name: 2, created: 3, option: 4 };
-FeignTool.role = [
-    { id: -2, name: "Hoge", roletype: [false, false, false, false, false], actionType: FeignTool.actionType.option },
-    { id: 0, name: "ねずみ", defaultRoletype1: 0, defaultRoletype2: 1, defaultRoletype3: 2, roletype: [true, true, true, false, true], actionType: FeignTool.actionType.role },
-    { id: 1, name: "インベ", defaultRoletype1: 0, defaultRoletype2: 1, defaultRoletype3: 2, roletype: [true, true, true, false, true], actionType: FeignTool.actionType.role },
-    { id: 2, name: "ポリス", defaultRoletype1: 0, defaultRoletype2: 1, defaultRoletype3: 2, roletype: [true, true, true, false, true], actionType: FeignTool.actionType.role },
-    { id: 3, name: "トラッパ", defaultRoletype1: 0, defaultRoletype2: 1, defaultRoletype3: 2, roletype: [true, true, true, false, true], actionType: FeignTool.actionType.role },
-    { id: 4, name: "ルック", defaultRoletype1: 0, defaultRoletype2: 1, defaultRoletype3: 2, roletype: [true, true, true, false, true], actionType: FeignTool.actionType.role },
-    { id: 5, name: "挑発", defaultRoletype1: 0, defaultRoletype2: 1, defaultRoletype3: 2, roletype: [true, true, true, false, true], actionType: FeignTool.actionType.role },
-    { id: 6, name: "医者", defaultRoletype1: 0, defaultRoletype2: 1, defaultRoletype3: 1, roletype: [true, true, false, false, true], actionType: FeignTool.actionType.role },
-    { id: 7, name: "バカ", defaultRoletype1: 1, defaultRoletype2: 1, defaultRoletype3: 1, roletype: [true, true, false, false, true], actionType: FeignTool.actionType.role },
-    { id: 8, name: "ブレイマ", defaultRoletype1: 2, defaultRoletype2: 2, defaultRoletype3: 2, roletype: [true, false, true, false, true], actionType: FeignTool.actionType.role },
-    { id: 9, name: "クリーナ", defaultRoletype1: 2, defaultRoletype2: 2, defaultRoletype3: 2, roletype: [true, false, true, false, true], actionType: FeignTool.actionType.role },
-    { id: 10, name: "シリアル", defaultRoletype1: 3, defaultRoletype2: 3, defaultRoletype3: 3, roletype: [true, false, false, true, false], actionType: FeignTool.actionType.role },
-    { id: 11, name: "ボマー", defaultRoletype1: 3, defaultRoletype2: 3, defaultRoletype3: 3, roletype: [true, false, false, true, false], actionType: FeignTool.actionType.role },
-    { id: 12, name: "シーフ", defaultRoletype1: 3, defaultRoletype2: 3, defaultRoletype3: 3, roletype: [true, false, false, true, false], actionType: FeignTool.actionType.role },
-    { id: 13, name: "サバイバ", defaultRoletype1: 3, defaultRoletype2: 3, defaultRoletype3: 3, roletype: [true, false, false, true, false], actionType: FeignTool.actionType.role },
-    { id: -1, name: "？", roletype: [true, true, true, true, true], actionType: FeignTool.actionType.role }];
-
-FeignTool.roleImage = {
-    "ねずみ": process.env.PUBLIC_URL + "/image/Snitch.png",
-    "インベ": process.env.PUBLIC_URL + "/image/Investigator.png",
-    "ポリス": process.env.PUBLIC_URL + "/image/Police.png",
-    "トラッパ": process.env.PUBLIC_URL + "/image/Trapper.png",
-    "ルック": process.env.PUBLIC_URL + "/image/Lookout.png",
-    "挑発": process.env.PUBLIC_URL + "/image/Provoker.png",
-    "医者": process.env.PUBLIC_URL + "/image/Doctor.png",
-    "バカ": process.env.PUBLIC_URL + "/image/Insane.png",
-    "ブレイマ": process.env.PUBLIC_URL + "/image/Blamer.png",
-    "クリーナ": process.env.PUBLIC_URL + "/image/Cleaner.png",
-    "シリアル": process.env.PUBLIC_URL + "/image/SerialKiller.png",
-    "ボマー": process.env.PUBLIC_URL + "/image/Bomber.png",
-    "シーフ": process.env.PUBLIC_URL + "/image/Thief.png",
-    "サバイバ": process.env.PUBLIC_URL + "/image/Survivor.png",
-    "？": process.env.PUBLIC_URL + "/image/Unknown.png",
-    "成功": process.env.PUBLIC_URL + "/image/Success.png",
-    "失敗": process.env.PUBLIC_URL + "/image/Failure.png",
-};
+FeignTool.role = createLegacyRoleOptions(FeignTool.actionType).concat({
+    id: -1,
+    name: "？",
+    roletype: [true, true, true, true, true],
+    actionType: FeignTool.actionType.role,
+});
+FeignTool.roleImage = createRoleImageMap(process.env.PUBLIC_URL);
 FeignTool.actionResult = [
     { id: 100, name: "成功", roletype: [true, false, false, false, false], actionType: FeignTool.actionType.action },
     { id: 101, name: "失敗", roletype: [true, false, false, false, false], actionType: FeignTool.actionType.action },
@@ -291,20 +267,30 @@ FeignTool.action_day = {
     ...FeignTool.column_template,
     editorRenderer: (editorProps, value, row, column, rowIndex, columnIndex) => {
         if (!(column.dataField in row)) row[column.dataField] = [];
-        let newOptions = FeignTool.actionResult.slice();
         let allrole = [];
         if (row.id < 0 && (row.name[0] === "殺害" || row.name[0] === "追放"))
             return (
                 <DeadSelect {...editorProps} value={value} row={row} options={FeignTool_nameList.concat(FeignTool.actionRevive)} dataField={column.dataField} text={column.text} />
             );
-        if (row.id < 0 && (row.name[0] === "医者" || row.name[0] === "爆発")) newOptions = FeignTool_nameList.concat(FeignTool.actionRevive);
-        else if (("role" in row && row.role.length) || ("deadRole" in row && row.deadRole.length)) {
+        if (row.id < 0 && (row.name[0] === "医者" || row.name[0] === "爆発")) {
+            const newOptions = FeignTool_nameList.concat(FeignTool.actionRevive);
+            return (
+                <RoleSelect {...editorProps} value={value} row={row} options={newOptions} dataField={column.dataField} text={column.text} allRole={allrole} />
+            );
+        }
+        if (("role" in row && row.role.length) || ("deadRole" in row && row.deadRole.length)) {
             if ("role" in row) allrole = allrole.concat(row.role?.map((item, i) => { return item[0]; }));
             if ("deadRole" in row) allrole = allrole.concat(row.deadRole?.map((item, i) => { return item[0]; }));
-            if (allrole.indexOf("ねずみ") >= 0 || allrole.indexOf("インベ") >= 0 || allrole.indexOf("シーフ") >= 0 || allrole.indexOf("？") >= 0) newOptions = [...FeignTool.role, FeignTool.hr, ...newOptions];
-            if (allrole.indexOf("ルック") >= 0 || allrole.indexOf("シーフ") >= 0) newOptions = [...FeignTool_nameList, FeignTool.hr, ...newOptions,];
-            else if (allrole.indexOf("トラッパ") >= 0 || allrole.indexOf("？") >= 0) newOptions = [...newOptions, FeignTool.hr, ...FeignTool_nameList];
-        } else newOptions = [...newOptions, FeignTool.hr, ...FeignTool.role, FeignTool.hr, ...FeignTool_nameList];
+        }
+        const optionsByActionItem = {
+            [ACTION_ITEM.ROLE]: FeignTool.role,
+            [ACTION_ITEM.PLAYER]: FeignTool_nameList,
+            [ACTION_ITEM.RESULT]: FeignTool.actionResult,
+        };
+        const newOptions = actionItemsForRoleLabels(allrole).flatMap((actionItem, index) => [
+            ...(index ? [FeignTool.hr] : []),
+            ...optionsByActionItem[actionItem],
+        ]);
         return (
             <RoleSelect {...editorProps} value={value} row={row} options={newOptions} dataField={column.dataField} text={column.text} allRole={allrole} />
         );
