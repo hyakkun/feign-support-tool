@@ -40,8 +40,7 @@ type ResultCode =
   | "trapped"
   | "at-home"
   | "visitor"
-  | "revive"
-  | "zero-people";
+  | "revive";
 type AlignmentNote = { label: string };
 type RoleAssignment = { roleId: RoleId; faction: DisplayFaction };
 
@@ -95,7 +94,7 @@ type DayEntry = {
 };
 ```
 
-固定イベント行に`provoker`（挑発）は含めない。役職としての挑発者の情報は、プレイヤー行の役職・行動履歴へ記録する。
+固定イベント行に`provoker`（プロボカ、旧称: 挑発）は含めない。役職としてのプロボカの情報は、プレイヤー行の役職・行動履歴へ記録する。
 
 ## 表示アイテム
 
@@ -121,11 +120,11 @@ const eventRows = [
   { id: "exile", label: "追放", editor: "player-then-optional-dead-role" },
   { id: "kill", label: "殺害", editor: "player-then-optional-dead-role" },
   { id: "chain-death", label: "道連れ", editor: "player-then-optional-dead-role" },
-  { id: "self-destruct", label: "自爆", editor: "player-then-optional-dead-role" },
+  { id: "self-destruct", label: "自爆", editor: "player-with-fixed-dead-role", fixedDeadRole: "magician" },
 ];
 ```
 
-役職が判明していない場合は人物だけを記録できる。死亡役職を追記したい場合だけ、追放・殺害と同様に人物行の死亡役欄へ反映する。自爆・道連れのための専用死体マーカーや人物間の関連データは持たない。補助表示ウィンドウでは、当日分の自爆・道連れ行に入力された対象人物をイベント要約として表示する。
+追放・殺害・道連れでは、役職が判明していない場合は人物だけを記録でき、必要な場合だけ死亡役職を追記する。自爆は魔術師固有のため、人物を選択した時点で死亡役欄へ魔術師を自動記録し、役職を追加選択する手順は設けない。自爆・道連れのための専用死体マーカーや人物間の関連データは持たない。補助表示ウィンドウでは、当日分の自爆・道連れ行に入力された対象人物をイベント要約として表示する。
 
 ## 役職カタログ
 
@@ -140,12 +139,12 @@ type ActionItemGroup = "role" | "player" | "result";
 
 const existingRoles: RoleDefinition[] = [
   // 緑（crew）・赤（imp）になり得る役職
-  { id: "snitch", label: "ねずみ", factions: ["crew", "imp"], actionItems: ["role", "result"] },
+  { id: "snitch", label: "スニッチ", legacyLabels: ["ねずみ"], factions: ["crew", "imp"], actionItems: ["role", "result"] },
   { id: "investigator", label: "インベ", factions: ["crew", "imp"], actionItems: ["role", "result"] },
   { id: "police", label: "ポリス", factions: ["crew", "imp"], actionItems: ["result"] },
   { id: "trapper", label: "トラッパ", factions: ["crew", "imp"], actionItems: ["result", "player"] },
   { id: "lookout", label: "ルック", factions: ["crew", "imp"], actionItems: ["player", "result"] },
-  { id: "provoker", label: "挑発", factions: ["crew", "imp"], actionItems: ["result"] },
+  { id: "provoker", label: "プロボカ", legacyLabels: ["挑発"], factions: ["crew", "imp"], actionItems: ["result"] },
 
   // 緑固定・赤固定・青固定の役職
   { id: "doctor", label: "医者", factions: ["crew"], actionItems: ["result"] },
@@ -163,7 +162,7 @@ const existingRoles: RoleDefinition[] = [
 
 | 既存の主張 | 現在の入力補助 | カタログ上の表現 |
 | --- | --- | --- |
-| ねずみ／インベ | 役職候補と通常結果を選べる | `actionItems: ["role", "result"]` |
+| スニッチ／インベ | 役職候補と通常結果を選べる | `actionItems: ["role", "result"]` |
 | ルック | 人物と通常結果を選べる | `actionItems: ["player", "result"]` |
 | トラッパ | 通常結果と人物を選べる | `actionItems: ["result", "player"]` |
 | シーフ | 役職・人物・通常結果を選べる | `actionItems: ["role", "player", "result"]` |
@@ -177,14 +176,14 @@ const existingEventRows = [
   { id: "kill", label: "殺害", editor: "player-then-optional-dead-role" },
   { id: "explosion", label: "爆発", editor: "player-or-revive" },
   { id: "chain-death", label: "道連れ", editor: "player-then-optional-dead-role" },
-  { id: "self-destruct", label: "自爆", editor: "player-then-optional-dead-role" },
+  { id: "self-destruct", label: "自爆", editor: "player-with-fixed-dead-role", fixedDeadRole: "magician" },
   { id: "doctor", label: "医者", editor: "player-or-revive" },
   { id: "conflict", label: "対立", editor: "freeform" },
   { id: "line", label: "ライン", editor: "freeform" },
 ];
 ```
 
-これは公開版の`DeadSelect`に相当する。`追放`、`殺害`、`自爆`、`道連れ`で人物、続けて死亡役職を入力すると、その人物行の死亡役欄へ役職を表示する。ツールはその主張の真偽を判定しない。
+これは公開版の`DeadSelect`に相当する。`追放`、`殺害`、`道連れ`では人物、続けて任意の死亡役職を入力すると、その人物行の死亡役欄へ役職を表示する。`自爆`では人物の選択だけで魔術師を死亡役欄へ記録する。ツールはその主張の真偽を判定しない。
 
 ### 既存役職だけの盤面例
 
@@ -260,13 +259,13 @@ type Interaction =
 
 | ID | 表示名 | 陣営 | `interaction` |
 | --- | --- | --- | --- |
-| `tracker` | トラッカー | `crew`, `imp` | `actionItems: ["player", "result"]`。結果なしは`{ kind: "result", result: "zero-people" }`、人物ありは既存の`{ kind: "player" }`で記録する |
+| `tracker` | トラッカ | `crew`, `imp` | `actionItems: ["player", "result"]`。対象者の行き先は既存の`{ kind: "player" }`で記録し、対象者が在宅などで人物が見えない場合は既存の`×`結果を使う。`legacyLabels: ["トラッカー"]` |
 | `magician` | 魔術師 | `neutral` | `actionItems: ["player", "role", "result"]`。対象・予想役職・成功／失敗を既存のセル種別で記録し、結果と自爆は利用者が行動欄・`自爆`行へ記録する |
-| `haunter` | ホーンター | `neutral` | `actionItems: ["player", "result"]`。ろうそく設置は対象人物と任意メモで記録し、道連れは利用者が`道連れ`行へ対象人物だけを記録する。`legacyLabels: ["ゴースト"]` |
+| `haunter` | ホーンタ | `neutral` | `actionItems: ["player", "result"]`。ろうそく設置は対象人物と任意メモで記録し、道連れは利用者が`道連れ`行へ対象人物だけを記録する。`legacyLabels: ["ホーンター", "ゴースト"]` |
 
-トラッカーと魔術師には新しいセル種別は不要である。必要な追加は、トラッカー用の結果コード`zero-people`と、魔術師用の役職定義である。
+トラッカと魔術師には新しいセル種別・結果コードは不要である。既存の人物選択と`×`結果で表現できる。
 
-ホーンターのために新しいセル種別や人物間の関連データは追加しない。前日の`追放`行と当日の`道連れ`行を盤面上で見比べて考察する。
+ホーンタのために新しいセル種別や人物間の関連データは追加しない。前日の`追放`行と当日の`道連れ`行を盤面上で見比べて考察する。
 
 ## 補助表示ウィンドウ
 
@@ -306,7 +305,7 @@ type DisplaySnapshot = {
 2. 既存タプルを`CellItem`へ読み込むアダプターと、既存テーブルが読める形式へ戻すアダプターを作る。
 3. 公開版のチュートリアル、メモ行、死亡処理、補助ウィンドウをアダプター経由で再現する。
 4. 役職選択・対象／結果選択を役職カタログから生成する。
-5. トラッカー、魔術師、ホーンターを追加する。
+5. トラッカ、魔術師、ホーンタを追加する。
 6. 旧タプル形式を編集経路から取り除く。互換読み込みは保存・インポート機能が導入されるまで保持する。
 
 ## 今後の検討事項
@@ -321,9 +320,9 @@ type DisplaySnapshot = {
 
 - 公開版のチュートリアル盤面を変換・再表示できる。
 - 追放・殺害による死亡役の反映を維持できる。
-- トラッカーは「対象」と「0人または1人の結果」を別の入力として保持できる。
-- 魔術師の役職予想と結果を記録でき、`自爆`行へ対象人物を記録できる。
-- ホーンターのろうそく対象を任意メモで記録でき、`道連れ`行へ対象人物を記録できる。
+- トラッカは「対象」と、行き先の人物または既存の`×`結果を別の入力として保持できる。
+- 魔術師の役職予想と結果を記録でき、`自爆`行で人物を選ぶと死亡役欄へ魔術師を自動記録できる。
+- ホーンタのろうそく対象を任意メモで記録でき、`道連れ`行へ対象人物を記録できる。
 - 自爆・道連れの対象が、補助表示ウィンドウの該当プレイヤーカードに表示される。
 - 入力内容からキル・自爆・道連れを自動実行または真偽判定しない。
 - 補助ウィンドウ向けのスナップショットに、盤面を変更する操作が含まれない。

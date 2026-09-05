@@ -18,12 +18,12 @@ const flexibleFactionLegacy = {
 };
 
 const roleDefinitions = [
-  { id: "snitch", label: "ねずみ", factions: [FACTION.CREW, FACTION.IMP], actionItems: [ACTION_ITEM.ROLE, ACTION_ITEM.RESULT], image: "Snitch.png" },
+  { id: "snitch", label: "スニッチ", legacyLabels: ["ねずみ"], factions: [FACTION.CREW, FACTION.IMP], actionItems: [ACTION_ITEM.ROLE, ACTION_ITEM.RESULT], image: "Snitch.png" },
   { id: "investigator", label: "インベ", factions: [FACTION.CREW, FACTION.IMP], actionItems: [ACTION_ITEM.ROLE, ACTION_ITEM.RESULT], image: "Investigator.png" },
   { id: "police", label: "ポリス", factions: [FACTION.CREW, FACTION.IMP], actionItems: [ACTION_ITEM.RESULT], image: "Police.png" },
   { id: "trapper", label: "トラッパ", factions: [FACTION.CREW, FACTION.IMP], actionItems: [ACTION_ITEM.RESULT, ACTION_ITEM.PLAYER], image: "Trapper.png" },
   { id: "lookout", label: "ルック", factions: [FACTION.CREW, FACTION.IMP], actionItems: [ACTION_ITEM.PLAYER, ACTION_ITEM.RESULT], image: "Lookout.png" },
-  { id: "provoker", label: "挑発", factions: [FACTION.CREW, FACTION.IMP], actionItems: [ACTION_ITEM.RESULT], image: "Provoker.png" },
+  { id: "provoker", label: "プロボカ", legacyLabels: ["挑発"], factions: [FACTION.CREW, FACTION.IMP], actionItems: [ACTION_ITEM.RESULT], image: "Provoker.png" },
   { id: "doctor", label: "医者", factions: [FACTION.CREW], actionItems: [ACTION_ITEM.RESULT], image: "Doctor.png" },
   { id: "insane", label: "バカ", factions: [FACTION.CREW], actionItems: [ACTION_ITEM.RESULT], image: "Insane.png" },
   { id: "blamer", label: "ブレイマ", factions: [FACTION.IMP], actionItems: [ACTION_ITEM.RESULT], image: "Blamer.png" },
@@ -32,6 +32,29 @@ const roleDefinitions = [
   { id: "bomber", label: "ボマー", factions: [FACTION.NEUTRAL], actionItems: [ACTION_ITEM.RESULT], image: "Bomber.png" },
   { id: "thief", label: "シーフ", factions: [FACTION.NEUTRAL], actionItems: [ACTION_ITEM.ROLE, ACTION_ITEM.PLAYER, ACTION_ITEM.RESULT], image: "Thief.png" },
   { id: "survivor", label: "サバイバ", factions: [FACTION.NEUTRAL], actionItems: [ACTION_ITEM.RESULT], image: "Survivor.png" },
+  {
+    id: "tracker",
+    label: "トラッカ",
+    legacyLabels: ["トラッカー"],
+    factions: [FACTION.CREW, FACTION.IMP],
+    actionItems: [ACTION_ITEM.PLAYER, ACTION_ITEM.RESULT],
+    interaction: { kind: "observe-visit", target: "player", result: "zero-or-one-player" },
+  },
+  {
+    id: "magician",
+    label: "魔術師",
+    factions: [FACTION.NEUTRAL],
+    actionItems: [ACTION_ITEM.PLAYER, ACTION_ITEM.ROLE, ACTION_ITEM.RESULT],
+    interaction: { kind: "guess-role", target: "player", prediction: "role", outcomes: ["correct", "incorrect"] },
+  },
+  {
+    id: "haunter",
+    label: "ホーンタ",
+    legacyLabels: ["ホーンター", "ゴースト"],
+    factions: [FACTION.NEUTRAL],
+    actionItems: [ACTION_ITEM.PLAYER, ACTION_ITEM.RESULT],
+    interaction: { kind: "place-candle", target: "player" },
+  },
 ];
 
 export const ROLE_CATALOG = Object.freeze(roleDefinitions.map((role) => Object.freeze({ ...role })));
@@ -42,7 +65,11 @@ export const ALL_ACTION_ITEMS = Object.freeze([
   ACTION_ITEM.RESULT,
 ]);
 
-export const findRoleByLabel = (label) => ROLE_CATALOG.find((role) => role.label === label);
+export const findRoleByLabel = (label) => ROLE_CATALOG.find((role) => (
+  role.label === label || role.legacyLabels?.includes(label)
+));
+
+export const findRoleById = (id) => ROLE_CATALOG.find((role) => role.id === id);
 
 export const actionItemsForRoleLabels = (labels) => {
   if (!labels.length || labels.includes("？")) return [...ALL_ACTION_ITEMS];
@@ -79,10 +106,20 @@ export const createLegacyRoleOptions = (actionType) => [{
   };
 })];
 
-export const createRoleImageMap = (publicUrl) => ROLE_CATALOG.reduce((images, role) => ({
-  ...images,
-  [role.label]: `${publicUrl}/image/${role.image}`,
-}), {
+export const createLegacyRoleToken = (roleId, actionType) => {
+  const role = findRoleById(roleId);
+  const legacyRole = createLegacyRoleOptions(actionType).find((option) => option.name === role?.label);
+  if (!role || !legacyRole) return undefined;
+  return [role.label, legacyRole.defaultRoletype2 ?? 0, actionType.role];
+};
+
+export const createRoleImageMap = (publicUrl) => ROLE_CATALOG.reduce((images, role) => {
+  if (!role.image) return images;
+  return [role.label, ...(role.legacyLabels || [])].reduce((imageMap, label) => ({
+    ...imageMap,
+    [label]: `${publicUrl}/image/${role.image}`,
+  }), images);
+}, {
   "？": `${publicUrl}/image/Unknown.png`,
   "成功": `${publicUrl}/image/Success.png`,
   "失敗": `${publicUrl}/image/Failure.png`,

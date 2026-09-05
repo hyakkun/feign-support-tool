@@ -14,7 +14,7 @@ const eventRows = [
   { type: EVENT_TYPE.KILL, label: "殺害", editor: "player-then-optional-dead-role" },
   { type: EVENT_TYPE.EXPLOSION, label: "爆発", editor: "player-or-revive", role: ["ボマー", 3] },
   { type: EVENT_TYPE.CHAIN_DEATH, label: "道連れ", editor: "player-then-optional-dead-role" },
-  { type: EVENT_TYPE.SELF_DESTRUCT, label: "自爆", editor: "player-then-optional-dead-role" },
+  { type: EVENT_TYPE.SELF_DESTRUCT, label: "自爆", editor: "player-with-fixed-dead-role", fixedDeathRoleId: "magician" },
   { type: EVENT_TYPE.DOCTOR, label: "医者", editor: "player-or-revive", role: ["医者", 1] },
   { type: EVENT_TYPE.CONFLICT, label: "対立", editor: "freeform" },
   { type: EVENT_TYPE.LINE, label: "ﾗｲﾝ", editor: "freeform" },
@@ -23,8 +23,12 @@ const eventRows = [
 export const EVENT_ROWS = Object.freeze(eventRows.map((eventRow) => Object.freeze({ ...eventRow })));
 
 export const isDeathEventLabel = (label) => EVENT_ROWS.some((eventRow) => (
-  eventRow.label === label && eventRow.editor === "player-then-optional-dead-role"
+  eventRow.label === label && ["player-then-optional-dead-role", "player-with-fixed-dead-role"].includes(eventRow.editor)
 ));
+
+export const fixedDeathRoleIdForEventLabel = (label) => EVENT_ROWS.find((eventRow) => (
+  eventRow.label === label
+))?.fixedDeathRoleId;
 
 const popupEventLabels = new Set([
   EVENT_ROWS.find((eventRow) => eventRow.type === EVENT_TYPE.SELF_DESTRUCT).label,

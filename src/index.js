@@ -10,10 +10,12 @@ import {
     ACTION_ITEM,
     actionItemsForRoleLabels,
     createLegacyRoleOptions,
+    createLegacyRoleToken,
     createRoleImageMap,
 } from "./roleCatalog";
 import {
     createLegacyEventRows,
+    fixedDeathRoleIdForEventLabel,
     isDeathEventLabel,
     popupEventsByPlayerName,
 } from "./eventRows";
@@ -22,7 +24,7 @@ import './index.scss';
 
 
 const FeignTool = {};
-FeignTool.tutorialData = [{ "keyid": 0, "id": 0, "name": ["名前例", 19], "color": ["/feign-support-tool/icon/Yellow.png", "#ffe352"], "role": [["ねずみ", 1, 1], ["真結果", 5, 4]], "target_day2": [["最初に", 0, 2]], "action_day2": [["ポリス", 1, 1], ["重要結果", 0, 4]] }, { "keyid": 1, "id": 1, "name": ["名前は", 4], "color": ["/feign-support-tool/icon/Magenta.png", "#ff00df"], "role": [["インベ", 0, 1]], "deadRole": [], "target_day1": [["ページ下部", 0, 2]], "action_day1": [["ねずみ", 1, 1], ["クリーナ", 2, 1], ["バカ結果？", 4, 4]], "target_day2": [], "action_day2": [] }, { "keyid": 2, "id": 2, "name": ["最初に", 2], "color": ["/feign-support-tool/icon/Blue.png", "#4b6fd7"], "role": [], "action_day2": [] }, { "keyid": 3, "id": 3, "name": ["ページ下部", 19], "color": ["/feign-support-tool/icon/DarkBlue.png", "#3817e3"], "role": [["トラッパ", 0, 1], ["真結果", 5, 4]], "target_day1": [["入力欄横", 0, 2]], "action_day1": [["成功", 0, 0], ["真結果", 5, 4]] }, { "keyid": 4, "id": 4, "name": ["入力欄に", 1], "color": ["/feign-support-tool/icon/Red.png", "#b3000b"], "role": [["トラッパ", 0, 1]], "target_day1": [["入力欄横", 0, 2]], "action_day1": [["失敗", 0, 0]], "deadRole": [["ボマー", 3, 1]] }, { "keyid": 5, "id": 5, "name": ["改行区切り", 19], "color": ["/feign-support-tool/icon/Pink.png", "#ff8fb3"] }, { "keyid": 6, "id": 6, "name": ["で入力", 19], "color": ["/feign-support-tool/icon/Cyan.png", "#31d7c7"], "action_day1": [["補導", 0, 0]] }, { "keyid": 7, "id": 7, "name": ["setName", 4], "color": ["/feign-support-tool/icon/Purple.png", "#71348b"], "role": [["ルック", 0, 1]], "target_day1": [["改行区切り", 0, 2]], "action_day1": [["使い方参照", 0, 2], ["バカ結果？", 4, 4]], "target_day2": [["で設定", 0, 2]] }, { "keyid": 8, "id": 8, "name": ["で設定", 19], "color": ["/feign-support-tool/icon/Green.png", "#2a7b0c"], "role": [], "action_day1": [["蘇生", 0, 0]] }, { "keyid": 9, "id": 9, "name": ["詳細は", 19], "color": ["/feign-support-tool/icon/Brown.png", "#654321"], "target_day1": [["入力欄横", 0, 2]], "action_day1": [["罠", 0, 0]] }, { "keyid": 10, "id": 10, "name": ["入力欄横", 16], "color": ["/feign-support-tool/icon/White.png", "#ffffff"], "target_day1": [["で設定", 0, 2]], "role": [["ルック", 0, 1]], "action_day1": [["入力欄に", 0, 2], ["改行区切り", 0, 2]], "target_day2": [["ページ下部", 0, 2]], "action_day2": [["setName", 0, 2], ["バカ結果？", 4, 4]] }, { "keyid": 11, "id": 11, "name": ["使い方参照", 4], "color": ["/feign-support-tool/icon/Orange.png", "#ff871f"], "deadRole": [["バカ", 1, 1]] }, { "keyid": -1, "id": -1, "name": ["追放", 19], "target_day1": [["入力欄に", 0, 2]] }, { "keyid": -2, "id": -2, "name": ["殺害", 19], "target_day2": [["使い方参照", 0, 2]], "target_day1": [["で設定", 0, 2], ["蘇生", 0, 4]], "action_day1": [] }, { "keyid": -3, "id": -3, "name": ["爆発", 19], role: [["ボマー", 3, 1]] }, { "keyid": -4, "id": -4, "name": ["医者", 19], role: [["医者", 1, 1]], "target_day1": [["で設定", 0, 2], ["蘇生", 0, 4]] }, { "keyid": -5, "id": -5, "name": ["対立", 19] }, { "keyid": -6, "id": -6, "name": ["ﾗｲﾝ", 19] }];
+FeignTool.tutorialData = [{ "keyid": 0, "id": 0, "name": ["名前例", 19], "color": ["/feign-support-tool/icon/Yellow.png", "#ffe352"], "role": [["スニッチ", 1, 1], ["真結果", 5, 4]], "target_day2": [["最初に", 0, 2]], "action_day2": [["ポリス", 1, 1], ["重要結果", 0, 4]] }, { "keyid": 1, "id": 1, "name": ["名前は", 4], "color": ["/feign-support-tool/icon/Magenta.png", "#ff00df"], "role": [["インベ", 0, 1]], "deadRole": [], "target_day1": [["ページ下部", 0, 2]], "action_day1": [["スニッチ", 1, 1], ["クリーナ", 2, 1], ["バカ結果？", 4, 4]], "target_day2": [], "action_day2": [] }, { "keyid": 2, "id": 2, "name": ["最初に", 2], "color": ["/feign-support-tool/icon/Blue.png", "#4b6fd7"], "role": [], "action_day2": [] }, { "keyid": 3, "id": 3, "name": ["ページ下部", 19], "color": ["/feign-support-tool/icon/DarkBlue.png", "#3817e3"], "role": [["トラッパ", 0, 1], ["真結果", 5, 4]], "target_day1": [["入力欄横", 0, 2]], "action_day1": [["成功", 0, 0], ["真結果", 5, 4]] }, { "keyid": 4, "id": 4, "name": ["入力欄に", 1], "color": ["/feign-support-tool/icon/Red.png", "#b3000b"], "role": [["トラッパ", 0, 1]], "target_day1": [["入力欄横", 0, 2]], "action_day1": [["失敗", 0, 0]], "deadRole": [["ボマー", 3, 1]] }, { "keyid": 5, "id": 5, "name": ["改行区切り", 19], "color": ["/feign-support-tool/icon/Pink.png", "#ff8fb3"] }, { "keyid": 6, "id": 6, "name": ["で入力", 19], "color": ["/feign-support-tool/icon/Cyan.png", "#31d7c7"], "action_day1": [["補導", 0, 0]] }, { "keyid": 7, "id": 7, "name": ["setName", 4], "color": ["/feign-support-tool/icon/Purple.png", "#71348b"], "role": [["ルック", 0, 1]], "target_day1": [["改行区切り", 0, 2]], "action_day1": [["使い方参照", 0, 2], ["バカ結果？", 4, 4]], "target_day2": [["で設定", 0, 2]] }, { "keyid": 8, "id": 8, "name": ["で設定", 19], "color": ["/feign-support-tool/icon/Green.png", "#2a7b0c"], "role": [], "action_day1": [["蘇生", 0, 0]] }, { "keyid": 9, "id": 9, "name": ["詳細は", 19], "color": ["/feign-support-tool/icon/Brown.png", "#654321"], "target_day1": [["入力欄横", 0, 2]], "action_day1": [["罠", 0, 0]] }, { "keyid": 10, "id": 10, "name": ["入力欄横", 16], "color": ["/feign-support-tool/icon/White.png", "#ffffff"], "target_day1": [["で設定", 0, 2]], "role": [["ルック", 0, 1]], "action_day1": [["入力欄に", 0, 2], ["改行区切り", 0, 2]], "target_day2": [["ページ下部", 0, 2]], "action_day2": [["setName", 0, 2], ["バカ結果？", 4, 4]] }, { "keyid": 11, "id": 11, "name": ["使い方参照", 4], "color": ["/feign-support-tool/icon/Orange.png", "#ff871f"], "deadRole": [["バカ", 1, 1]] }, { "keyid": -1, "id": -1, "name": ["追放", 19], "target_day1": [["入力欄に", 0, 2]] }, { "keyid": -2, "id": -2, "name": ["殺害", 19], "target_day2": [["使い方参照", 0, 2]], "target_day1": [["で設定", 0, 2], ["蘇生", 0, 4]], "action_day1": [] }, { "keyid": -3, "id": -3, "name": ["爆発", 19], role: [["ボマー", 3, 1]] }, { "keyid": -4, "id": -4, "name": ["医者", 19], role: [["医者", 1, 1]], "target_day1": [["で設定", 0, 2], ["蘇生", 0, 4]] }, { "keyid": -5, "id": -5, "name": ["対立", 19] }, { "keyid": -6, "id": -6, "name": ["ﾗｲﾝ", 19] }];
 FeignTool.tutorialNameStringList = ["名前例", "最初に", "名前は", "ページ下部", "入力欄に", "改行区切り", "で入力", "setName", "で設定", "詳細は", "入力欄横", "使い方参照",];
 
 FeignTool.allRoleLabel = [
@@ -146,6 +148,10 @@ FeignTool.otheActions = ["追放", "キル", "爆発", "CO", "不明"];
 FeignTool.hr = { id: -3, name: "hr", roletype: [false, false, false, false, false], actionType: FeignTool.actionType.option };
 FeignTool.br = { id: -4, name: "br", roletype: [false, false, false, false, false], actionType: FeignTool.actionType.option };
 FeignTool.ActionsNameList = createLegacyEventRows(FeignTool.actionType);
+FeignTool.fixedDeathRoleForEvent = (eventLabel) => {
+    const roleId = fixedDeathRoleIdForEventLabel(eventLabel);
+    return roleId ? createLegacyRoleToken(roleId, FeignTool.actionType) : undefined;
+};
 const tutorialEventsByLabel = new Map(FeignTool.tutorialData
     .filter((row) => row.id < 0)
     .map((row) => [row.name[0], row]));
@@ -262,7 +268,7 @@ FeignTool.target_day = {
         if (row.id < 0) {
             if (isDeathEventLabel(row.name[0]))
                 return (
-                    <DeadSelect {...editorProps} value={value} row={row} options={FeignTool_nameList.concat(FeignTool.actionRevive)} dataField={column.dataField} text={column.text} />
+                    <DeadSelect {...editorProps} value={value} row={row} options={FeignTool_nameList.concat(FeignTool.actionRevive)} fixedDeathRole={FeignTool.fixedDeathRoleForEvent(row.name[0])} dataField={column.dataField} text={column.text} />
                 );
             if (row.name[0] === "医者" || row.name[0] === "爆発") options = options.concat(FeignTool.actionRevive);
         }
@@ -279,7 +285,7 @@ FeignTool.action_day = {
         let allrole = [];
         if (row.id < 0 && isDeathEventLabel(row.name[0]))
             return (
-                <DeadSelect {...editorProps} value={value} row={row} options={FeignTool_nameList.concat(FeignTool.actionRevive)} dataField={column.dataField} text={column.text} />
+                <DeadSelect {...editorProps} value={value} row={row} options={FeignTool_nameList.concat(FeignTool.actionRevive)} fixedDeathRole={FeignTool.fixedDeathRoleForEvent(row.name[0])} dataField={column.dataField} text={column.text} />
             );
         if (row.id < 0 && (row.name[0] === "医者" || row.name[0] === "爆発")) {
             const newOptions = FeignTool_nameList.concat(FeignTool.actionRevive);
@@ -866,6 +872,19 @@ class DeadSelect extends React.Component {
                         }
                     });
                 } else if (!this.state.nameSelected && newItem[2] === FeignTool.actionType.name) {
+                    if (this.props.fixedDeathRole) {
+                        FeignTool_tableData.forEach((item) => {
+                            if (item.name[0] === newItem[0] && item.id >= 0) {
+                                const fixedRole = [...this.props.fixedDeathRole];
+                                if (item.deadRole?.some((deadRole) => deadRole[0] === fixedRole[0])) return;
+                                if (item.deadRole) item.deadRole.push(fixedRole);
+                                else item.deadRole = [fixedRole];
+                                item.keyid = item.id + ((item.keyid * 10) % 5 + 1) * 0.1;
+                            }
+                        });
+                        this.setState({ value: this.newValue, nameSelected: false });
+                        return true;
+                    }
                     this.setState({ value: this.newValue, nameSelected: newItem[0] });
                     let roleExist = false;
                     FeignTool_tableData.forEach((item) => {
