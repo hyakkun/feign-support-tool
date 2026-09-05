@@ -149,6 +149,14 @@ FeignTool.otheActions = ["追放", "キル", "爆発", "CO", "不明"];
 FeignTool.hr = { id: -3, name: "hr", roletype: [false, false, false, false, false], actionType: FeignTool.actionType.option };
 FeignTool.br = { id: -4, name: "br", roletype: [false, false, false, false, false], actionType: FeignTool.actionType.option };
 FeignTool.ActionsNameList = createLegacyEventRows(FeignTool.actionType);
+const tutorialEventLabels = new Set(FeignTool.tutorialData
+    .filter((row) => row.id < 0)
+    .map((row) => row.name[0]));
+FeignTool.tutorialData = FeignTool.tutorialData.concat(
+    FeignTool.ActionsNameList
+        .filter((row) => !tutorialEventLabels.has(row.name[0]))
+        .map((row) => Object.assign({}, row))
+);
 FeignTool.column_template = {
     sort: true,
     sortFunc: (a, b, order, dataField, rowA, rowB) => {
