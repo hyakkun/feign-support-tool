@@ -15,6 +15,7 @@ import {
 import {
     createLegacyEventRows,
     isDeathEventLabel,
+    popupEventsByPlayerName,
 } from "./eventRows";
 import './index.scss';
 
@@ -1248,6 +1249,7 @@ const FeignSupportToolRoot = () => {
                 type: "feign-board-snapshot",
                 tableData: JSON.parse(JSON.stringify(FeignTool_tableData)),
                 colorNameDic: JSON.parse(JSON.stringify(FeignTool_colorNameDic)),
+                playerEvents: popupEventsByPlayerName(FeignTool_tableData, day),
                 day,
             }, window.location.origin);
         }

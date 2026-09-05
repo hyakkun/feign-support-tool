@@ -26,6 +26,33 @@ export const isDeathEventLabel = (label) => EVENT_ROWS.some((eventRow) => (
   eventRow.label === label && eventRow.editor === "player-then-optional-dead-role"
 ));
 
+const popupEventLabels = new Set([
+  EVENT_ROWS.find((eventRow) => eventRow.type === EVENT_TYPE.SELF_DESTRUCT).label,
+  EVENT_ROWS.find((eventRow) => eventRow.type === EVENT_TYPE.CHAIN_DEATH).label,
+]);
+
+const playerNamesInCell = (cell) => (cell || [])
+  .filter((item) => Array.isArray(item) && item[2] === 2)
+  .map((item) => item[0]);
+
+export const popupEventsByPlayerName = (tableData, day) => {
+  const playerEvents = {};
+  tableData
+    .filter((row) => popupEventLabels.has(row.name?.[0]))
+    .forEach((row) => {
+      const eventLabel = row.name[0];
+      const targets = [
+        ...playerNamesInCell(row[`target_day${day}`]),
+        ...playerNamesInCell(row[`action_day${day}`]),
+      ];
+      targets.forEach((target) => {
+        if (!playerEvents[target]) playerEvents[target] = [];
+        if (!playerEvents[target].includes(eventLabel)) playerEvents[target].push(eventLabel);
+      });
+    });
+  return playerEvents;
+};
+
 export const createLegacyEventRows = (actionType) => EVENT_ROWS.map((eventRow, index) => {
   const row = {
     keyid: -(index + 1),
