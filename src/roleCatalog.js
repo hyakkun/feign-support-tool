@@ -32,6 +32,29 @@ const roleDefinitions = [
   { id: "bomber", label: "ボマー", factions: [FACTION.NEUTRAL], actionItems: [ACTION_ITEM.RESULT], image: "Bomber.png" },
   { id: "thief", label: "シーフ", factions: [FACTION.NEUTRAL], actionItems: [ACTION_ITEM.ROLE, ACTION_ITEM.PLAYER, ACTION_ITEM.RESULT], image: "Thief.png" },
   { id: "survivor", label: "サバイバ", factions: [FACTION.NEUTRAL], actionItems: [ACTION_ITEM.RESULT], image: "Survivor.png" },
+  {
+    id: "tracker",
+    label: "トラッカー",
+    factions: [FACTION.CREW, FACTION.IMP],
+    actionItems: [ACTION_ITEM.PLAYER, ACTION_ITEM.RESULT],
+    resultCodes: ["zero-people"],
+    interaction: { kind: "observe-visit", target: "player", result: "zero-or-one-player" },
+  },
+  {
+    id: "magician",
+    label: "魔術師",
+    factions: [FACTION.NEUTRAL],
+    actionItems: [ACTION_ITEM.PLAYER, ACTION_ITEM.ROLE, ACTION_ITEM.RESULT],
+    interaction: { kind: "guess-role", target: "player", prediction: "role", outcomes: ["correct", "incorrect"] },
+  },
+  {
+    id: "haunter",
+    label: "ホーンター",
+    legacyLabels: ["ゴースト"],
+    factions: [FACTION.NEUTRAL],
+    actionItems: [ACTION_ITEM.PLAYER, ACTION_ITEM.RESULT],
+    interaction: { kind: "place-candle", target: "player" },
+  },
 ];
 
 export const ROLE_CATALOG = Object.freeze(roleDefinitions.map((role) => Object.freeze({ ...role })));
@@ -42,7 +65,9 @@ export const ALL_ACTION_ITEMS = Object.freeze([
   ACTION_ITEM.RESULT,
 ]);
 
-export const findRoleByLabel = (label) => ROLE_CATALOG.find((role) => role.label === label);
+export const findRoleByLabel = (label) => ROLE_CATALOG.find((role) => (
+  role.label === label || role.legacyLabels?.includes(label)
+));
 
 export const actionItemsForRoleLabels = (labels) => {
   if (!labels.length || labels.includes("？")) return [...ALL_ACTION_ITEMS];
@@ -55,6 +80,11 @@ export const actionItemsForRoleLabels = (labels) => {
     });
   });
   return actionItems.length ? actionItems : [...ALL_ACTION_ITEMS];
+};
+
+export const supportsResultCodeForRoleLabels = (labels, resultCode) => {
+  if (!labels.length || labels.includes("？")) return true;
+  return labels.some((label) => findRoleByLabel(label)?.resultCodes?.includes(resultCode));
 };
 
 export const createLegacyRoleOptions = (actionType) => [{
@@ -79,10 +109,10 @@ export const createLegacyRoleOptions = (actionType) => [{
   };
 })];
 
-export const createRoleImageMap = (publicUrl) => ROLE_CATALOG.reduce((images, role) => ({
-  ...images,
-  [role.label]: `${publicUrl}/image/${role.image}`,
-}), {
+export const createRoleImageMap = (publicUrl) => ROLE_CATALOG.reduce((images, role) => {
+  if (!role.image) return images;
+  return { ...images, [role.label]: `${publicUrl}/image/${role.image}` };
+}, {
   "？": `${publicUrl}/image/Unknown.png`,
   "成功": `${publicUrl}/image/Success.png`,
   "失敗": `${publicUrl}/image/Failure.png`,

@@ -4,11 +4,13 @@ import {
   ROLE_CATALOG,
   actionItemsForRoleLabels,
   createLegacyRoleOptions,
+  findRoleByLabel,
+  supportsResultCodeForRoleLabels,
 } from "./roleCatalog";
 
 describe("role catalog", () => {
   test("contains every existing role with its supported faction", () => {
-    expect(ROLE_CATALOG).toHaveLength(14);
+    expect(ROLE_CATALOG).toHaveLength(17);
     expect(ROLE_CATALOG.find((role) => role.id === "snitch").factions).toEqual([FACTION.CREW, FACTION.IMP]);
     expect(ROLE_CATALOG.find((role) => role.id === "bomber").factions).toEqual([FACTION.NEUTRAL]);
   });
@@ -17,6 +19,19 @@ describe("role catalog", () => {
     expect(actionItemsForRoleLabels(["ねずみ"])).toEqual([ACTION_ITEM.ROLE, ACTION_ITEM.RESULT]);
     expect(actionItemsForRoleLabels(["トラッパ"])).toEqual([ACTION_ITEM.RESULT, ACTION_ITEM.PLAYER]);
     expect(actionItemsForRoleLabels(["？"])).toEqual([ACTION_ITEM.ROLE, ACTION_ITEM.PLAYER, ACTION_ITEM.RESULT]);
+    expect(actionItemsForRoleLabels(["魔術師"])).toEqual([ACTION_ITEM.PLAYER, ACTION_ITEM.ROLE, ACTION_ITEM.RESULT]);
+    expect(actionItemsForRoleLabels(["ゴースト"])).toEqual([ACTION_ITEM.PLAYER, ACTION_ITEM.RESULT]);
+  });
+
+  test("defines the new roles with their intended factions and interactions", () => {
+    expect(findRoleByLabel("トラッカー")).toMatchObject({
+      factions: [FACTION.CREW, FACTION.IMP],
+      interaction: { kind: "observe-visit" },
+    });
+    expect(findRoleByLabel("魔術師")).toMatchObject({ factions: [FACTION.NEUTRAL] });
+    expect(findRoleByLabel("ゴースト")).toMatchObject({ id: "haunter", label: "ホーンター" });
+    expect(supportsResultCodeForRoleLabels(["トラッカー"], "zero-people")).toBe(true);
+    expect(supportsResultCodeForRoleLabels(["ルック"], "zero-people")).toBe(false);
   });
 
   test("keeps the legacy selector representation for existing roles", () => {
