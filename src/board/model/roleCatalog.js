@@ -43,6 +43,7 @@ const roleDefinitions = [
     factions: [FACTION.CREW, FACTION.IMP],
     actionItems: [ACTION_ITEM.PLAYER, ACTION_ITEM.RESULT],
     interaction: { kind: "observe-visit", target: "player", result: "zero-or-one-player" },
+    image: "Tracker.png",
   },
   {
     id: "magician",
@@ -50,6 +51,7 @@ const roleDefinitions = [
     factions: [FACTION.NEUTRAL],
     actionItems: [ACTION_ITEM.PLAYER, ACTION_ITEM.ROLE, ACTION_ITEM.RESULT],
     interaction: { kind: "guess-role", target: "player", prediction: "role", outcomes: ["correct", "incorrect"] },
+    image: "Magician.png",
   },
   {
     id: "haunter",
@@ -58,6 +60,7 @@ const roleDefinitions = [
     factions: [FACTION.NEUTRAL],
     actionItems: [ACTION_ITEM.PLAYER, ACTION_ITEM.RESULT],
     interaction: { kind: "place-candle", target: "player" },
+    image: "Haunter.png",
   },
 ];
 
