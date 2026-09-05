@@ -18,12 +18,12 @@ const flexibleFactionLegacy = {
 };
 
 const roleDefinitions = [
-  { id: "snitch", label: "ねずみ", factions: [FACTION.CREW, FACTION.IMP], actionItems: [ACTION_ITEM.ROLE, ACTION_ITEM.RESULT], image: "Snitch.png" },
+  { id: "snitch", label: "スニッチ", legacyLabels: ["ねずみ"], factions: [FACTION.CREW, FACTION.IMP], actionItems: [ACTION_ITEM.ROLE, ACTION_ITEM.RESULT], image: "Snitch.png" },
   { id: "investigator", label: "インベ", factions: [FACTION.CREW, FACTION.IMP], actionItems: [ACTION_ITEM.ROLE, ACTION_ITEM.RESULT], image: "Investigator.png" },
   { id: "police", label: "ポリス", factions: [FACTION.CREW, FACTION.IMP], actionItems: [ACTION_ITEM.RESULT], image: "Police.png" },
   { id: "trapper", label: "トラッパ", factions: [FACTION.CREW, FACTION.IMP], actionItems: [ACTION_ITEM.RESULT, ACTION_ITEM.PLAYER], image: "Trapper.png" },
   { id: "lookout", label: "ルック", factions: [FACTION.CREW, FACTION.IMP], actionItems: [ACTION_ITEM.PLAYER, ACTION_ITEM.RESULT], image: "Lookout.png" },
-  { id: "provoker", label: "挑発", factions: [FACTION.CREW, FACTION.IMP], actionItems: [ACTION_ITEM.RESULT], image: "Provoker.png" },
+  { id: "provoker", label: "プロボカ", legacyLabels: ["挑発"], factions: [FACTION.CREW, FACTION.IMP], actionItems: [ACTION_ITEM.RESULT], image: "Provoker.png" },
   { id: "doctor", label: "医者", factions: [FACTION.CREW], actionItems: [ACTION_ITEM.RESULT], image: "Doctor.png" },
   { id: "insane", label: "バカ", factions: [FACTION.CREW], actionItems: [ACTION_ITEM.RESULT], image: "Insane.png" },
   { id: "blamer", label: "ブレイマ", factions: [FACTION.IMP], actionItems: [ACTION_ITEM.RESULT], image: "Blamer.png" },
@@ -34,7 +34,8 @@ const roleDefinitions = [
   { id: "survivor", label: "サバイバ", factions: [FACTION.NEUTRAL], actionItems: [ACTION_ITEM.RESULT], image: "Survivor.png" },
   {
     id: "tracker",
-    label: "トラッカー",
+    label: "トラッカ",
+    legacyLabels: ["トラッカー"],
     factions: [FACTION.CREW, FACTION.IMP],
     actionItems: [ACTION_ITEM.PLAYER, ACTION_ITEM.RESULT],
     interaction: { kind: "observe-visit", target: "player", result: "zero-or-one-player" },
@@ -48,8 +49,8 @@ const roleDefinitions = [
   },
   {
     id: "haunter",
-    label: "ホーンター",
-    legacyLabels: ["ゴースト"],
+    label: "ホーンタ",
+    legacyLabels: ["ホーンター", "ゴースト"],
     factions: [FACTION.NEUTRAL],
     actionItems: [ACTION_ITEM.PLAYER, ACTION_ITEM.RESULT],
     interaction: { kind: "place-candle", target: "player" },
@@ -114,7 +115,10 @@ export const createLegacyRoleToken = (roleId, actionType) => {
 
 export const createRoleImageMap = (publicUrl) => ROLE_CATALOG.reduce((images, role) => {
   if (!role.image) return images;
-  return { ...images, [role.label]: `${publicUrl}/image/${role.image}` };
+  return [role.label, ...(role.legacyLabels || [])].reduce((imageMap, label) => ({
+    ...imageMap,
+    [label]: `${publicUrl}/image/${role.image}`,
+  }), images);
 }, {
   "？": `${publicUrl}/image/Unknown.png`,
   "成功": `${publicUrl}/image/Success.png`,

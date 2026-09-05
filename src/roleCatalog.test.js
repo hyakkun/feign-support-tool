@@ -16,6 +16,7 @@ describe("role catalog", () => {
   });
 
   test("derives the documented action candidates from role claims", () => {
+    expect(actionItemsForRoleLabels(["スニッチ"])).toEqual([ACTION_ITEM.ROLE, ACTION_ITEM.RESULT]);
     expect(actionItemsForRoleLabels(["ねずみ"])).toEqual([ACTION_ITEM.ROLE, ACTION_ITEM.RESULT]);
     expect(actionItemsForRoleLabels(["トラッパ"])).toEqual([ACTION_ITEM.RESULT, ACTION_ITEM.PLAYER]);
     expect(actionItemsForRoleLabels(["？"])).toEqual([ACTION_ITEM.ROLE, ACTION_ITEM.PLAYER, ACTION_ITEM.RESULT]);
@@ -24,12 +25,12 @@ describe("role catalog", () => {
   });
 
   test("defines the new roles with their intended factions and interactions", () => {
-    expect(findRoleByLabel("トラッカー")).toMatchObject({
+    expect(findRoleByLabel("トラッカ")).toMatchObject({
       factions: [FACTION.CREW, FACTION.IMP],
       interaction: { kind: "observe-visit" },
     });
     expect(findRoleByLabel("魔術師")).toMatchObject({ factions: [FACTION.NEUTRAL] });
-    expect(findRoleByLabel("ゴースト")).toMatchObject({ id: "haunter", label: "ホーンター" });
+    expect(findRoleByLabel("ゴースト")).toMatchObject({ id: "haunter", label: "ホーンタ" });
   });
 
   test("keeps the legacy selector representation for existing roles", () => {
