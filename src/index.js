@@ -341,12 +341,10 @@ FeignTool.defaultColumns = [
             else return -res;
         },
         formatter: (cell, row) => {
-            if (FeignTool_nameIsIcon) {
-                const name = row.name[0];
-                if (row.id >= 0 && name in FeignTool_colorNameDic) {
-                    return <div className="tableCell" id={"color_tableid_" + row.id}><div className="nameAreaIconContainer"><span className="iconContainer"><img src={FeignTool_colorNameDic[name][0]} alt={name} /><span className="iconTextContainer "><span className="iconText">{name}</span></span></span></div></div>;
-                } else return <div className="tableCell" id={"color_tableid_" + row.id}>{name}</div>;
-            } else if (cell && cell.length > 1) {
+            if (cell && cell.length > 1) {
+                if (FeignTool_nameIsIcon && row.id >= 0) {
+                    return <div className="tableCell" id={"color_tableid_" + row.id}><div className="colorIconContainer"><img src={cell[0]} alt={`${row.name[0]}の色`} /></div></div>;
+                }
                 return <div className="tableCell" id={"color_tableid_" + row.id}><div className="colorpicker" style={{ display: "block", backgroundColor: cell[1] }}>　</div></div>;
             }
                     return <div className="tableCell" id={"color_tableid_" + row.id}>　</div>;
@@ -372,7 +370,7 @@ FeignTool.defaultColumns = [
         editable: true,
         formatter: (cell, row) => {
             if (cell) {
-                return <div className="tableCell" id={"name_tableid_" + row.id}><span className="might" style={FeignTool.optionbackground[cell[1]]}>{FeignTool_nameIsIcon ? "　" : cell[0]}</span></div>;
+                return <div className="tableCell" id={"name_tableid_" + row.id}><span className="might" style={FeignTool.optionbackground[cell[1]]}>{cell[0]}</span></div>;
             }
             return <div className="tableCell" id={"name_tableid_" + row.id}>　</div>;
         },
@@ -464,7 +462,7 @@ let FeignTool_tableData = FeignTool.tutorialData;
 let FeignTool_nameList = FeignTool.tutorialNameStringList.map((name, i) => { return { id: i + 200, name: name, roletype: [true, true, true, true, true,], actionType: 2 }; }).concat({ id: 199, name: "？", roletype: [true, false, false, false, false], actionType: 2 });
 let FeignTool_colorNameDic = {};
 let FeignTool_playerIsIcon = true;
-let FeignTool_nameIsIcon = false;
+let FeignTool_nameIsIcon = true;
 let FeignTool_IsTutorial = true;
 FeignTool.tutorialData.forEach((item) => {
     if (item.id < 0 || !("color" in item)) return;
@@ -1078,14 +1076,6 @@ const FeignSupportToolRoot = () => {
             FeignTool_nameList = newNameStringList.map((name, i) => { return { id: i + 200, name: name, roletype: [true, true, true, true, true,], actionType: 2 }; }).concat({ id: 199, name: "？", roletype: [true, false, false, false, false], actionType: 2 });
             FeignTool_colorNameDic = {};
             const newColumns = FeignTool.defaultColumns.slice();
-            const firstColumn = newColumns.shift();
-            if (FeignTool_nameIsIcon) {
-                if (firstColumn.dataField === "name") newColumns.unshift(firstColumn);
-                else newColumns.splice(1, 0, firstColumn);
-            } else {
-                if (firstColumn.dataField === "color") newColumns.unshift(firstColumn);
-                else newColumns.splice(1, 0, firstColumn);
-            }
             newColumns[0].text = "　";
             newColumns[1].text = "名前";
             setColumns(newColumns);
@@ -1146,24 +1136,16 @@ const FeignSupportToolRoot = () => {
     };
     const NameInputArea = () => {
         const playerIconChangeHandler = (event) => {
-            setPlayerIsIcon(event.target.checked);
             FeignTool_playerIsIcon = event.target.checked;
+            setPlayerIsIcon(event.target.checked);
         };
         const nameIconChangeHandler = (event) => {
-            setNameIsIcon(event.target.checked);
             FeignTool_nameIsIcon = event.target.checked;
-            const newColumns = columns.slice();
-            const firstColumn = newColumns.shift();
-            if (FeignTool_nameIsIcon) {
-                if (firstColumn.dataField === "name") newColumns.unshift(firstColumn);
-                else newColumns.splice(1, 0, firstColumn);
-            } else {
-                if (firstColumn.dataField === "color") newColumns.unshift(firstColumn);
-                else newColumns.splice(1, 0, firstColumn);
-            }
-            newColumns[0].text = "　";
-            newColumns[1].text = "名前";
-            setColumns(newColumns);
+            setNameIsIcon(event.target.checked);
+            // react-bootstrap-table-next にセル formatter を再評価させるため、
+            // 列定義と行データを新しい参照にする。
+            setColumns(columns.map((column) => ({ ...column })));
+            setData(data.map((row) => ({ ...row })));
         };
         const onClickReset = () => {
             if (window.confirm("入力内容をリセットしますか？")) {
@@ -1172,14 +1154,6 @@ const FeignSupportToolRoot = () => {
                     else return { keyid: item.keyid, id: item.id, name: [item.name[0], 19] };
                 }).filter(item => (item.id >= 0)).concat(FeignTool.ActionsNameList.map((item) => Object.assign({}, item)));
                 const newColumns = FeignTool.defaultColumns.slice();
-                const firstColumn = newColumns.shift();
-                if (FeignTool_nameIsIcon) {
-                    if (firstColumn.dataField === "name") newColumns.unshift(firstColumn);
-                    else newColumns.splice(1, 0, firstColumn);
-                } else {
-                    if (firstColumn.dataField === "color") newColumns.unshift(firstColumn);
-                    else newColumns.splice(1, 0, firstColumn);
-                }
                 newColumns[0].text = "　";
                 newColumns[1].text = "名前";
                 setColumns(newColumns);
@@ -1281,6 +1255,7 @@ const FeignSupportToolRoot = () => {
                 <Container style={{ whiteSpace: "nowrap", display: "flex", alignItems: "flex-end"}}>
                     <FeignTableErrorBoundary>
                         <BootstrapTable
+                            key={`table-${PlayerIsIcon}-${NameIsIcon}`}
                             data={data}
                             columns={columns}
                             keyField="keyid"
