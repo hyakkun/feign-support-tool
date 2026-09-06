@@ -10,6 +10,10 @@ export const ACTION_ITEM = Object.freeze({
   RESULT: "result",
 });
 
+export const LEGACY_SELECTOR = Object.freeze({
+  FACTION: "__faction-selector__",
+});
+
 const flexibleFactionLegacy = {
   roletype: [true, true, true, false, true],
   defaultRoletype1: 0,
@@ -71,6 +75,10 @@ export const findRoleByLabel = (label) => ROLE_CATALOG.find((role) => (
 
 export const findRoleById = (id) => ROLE_CATALOG.find((role) => role.id === id);
 
+export const roleIdsForRoleLabels = (labels) => labels
+  .map((label) => findRoleByLabel(label)?.id)
+  .filter(Boolean);
+
 export const actionItemsForRoleLabels = (labels) => {
   if (!labels.length || labels.includes("？")) return [...ALL_ACTION_ITEMS];
 
@@ -86,7 +94,7 @@ export const actionItemsForRoleLabels = (labels) => {
 
 export const createLegacyRoleOptions = (actionType) => [{
   id: -2,
-  name: "Hoge",
+  name: LEGACY_SELECTOR.FACTION,
   roletype: [false, false, false, false, false],
   actionType: actionType.option,
 }, ...ROLE_CATALOG.map((role, index) => {

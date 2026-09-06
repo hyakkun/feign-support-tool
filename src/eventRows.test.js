@@ -1,7 +1,11 @@
 import {
   EVENT_ROWS,
+  appendDeadRole,
+  appendDeadRoleIfAbsent,
+  allowsReviveForEventLabel,
   createLegacyEventRows,
   fixedDeathRoleIdForEventLabel,
+  findEventByLabel,
   isDeathEventLabel,
   popupEventsByPlayerName,
 } from "./eventRows";
@@ -15,6 +19,14 @@ describe("event rows", () => {
     expect(isDeathEventLabel("道連れ")).toBe(true);
     expect(fixedDeathRoleIdForEventLabel("自爆")).toBe("magician");
     expect(fixedDeathRoleIdForEventLabel("道連れ")).toBeUndefined();
+  });
+
+  test("defines which fixed event rows accept revive as an action", () => {
+    expect(findEventByLabel("爆発")).toMatchObject({ type: "explosion" });
+    expect(allowsReviveForEventLabel("爆発")).toBe(true);
+    expect(allowsReviveForEventLabel("医者")).toBe(true);
+    expect(allowsReviveForEventLabel("自爆")).toBe(false);
+    expect(allowsReviveForEventLabel("未定義")).toBe(false);
   });
 
   test("keeps legacy rows compatible with the current table", () => {
@@ -32,5 +44,59 @@ describe("event rows", () => {
       "アリス": ["自爆"],
       "ボブ": ["道連れ", "自爆"],
     });
+  });
+
+  test("keeps popup events limited to players and removes duplicate event labels", () => {
+    const tableData = [
+      {
+        id: -4,
+        name: ["道連れ", 19],
+        target_day1: [["ボブ", 0, 2], ["魔術師", 3, 1]],
+        action_day1: [["ボブ", 0, 2], ["成功", 0, 0]],
+      },
+      { id: -5, name: ["自爆", 19], action_day1: [["アリス", 0, 2]] },
+    ];
+
+    expect(popupEventsByPlayerName(tableData, 1)).toEqual({
+      "ボブ": ["道連れ"],
+      "アリス": ["自爆"],
+    });
+  });
+
+  test("keeps popup events scoped to the requested day", () => {
+    const tableData = [
+      { id: -4, name: ["道連れ", 19], target_day1: [["アリス", 0, 2]] },
+      { id: -5, name: ["自爆", 19], action_day2: [["ボブ", 0, 2]] },
+    ];
+
+    expect(popupEventsByPlayerName(tableData, 1)).toEqual({ "アリス": ["道連れ"] });
+    expect(popupEventsByPlayerName(tableData, 2)).toEqual({ "ボブ": ["自爆"] });
+    expect(popupEventsByPlayerName(tableData, 3)).toEqual({});
+  });
+
+  test("adds the fixed magician death role once without mutating the player row", () => {
+    const player = { id: 1, name: ["アリス", 19], deadRole: [["シーフ", 3, 1]] };
+    const magician = ["魔術師", 3, 1];
+
+    expect(appendDeadRoleIfAbsent(player, magician)).toEqual({
+      id: 1,
+      name: ["アリス", 19],
+      deadRole: [["シーフ", 3, 1], ["魔術師", 3, 1]],
+    });
+    expect(player.deadRole).toEqual([["シーフ", 3, 1]]);
+    expect(appendDeadRoleIfAbsent(player, ["シーフ", 3, 1])).toBe(player);
+  });
+
+  test("adds a manually recorded death role without mutating its inputs", () => {
+    const player = { id: 1, name: ["アリス", 19], deadRole: [["シーフ", 3, 1]] };
+    const roleToken = ["トラッカ", 1, 1];
+
+    expect(appendDeadRole(player, roleToken)).toEqual({
+      id: 1,
+      name: ["アリス", 19],
+      deadRole: [["シーフ", 3, 1], ["トラッカ", 1, 1]],
+    });
+    expect(player.deadRole).toEqual([["シーフ", 3, 1]]);
+    expect(roleToken).toEqual(["トラッカ", 1, 1]);
   });
 });

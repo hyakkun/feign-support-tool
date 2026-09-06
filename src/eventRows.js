@@ -22,6 +22,8 @@ const eventRows = [
 
 export const EVENT_ROWS = Object.freeze(eventRows.map((eventRow) => Object.freeze({ ...eventRow })));
 
+export const findEventByLabel = (label) => EVENT_ROWS.find((eventRow) => eventRow.label === label);
+
 export const isDeathEventLabel = (label) => EVENT_ROWS.some((eventRow) => (
   eventRow.label === label && ["player-then-optional-dead-role", "player-with-fixed-dead-role"].includes(eventRow.editor)
 ));
@@ -29,6 +31,23 @@ export const isDeathEventLabel = (label) => EVENT_ROWS.some((eventRow) => (
 export const fixedDeathRoleIdForEventLabel = (label) => EVENT_ROWS.find((eventRow) => (
   eventRow.label === label
 ))?.fixedDeathRoleId;
+
+export const allowsReviveForEventLabel = (label) => [
+  EVENT_TYPE.EXPLOSION,
+  EVENT_TYPE.DOCTOR,
+].includes(findEventByLabel(label)?.type);
+
+export const appendDeadRole = (row, roleToken) => ({
+  ...row,
+  deadRole: [...(row.deadRole || []), [...roleToken]],
+});
+
+export const appendDeadRoleIfAbsent = (row, roleToken) => {
+  if (row.deadRole?.some((deadRole) => deadRole[0] === roleToken[0])) return row;
+  return {
+    ...appendDeadRole(row, roleToken),
+  };
+};
 
 const popupEventLabels = new Set([
   EVENT_ROWS.find((eventRow) => eventRow.type === EVENT_TYPE.SELF_DESTRUCT).label,
