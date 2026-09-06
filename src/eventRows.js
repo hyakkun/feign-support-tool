@@ -49,6 +49,10 @@ export const appendDeadRoleIfAbsent = (row, roleToken) => {
   };
 };
 
+export const requiresDeathRoleSelection = (row) => Boolean(row.deadRole?.length);
+
+export const createDeathRoleAnimationToken = (roleToken, playerId) => [...roleToken, playerId];
+
 const popupEventLabels = new Set([
   EVENT_ROWS.find((eventRow) => eventRow.type === EVENT_TYPE.SELF_DESTRUCT).label,
   EVENT_ROWS.find((eventRow) => eventRow.type === EVENT_TYPE.CHAIN_DEATH).label,
