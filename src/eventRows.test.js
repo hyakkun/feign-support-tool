@@ -2,12 +2,14 @@ import {
   EVENT_ROWS,
   appendDeadRole,
   appendDeadRoleIfAbsent,
+  createDeathRoleAnimationToken,
   allowsReviveForEventLabel,
   createLegacyEventRows,
   fixedDeathRoleIdForEventLabel,
   findEventByLabel,
   isDeathEventLabel,
   popupEventsByPlayerName,
+  requiresDeathRoleSelection,
 } from "./eventRows";
 
 describe("event rows", () => {
@@ -98,5 +100,11 @@ describe("event rows", () => {
     });
     expect(player.deadRole).toEqual([["シーフ", 3, 1]]);
     expect(roleToken).toEqual(["トラッカ", 1, 1]);
+  });
+
+  test("derives death-role follow-up and animation data from player data", () => {
+    expect(requiresDeathRoleSelection({ deadRole: [["医者", 1, 1]] })).toBe(true);
+    expect(requiresDeathRoleSelection({})).toBe(false);
+    expect(createDeathRoleAnimationToken(["魔術師", 3, 1], 4)).toEqual(["魔術師", 3, 1, 4]);
   });
 });

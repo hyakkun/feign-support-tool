@@ -9,15 +9,16 @@ import {
     ACTION_ITEM,
     LEGACY_SELECTOR,
     createLegacyRoleToken,
-    roleIdsForRoleLabels,
 } from "./roleCatalog";
 import {
     appendDeadRole,
     appendDeadRoleIfAbsent,
+    createDeathRoleAnimationToken,
     allowsReviveForEventLabel,
     fixedDeathRoleIdForEventLabel,
     isDeathEventLabel,
     popupEventsByPlayerName,
+    requiresDeathRoleSelection,
 } from "./eventRows";
 import {
     createInitialTableData,
@@ -30,6 +31,9 @@ import { actionOptionsForRoleLabels, roleLabelsForRow } from "./actionOptions";
 import { createTableFormatters } from "./tableFormatters";
 import { ColorSelect } from "./ColorSelect";
 import { InsaneSelect } from "./InsaneSelect";
+import { createRoleSelectState } from "./roleSelectState";
+import { createRoleOptionToken } from "./roleOptionTokens";
+import { createMemoRow, nextDayNumber, resetTableData } from "./boardOperations";
 import './index.scss';
 
 
@@ -290,24 +294,10 @@ FeignTool.tutorialData.forEach((item) => {
 class RoleSelect extends React.Component {
     constructor(props) {
         super(props);
-        let isLook = false;
-        let isInv = false;
-        let defaultRoleTypeNum = props.dataField === "role" ? -1 : -2;
-        if (props.dataField.indexOf('action_day') >= 0) {
-            const roleIds = roleIdsForRoleLabels(props.allRole);
-            isLook = roleIds.includes("lookout");
-            isInv = roleIds.includes("investigator");
-            if (isInv && this.props.row[props.dataField]) {
-                const roles = this.props.row[props.dataField].filter(item => item[2] === FeignTool.actionType.role);
-                if (roles.length === 1 && roles[0][1] === 1) defaultRoleTypeNum = -3;
-            }
-        }
+        const roleSelectState = createRoleSelectState({ dataField: props.dataField, roleLabels: props.allRole, value: props.row[props.dataField], actionType: FeignTool.actionType });
         this.state = {
             value: this.props.row[props.dataField] ?? [],
-            defaultRoleTypeNum: defaultRoleTypeNum,
-            roleTypeNum: defaultRoleTypeNum,
-            isLook: isLook,
-            isInv: isInv,
+            ...roleSelectState,
         };
     }
 
@@ -437,7 +427,7 @@ class RoleSelect extends React.Component {
                 })}
                 options={[...this.props.options.map((option) => {
                     let label = option.name;
-                    let roleTypeNum = this.state.roleTypeNum < 0 ? (option["defaultRoletype" + (-this.state.roleTypeNum)] ?? 0) : (option.roletype[this.state.roleTypeNum] ? this.state.roleTypeNum : 0);
+                    const token = createRoleOptionToken(option, this.state.roleTypeNum, FeignTool.actionType);
 
                     if (option.actionType !== FeignTool.actionType.name) {
                         if (option.name in FeignTool.roleImage) {
@@ -447,14 +437,11 @@ class RoleSelect extends React.Component {
                                 label = <span className="selectImg"><img src={FeignTool.roleImage[option.name]} alt={option.name} /></span>;
                         }
                         if (option.actionType === FeignTool.actionType.option) {
-                            if (option.name === "バ") return { value: ["バカ結果？", 4, 4], label: <span className="roleOption">バ</span> };
-                            if (option.name === "真") return { value: ["真結果", 5, 4], label: <span className="roleOption">真</span> };
-                            if (option.name === "バカ結果？") roleTypeNum = 4;
-                            else if (option.name === "真結果") roleTypeNum = 5;
+                            if (option.name === "バ" || option.name === "真") return { value: token, label: <span className="roleOption">{option.name}</span> };
                         }
                     }
                     return {
-                        value: [option.name, roleTypeNum, option.actionType], label: label
+                        value: token, label: label
                     };
                 })]}
                 components={{ Option: typeButton }}
@@ -497,7 +484,7 @@ class DeadSelect extends React.Component {
                     FeignTool_tableData.forEach((item) => {
                         if (item.name[0] === name && item.id >= 0) {
                             Object.assign(item, appendDeadRole(item, newItem));
-                            newItem.push(item.id);
+                            this.newValue[this.newValue.length - 1] = createDeathRoleAnimationToken(newItem, item.id);
                             item.keyid = item.id + ((item.keyid * 10) % 5 + 1) * 0.1 ;
                         }
                     });
@@ -519,7 +506,7 @@ class DeadSelect extends React.Component {
                     let roleExist = false;
                     FeignTool_tableData.forEach((item) => {
                         if (item.name[0] === newItem[0] && item.id >= 0) {
-                            roleExist = item.deadRole && item.deadRole.length > 0;
+                            roleExist = requiresDeathRoleSelection(item);
                         }
                     });
                     return roleExist;
@@ -727,15 +714,12 @@ const FeignSupportToolRoot = () => {
         }
     }
     const AddDay = () => {
-        const day = (columns.length - 4) / 2 + 1;
+        const day = nextDayNumber(columns);
         setColumns(columns.concat([{ ...FeignTool.target_day, formatter: FeignTool.dead_formatter('target_day' + day), text: '' + day, dataField: 'target_day' + day, }, { ...FeignTool.action_day, formatter: FeignTool.dead_formatter('action_day' + day), dataField: 'action_day' + day, }]));
         PopupWin(day);
     }
     const AddRow = () => {
-        let minNum = 0;
-        data.forEach(item => { if (minNum > item.id) minNum = item.id });
-        minNum--;
-        FeignTool_tableData = data.concat({ keyid: minNum, id: minNum, name: ["メモ", 19] });
+        FeignTool_tableData = data.concat(createMemoRow(data));
         setData(FeignTool_tableData);
         PopupWin((columns.length - 4) / 2);
     }
@@ -763,10 +747,7 @@ const FeignSupportToolRoot = () => {
         };
         const onClickReset = () => {
             if (window.confirm("入力内容をリセットしますか？")) {
-                const newData = data.map((item) => {
-                    if ("color" in item) return { keyid: item.keyid, id: item.id, name: [item.name[0], 19], color: item.color };
-                    else return { keyid: item.keyid, id: item.id, name: [item.name[0], 19] };
-                }).filter(item => (item.id >= 0)).concat(FeignTool.ActionsNameList.map((item) => Object.assign({}, item)));
+                const newData = resetTableData(data, FeignTool.ActionsNameList);
                 const newColumns = FeignTool.defaultColumns.slice();
                 newColumns[0].text = "　";
                 newColumns[1].text = "名前";
