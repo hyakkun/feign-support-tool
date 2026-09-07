@@ -1,22 +1,14 @@
 import React, { useReducer, useState } from 'react'
-import BootstrapTable from "react-bootstrap-table-next";
-import cellEditFactory from "react-bootstrap-table2-editor";
 import ReactDOM from 'react-dom';
-import { Container } from 'reactstrap';
-import { components } from "react-select";
-import CreatableSelect from 'react-select/creatable';
 import {
     ACTION_ITEM,
-    LEGACY_SELECTOR,
     createLegacyRoleToken,
 } from "./roleCatalog";
 import {
-    createDeathRoleAnimationToken,
     deathRoleRecordsFromEventCell,
     allowsReviveForEventLabel,
     fixedDeathRoleIdForEventLabel,
     isDeathEventLabel,
-    requiresDeathRoleSelection,
 } from "./eventRows";
 import {
     createLegacyPlayerOptions,
@@ -27,8 +19,8 @@ import { actionOptionsForRoleLabels, roleLabelsForRow } from "./actionOptions";
 import { createTableFormatters } from "./tableFormatters";
 import { ColorSelect } from "./ColorSelect";
 import { InsaneSelect } from "./InsaneSelect";
-import { createRoleSelectState } from "./roleSelectState";
-import { createRoleOptionToken } from "./roleOptionTokens";
+import { RoleSelect } from "./RoleSelect";
+import { DeadSelect } from "./DeadSelect";
 import { nextDayNumber } from "./boardOperations";
 import {
     createBoardState,
@@ -38,6 +30,8 @@ import {
 } from "./boardState";
 import { BOARD_ACTION, boardReducer } from "./boardReducer";
 import { sendPopupSnapshot } from "./popupBridge";
+import { BoardTable } from "./BoardTable";
+import { NameInputPanel } from "./NameInputPanel";
 import './index.scss';
 
 
@@ -100,12 +94,12 @@ FeignTool.target_day = {
         if (row.id < 0) {
             if (isDeathEventLabel(row.name[0]))
                 return (
-                    <DeadSelect {...editorProps} value={value} row={row} options={FeignTool_nameList.concat(FeignTool.actionRevive)} fixedDeathRole={FeignTool.fixedDeathRoleForEvent(row.name[0])} dataField={column.dataField} text={column.text} />
+                    <DeadSelect config={FeignTool} {...editorProps} value={value} row={row} options={FeignTool_nameList.concat(FeignTool.actionRevive)} fixedDeathRole={FeignTool.fixedDeathRoleForEvent(row.name[0])} dataField={column.dataField} text={column.text} />
                 );
             if (allowsReviveForEventLabel(row.name[0])) options = options.concat(FeignTool.actionRevive);
         }
         return (
-            <RoleSelect {...editorProps} value={value} row={row} options={options} dataField={column.dataField} text={column.text} />
+            <RoleSelect config={FeignTool} {...editorProps} value={value} row={row} options={options} dataField={column.dataField} text={column.text} />
         );
     },
 };
@@ -117,12 +111,12 @@ FeignTool.action_day = {
         let allrole = [];
         if (row.id < 0 && isDeathEventLabel(row.name[0]))
             return (
-                <DeadSelect {...editorProps} value={value} row={row} options={FeignTool_nameList.concat(FeignTool.actionRevive)} fixedDeathRole={FeignTool.fixedDeathRoleForEvent(row.name[0])} dataField={column.dataField} text={column.text} />
+                <DeadSelect config={FeignTool} {...editorProps} value={value} row={row} options={FeignTool_nameList.concat(FeignTool.actionRevive)} fixedDeathRole={FeignTool.fixedDeathRoleForEvent(row.name[0])} dataField={column.dataField} text={column.text} />
             );
         if (row.id < 0 && allowsReviveForEventLabel(row.name[0])) {
             const newOptions = FeignTool_nameList.concat(FeignTool.actionRevive);
             return (
-                <RoleSelect {...editorProps} value={value} row={row} options={newOptions} dataField={column.dataField} text={column.text} allRole={allrole} />
+                <RoleSelect config={FeignTool} {...editorProps} value={value} row={row} options={newOptions} dataField={column.dataField} text={column.text} allRole={allrole} />
             );
         }
         allrole = roleLabelsForRow(row);
@@ -133,7 +127,7 @@ FeignTool.action_day = {
         };
         const newOptions = actionOptionsForRoleLabels(allrole, optionsByActionItem, FeignTool.hr);
         return (
-            <RoleSelect {...editorProps} value={value} row={row} options={newOptions} dataField={column.dataField} text={column.text} allRole={allrole} />
+            <RoleSelect config={FeignTool} {...editorProps} value={value} row={row} options={newOptions} dataField={column.dataField} text={column.text} allRole={allrole} />
         );
     },
 };
@@ -239,7 +233,7 @@ FeignTool.defaultColumns = [
             if (!(column.dataField in row)) row[column.dataField] = [];
             const roleWithTrue = [...FeignTool.role, FeignTool.br, { id: 103, name: "バ", roletype: [true, false, false, false, false], actionType: 4 }, { id: 104, name: "真", roletype: [true, false, false, false, false], actionType: 4 }];
             return (
-                <RoleSelect {...editorProps} value={value} row={row} options={roleWithTrue} dataField={column.dataField} text={column.text} />
+                <RoleSelect config={FeignTool} {...editorProps} value={value} row={row} options={roleWithTrue} dataField={column.dataField} text={column.text} />
             );
         },
     },
@@ -275,7 +269,7 @@ FeignTool.defaultColumns = [
         editorRenderer: (editorProps, value, row, column, rowIndex, columnIndex) => {
             if (!(column.dataField in row)) row[column.dataField] = [];
             return (
-                <RoleSelect {...editorProps} value={value} row={row} options={FeignTool.role} dataField={column.dataField} text={column.text} />
+                <RoleSelect config={FeignTool} {...editorProps} value={value} row={row} options={FeignTool.role} dataField={column.dataField} text={column.text} />
             );
         },
     },
@@ -289,376 +283,14 @@ let FeignTool_nameList = createLegacyPlayerOptions(FeignTool.tutorialNameStringL
 let FeignTool_colorNameDic = {};
 let FeignTool_playerIsIcon = true;
 let FeignTool_nameIsIcon = true;
+FeignTool.getColorNameDictionary = () => FeignTool_colorNameDic;
+FeignTool.getTableData = () => FeignTool_tableData;
+FeignTool.getPlayerOptions = () => FeignTool_nameList;
 FeignTool.tutorialData.forEach((item) => {
     if (item.id < 0 || !("color" in item)) return;
     FeignTool_colorNameDic[item.name[0]] = item.color;
 });
 
-class RoleSelect extends React.Component {
-    constructor(props) {
-        super(props);
-        const roleSelectState = createRoleSelectState({ dataField: props.dataField, roleLabels: props.allRole, value: props.row[props.dataField], actionType: FeignTool.actionType });
-        this.state = {
-            value: this.props.row[props.dataField] ?? [],
-            ...roleSelectState,
-        };
-    }
-
-    getValue() {
-        if ("newValue" in this) return this.newValue;
-        else return this.state.value;
-    }
-
-    checkFinish() {
-        if (this.newValue.length <= this.state.value.length) {
-            if (this.state.isLook && this.newValue.length > 0) return false;
-            return true;
-        }
-        const newItem = this.newValue[this.newValue.length - 1];
-        if (this.state.isLook) {
-            if (newItem[2] !== FeignTool.actionType.name) return true;
-            else return false;
-        } else if (this.state.isInv) {
-            if (newItem[2] !== FeignTool.actionType.role) return true;
-            const roles = this.newValue.filter(item => item[2] === FeignTool.actionType.role);
-            if (roles.length !== 1) return true;
-            if (roles[0][1] === 1) this.setState({ roleTypeNum: -3 });
-            else this.setState({ roleTypeNum: -2 });
-            return false;
-
-        } else return true;
-    }
-
-    handleOnUpdate(event) {
-        if (event) {
-            this.newValue = event.map(x => x.value);
-            const finish = this.checkFinish();
-            this.setState({
-                value: this.newValue
-            })
-            return finish;
-        } else {
-            return true;
-        }
-    }
-
-    render() {
-        const { value, onUpdate, ...rest } = this.props
-        const customStyles = {
-            option: (provided, state) => {
-                const style = (
-                    {
-                        ...provided,
-                        display: "inline-block",
-                        width: (typeof (state.label) === "string") ? "6rem" : (state.data.value[2] === 1 || state.data.value[2] === 4 ?"2.25rem" : "2rem"),
-                        padding: "0.1rem",
-                        borderCollapse: "collapse",
-                        border: "0.05rem solid #aaa",
-                        backgroundColor: FeignTool.roletypeColor[state.data.value[1]],
-                        boxSizing: "border-box",
-                    });
-                if (state.data.value[2] === 2 && state.data.value[0] in FeignTool_colorNameDic)
-                    style.background = "linear-gradient(transparent 80%, " + FeignTool_colorNameDic[state.data.value[0]][1] + " 18%)";
-                return style;
-            },
-            control: (provided) => ({
-                ...provided,
-                display: "flex"
-            }),
-            multiValue: (provided, { data }) => {
-                if (data.value[2] === 2 && data.value[0] in FeignTool_colorNameDic) return {
-                    ...provided,
-                    background: "linear-gradient(transparent 80%, " + FeignTool_colorNameDic[data.value[0]][1] + " 18%)",
-                    border: "1px solid #888",
-                };
-                else return {
-                    ...provided,
-                    backgroundColor: FeignTool.roletypeColor[data.value[1]],
-                };
-            },
-            menu: (provided) => ({
-                ...provided,
-                width: "fit-content",
-            }),
-            menuList: (provided) => ({
-                ...provided,
-                width: "18rem",
-                marginLeft: "auto",
-                marginRight: "auto",
-            }),
-            container: (provided) => ({
-                ...provided,
-                whiteSpace: "normal",
-                width: "fit-content",
-            }),
-        };
-        const toggleRoleTypeNum = (typeNum) => {
-            if (typeNum === this.state.roleTypeNum) this.setState({ roleTypeNum: this.state.defaultRoleTypeNum });
-            else this.setState({ roleTypeNum: typeNum });
-        }
-        const typeButton = (props) => {
-            if (props.data.value?.length >= 2 && props.data.value[2]!==2) {
-                if (props.data.value[0] === LEGACY_SELECTOR.FACTION) {
-                    return (
-                        <div style={{ display: "flex" }}>
-                            <button className="roleButton crew" onClick={() => toggleRoleTypeNum(1)}>crew</button>
-                            <button className="roleButton imp" onClick={() => toggleRoleTypeNum(2)}>imp</button>
-                            <button className="roleButton neutral" onClick={() => toggleRoleTypeNum(3)}>neutral</button>
-                            <button className="roleButton unknown" onClick={() => toggleRoleTypeNum(0)}>none</button>
-                        </div>
-                    );
-                } else if (props.data.value[0] === "hr") {
-                    return <hr style={{ display: "block" }} />;
-                } else if (props.data.value[0] === "br") {
-                    return <br />;
-                }
-            }
-            return <components.Option {...props} />;
-        }
-        return (
-            <CreatableSelect
-                {...rest} isMulti
-                key={this.props.dataField} name={this.props.text}
-                onChange={(event) => { if (this.handleOnUpdate(event)) return onUpdate(this.getValue()); }}
-                className="selectRole"
-                defaultValue={this.props.row[this.props.dataField].map((role) => {
-                    let label = role[0];
-                    if (role[2] !== 2 && role[0] in FeignTool.roleImage) {
-                        label = <img src={FeignTool.roleImage[role[0]]} alt={role[0]} />;
-                    }
-                    return { value: role, label: label }
-                })}
-                options={[...this.props.options.map((option) => {
-                    let label = option.name;
-                    const token = createRoleOptionToken(option, this.state.roleTypeNum, FeignTool.actionType);
-
-                    if (option.actionType !== FeignTool.actionType.name) {
-                        if (option.name in FeignTool.roleImage) {
-                            if (option.actionType === FeignTool.actionType.role)
-                                label = <span className="selectImg"><img className="roleImg" src={FeignTool.roleImage[option.name]} alt={option.name} /></span>;
-                            else
-                                label = <span className="selectImg"><img src={FeignTool.roleImage[option.name]} alt={option.name} /></span>;
-                        }
-                        if (option.actionType === FeignTool.actionType.option) {
-                            if (option.name === "バ" || option.name === "真") return { value: token, label: <span className="roleOption">{option.name}</span> };
-                        }
-                    }
-                    return {
-                        value: token, label: label
-                    };
-                })]}
-                components={{ Option: typeButton }}
-                styles={customStyles}
-                menuIsOpen={true}
-                autoFocus={true}
-                isClearable={true}
-                getNewOptionData={(newOptionString) => ({ value: [newOptionString, 0, 3], label: newOptionString })}
-                closeMenuOnSelect={false}
-                blurInputOnSelect={false}
-                onMenuClose={() => { onUpdate(this.getValue()); }}
-            />
-        )
-    }
-}
-
-class DeadSelect extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            value: this.props.row[props.dataField] ?? [],
-            roleTypeNum: -2,
-            nameSelected: false
-        };
-    }
-
-    getValue() {
-        if ("newValue" in this) return this.newValue;
-        else return this.state.value;
-    }
-
-    handleOnUpdate(event) {
-        if (event) {
-            this.newValue = event.map(x => x.value);
-            if (event.length > this.state.value.length) {
-                const newItem = event[event.length - 1].value;
-                if (this.state.nameSelected && newItem[2] === FeignTool.actionType.role) {
-                    const name = this.state.nameSelected;
-                    this.setState({ nameSelected: false });
-                    const player = FeignTool_tableData.find((item) => item.name[0] === name && item.id >= 0);
-                    if (player) this.newValue[this.newValue.length - 1] = createDeathRoleAnimationToken(newItem, player.id);
-                } else if (!this.state.nameSelected && newItem[2] === FeignTool.actionType.name) {
-                    if (this.props.fixedDeathRole) {
-                        this.setState({ value: this.newValue, nameSelected: false });
-                        return true;
-                    }
-                    this.setState({ value: this.newValue, nameSelected: newItem[0] });
-                    let roleExist = false;
-                    FeignTool_tableData.forEach((item) => {
-                        if (item.name[0] === newItem[0] && item.id >= 0) {
-                            roleExist = requiresDeathRoleSelection(item);
-                        }
-                    });
-                    return roleExist;
-                }
-            }
-            this.setState({ value: this.newValue });
-        }
-        return true;
-    }
-
-    render() {
-        const { value, onUpdate, ...rest } = this.props
-        const customStyles = {
-            option: (provided, state) => {
-                const style = (
-                    {
-                        ...provided,
-                        display: "inline-block",
-                        width: (typeof (state.label) === "string") ? "6rem" : (state.data.value[2] === 1 || state.data.value[2] === 4 ? "2.25rem" : "2rem"),
-                        padding: "0.1rem",
-                        borderCollapse: "collapse",
-                        border: "0.05rem solid #aaa",
-                        backgroundColor: FeignTool.roletypeColor[state.data.value[1]],
-                        boxSizing: "border-box",
-                    });
-                if (state.data.value[2] === 2 && state.data.value[0] in FeignTool_colorNameDic)
-                    style.background = "linear-gradient(transparent 80%, " + FeignTool_colorNameDic[state.data.value[0]][1] + " 18%)";
-                return style;
-            },
-            control: (provided) => ({
-                ...provided,
-                display: "flex"
-            }),
-            multiValue: (provided, { data }) => {
-                if (data.value[2] === 2 && data.value[0] in FeignTool_colorNameDic) return {
-                    ...provided,
-                    background: "linear-gradient(transparent 80%, " + FeignTool_colorNameDic[data.value[0]][1] + " 18%)",
-                    border: "1px solid #888",
-                };
-                else return {
-                    ...provided,
-                    backgroundColor: FeignTool.roletypeColor[data.value[1]],
-                };
-            },
-            menu: (provided) => ({
-                ...provided,
-                width: "fit-content",
-            }),
-            menuList: (provided) => ({
-                ...provided,
-                width: "18rem",
-                marginLeft: "auto",
-                marginRight: "auto",
-            }),
-            container: (provided) => ({
-                ...provided,
-                whiteSpace: "normal",
-                width: "fit-content",
-            }),
-        };
-        const toggleRoleTypeNum = (typeNum) => {
-            if (typeNum === this.state.roleTypeNum) this.setState({ roleTypeNum: -2 });
-            else this.setState({ roleTypeNum: typeNum });
-        }
-        const typeButton = (props) => {
-            if (props.data.value?.length >= 2 && props.data.value[2] !== 2) {
-                if (props.data.value[0] === LEGACY_SELECTOR.FACTION) {
-                    return (
-                        <div style={{ display: "flex" }}>
-                            <button className="roleButton crew" onClick={() => toggleRoleTypeNum(1)}>crew</button>
-                            <button className="roleButton imp" onClick={() => toggleRoleTypeNum(2)}>imp</button>
-                            <button className="roleButton neutral" onClick={() => toggleRoleTypeNum(3)}>neutral</button>
-                            <button className="roleButton unknown" onClick={() => toggleRoleTypeNum(0)}>none</button>
-                        </div>
-                    );
-                } else if (props.data.value[0] === "hr") {
-                    return <hr style={{ display: "block" }} />;
-                } else if (props.data.value[0] === "br") {
-                    return <br />;
-                }
-            }
-            return <components.Option {...props} />;
-        }
-        return (
-            <CreatableSelect
-                {...rest} isMulti isClearable={false}
-                key={this.props.dataField} name={this.props.text}
-                onChange={(event) => {
-                    if (this.handleOnUpdate(event)) return onUpdate(this.getValue());
-                }}
-                className="selectRole"
-                defaultValue={this.props.row[this.props.dataField].map((role) => {
-                    let label = role[0];
-                    if (role[2] !== 2 && role[0] in FeignTool.roleImage) {
-                        label = <img src={FeignTool.roleImage[role[0]]} alt={role[0]} />;
-                    }
-                    return { value: role, label: label }
-                })}
-                options={(
-                    this.state.nameSelected ? [...FeignTool.role.map((option) => {
-                        let label = option.name;
-                        let roleTypeNum = this.state.roleTypeNum < 0 ? (option["defaultRoletype" + (-this.state.roleTypeNum)] ?? 0) : (option.roletype[this.state.roleTypeNum] ? this.state.roleTypeNum : 0);
-
-                        if (option.actionType !== FeignTool.actionType.name) {
-                            if (option.name in FeignTool.roleImage) {
-                                if (option.actionType === FeignTool.actionType.role)
-                                    label = <span className="selectImg"><img className="roleImg" src={FeignTool.roleImage[option.name]} alt={option.name} /></span>;
-                                else
-                                    label = <span className="selectImg"><img src={FeignTool.roleImage[option.name]} alt={option.name} /></span>;
-                            }
-                            if (option.actionType === FeignTool.actionType.option) {
-                                if (option.name === "バ") return { value: ["バカ結果？", 4, 4], label: <span className="roleOption">バ</span> };
-                                if (option.name === "真") return { value: ["真結果", 5, 4], label: <span className="roleOption">真</span> };
-                                if (option.name === "バカ結果？") roleTypeNum = 4;
-                                else if (option.name === "真結果") roleTypeNum = 5;
-                            }
-                        }
-                        return {
-                            value: [option.name, roleTypeNum, option.actionType], label: label
-                        };
-                    }), { value: ["蘇生", 0, FeignTool.actionType.option], label: <span className="roleOption">蘇</span> }]:
-                        [...FeignTool_nameList.concat(FeignTool.actionRevive).map((option) => ({ value: [option.name, 0, option.actionType], label: option.name}))]
-                    )}
-                components={{ Option: typeButton }}
-                styles={customStyles}
-                menuIsOpen={true}
-                autoFocus={true}
-                getNewOptionData={(newOptionString) => ({ value: [newOptionString, 0, 3], label: newOptionString })}
-                closeMenuOnSelect={false}
-                blurInputOnSelect={false}
-                onMenuClose={() => { onUpdate(this.getValue()); }}
-            />
-        )
-    }
-}
-
-
-class FeignTableErrorBoundary extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = { hasError: false };
-    }
-
-    static getDerivedStateFromError(error) {
-        // Update state so the next render will show the fallback UI.
-        return { hasError: true };
-    }
-
-    componentDidCatch(error, errorInfo) {
-        // You can also log the error to an error reporting service
-    }
-
-    render() {
-        if (this.state.hasError) {
-            // You can render any custom fallback UI
-            if (Array.isArray(FeignTool_tableData)) {
-                let renderData = FeignTool_tableData.map((item, i) => (<div key={i}>{JSON.stringify(item)}</div>));
-                return <div><h1>大変申し訳ありません、エラーが発生しました</h1><button onClick={() => { this.setState({ hasError: false }); }}>リトライ</button><div>{renderData}</div></div>;
-            } else return <h1>大変申し訳ありません、エラーが発生しました</h1>;
-        }
-        return this.props.children;
-    }
-}
 let FeignTool_popupWindow = null;
 
 const FeignSupportToolRoot = () => {
@@ -744,94 +376,42 @@ const FeignSupportToolRoot = () => {
         else if (row.name && row.name[1] > 4 && row.name[1] <= 11)
             return { background: FeignTool.roleLabelBgColor[4] };
     };
-    const NameInputArea = () => {
-        const playerIconChangeHandler = (event) => {
-            FeignTool_playerIsIcon = event.target.checked;
-            dispatch({ type: BOARD_ACTION.SET_DISPLAY_OPTION, option: "playerIsIcon", value: event.target.checked });
-        };
-        const nameIconChangeHandler = (event) => {
-            FeignTool_nameIsIcon = event.target.checked;
-            dispatch({ type: BOARD_ACTION.SET_DISPLAY_OPTION, option: "nameIsIcon", value: event.target.checked });
-        };
-        const onClickReset = () => {
-            if (window.confirm("入力内容をリセットしますか？")) {
-                const nextState = boardReducer({ ...boardState, board: data }, { type: BOARD_ACTION.RESET_BOARD, eventRows: FeignTool.ActionsNameList });
-                const newColumns = FeignTool.defaultColumns.slice();
-                newColumns[0].text = "　";
-                newColumns[1].text = "名前";
-                setColumns(newColumns);
-                dispatch({ type: BOARD_ACTION.REPLACE_STATE, state: nextState });
-                syncLegacyBoard(nextState);
-            }
-            PopupWin(1);
+    const playerIconChangeHandler = (event) => {
+        FeignTool_playerIsIcon = event.target.checked;
+        dispatch({ type: BOARD_ACTION.SET_DISPLAY_OPTION, option: "playerIsIcon", value: event.target.checked });
+    };
+    const nameIconChangeHandler = (event) => {
+        FeignTool_nameIsIcon = event.target.checked;
+        dispatch({ type: BOARD_ACTION.SET_DISPLAY_OPTION, option: "nameIsIcon", value: event.target.checked });
+    };
+    const onClickReset = () => {
+        if (window.confirm("入力内容をリセットしますか？")) {
+            const nextState = boardReducer({ ...boardState, board: data }, { type: BOARD_ACTION.RESET_BOARD, eventRows: FeignTool.ActionsNameList });
+            const newColumns = FeignTool.defaultColumns.slice();
+            newColumns[0].text = "　";
+            newColumns[1].text = "名前";
+            setColumns(newColumns);
+            dispatch({ type: BOARD_ACTION.REPLACE_STATE, state: nextState });
+            syncLegacyBoard(nextState);
         }
-
-        const OpenNewWindow = () => {
-            const onClickOpenNewWindow = () => {
-                FeignTool_popupWindow = null;
-                FeignTool_popupWindow = window.open(
-                    process.env.PUBLIC_URL + '/popup.html',
-                    'FeignTool_popupWindow',
-                    'width=1000, height=300'
-                );
-                const sendWhenReady = () => {
-                    if (!FeignTool_popupWindow || FeignTool_popupWindow.closed) return;
-                    if (FeignTool_popupWindow.document.readyState !== "complete") {
-                        window.setTimeout(sendWhenReady, 100);
-                        return;
-                    }
-                    PopupWin((columns.length - 4) / 2);
-                };
-                window.setTimeout(sendWhenReady, 100);
-            };
-            return (
-                <button onClick={onClickOpenNewWindow}>
-                    openDisplayWindow
-                </button>
-            );
-        };
-        return (
-            <div>
-                <div style={{ display: "flex" }}>
-                    <textarea cols="20" rows="12" value={nameText} onChange={onChangeText} style={{ display: "inline-block" }} placeholder="名前入力欄：参加者の名前（五文字以内）を改行区切りで入力" />
-                    <div style={{ display: "flex", flexDirection: "column" }}>
-                        <a href="https://github.com/sawa90/feign-support-tool/blob/master/README.md" target="_blank" rel="noopener noreferrer" style={{ marginLeft: "1rem" }}>使い方</a>
-                        <div style={{ marginTop: "auto" }}>
-                            <div>
-                                <div style={{ margin: "1rem" }}>
-                                    {OpenNewWindow()}
-                                </div>
-                                <label>
-                                    <input
-                                        type="checkbox"
-                                        checked={PlayerIsIcon}
-                                        onChange={playerIconChangeHandler}
-                                        id="iconCheckBox"
-                                        style={{ marginLeft: "1rem" }}
-                                    />
-                                    アイコン
-                                </label>
-                                <label>
-                                    <input
-                                        type="checkbox"
-                                        checked={NameIsIcon}
-                                        onChange={nameIconChangeHandler}
-                                        id="nameIconCheckBox"
-                                        style={{ marginLeft: "1rem" }}
-                                    />
-                                    名前欄アイコン
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div>
-                    <button onClick={onClickButton}>setName</button>
-                    <button onClick={onClickReset} style={{ marginLeft: "1rem" }}>リセット</button>
-                </div>
-            </div>
+        PopupWin(1);
+    };
+    const onOpenPopup = () => {
+        FeignTool_popupWindow = window.open(
+            process.env.PUBLIC_URL + '/popup.html',
+            'FeignTool_popupWindow',
+            'width=1000, height=300'
         );
-    }
+        const sendWhenReady = () => {
+            if (!FeignTool_popupWindow || FeignTool_popupWindow.closed) return;
+            if (FeignTool_popupWindow.document.readyState !== "complete") {
+                window.setTimeout(sendWhenReady, 100);
+                return;
+            }
+            PopupWin((columns.length - 4) / 2);
+        };
+        window.setTimeout(sendWhenReady, 100);
+    };
     const MemeArea = () => {
         return (
             <div>
@@ -842,45 +422,48 @@ const FeignSupportToolRoot = () => {
     const PopupWin = (day, state = { ...boardState, board: data }) => {
         sendPopupSnapshot({ popupWindow: FeignTool_popupWindow, state, day, origin: window.location.origin });
     }
+    const onCellSave = (oldValue, newValue, row, column) => {
+        const deathRoleActions = isDeathEventLabel(row.name[0])
+            ? deathRoleRecordsFromEventCell(row.name[0], newValue, FeignTool.actionType).map((record) => ({
+                type: BOARD_ACTION.RECORD_DEATH_ROLE,
+                playerName: record.playerName,
+                roleToken: record.roleToken || FeignTool.fixedDeathRoleForEvent(row.name[0]),
+                preventDuplicate: Boolean(record.fixedDeathRoleId),
+            }))
+            : [];
+        const nextState = applyBoardActions([
+            { type: BOARD_ACTION.UPDATE_CELL, rowId: row.id, field: column.dataField, value: newValue },
+            ...deathRoleActions,
+        ]);
+        if (FeignTool_popupWindow) PopupWin((columns.length - 4) / 2, nextState);
+        if (column.dataField === 'name' || row.id < 0) setTableRevision((revision) => revision + 1);
+    };
 
     return (
         <div>
             <div >
                 <button onClick={AddDay}>翌日</button>
-                <Container style={{ whiteSpace: "nowrap", display: "flex", alignItems: "flex-end"}}>
-                    <FeignTableErrorBoundary>
-                        <BootstrapTable
-                            key={`table-${PlayerIsIcon}-${NameIsIcon}-${tableRevision}`}
-                            data={data}
-                            columns={columns}
-                            keyField="keyid"
-                            bootstrap4={true}
-                            cellEdit={cellEditFactory({
-                                mode: "click", blurToSave: true, afterSaveCell: (oldValue, newValue, row, column) => {
-                                    const deathRoleActions = isDeathEventLabel(row.name[0])
-                                        ? deathRoleRecordsFromEventCell(row.name[0], newValue, FeignTool.actionType).map((record) => ({
-                                            type: BOARD_ACTION.RECORD_DEATH_ROLE,
-                                            playerName: record.playerName,
-                                            roleToken: record.roleToken || FeignTool.fixedDeathRoleForEvent(row.name[0]),
-                                            preventDuplicate: Boolean(record.fixedDeathRoleId),
-                                        }))
-                                        : [];
-                                    const nextState = applyBoardActions([
-                                        { type: BOARD_ACTION.UPDATE_CELL, rowId: row.id, field: column.dataField, value: newValue },
-                                        ...deathRoleActions,
-                                    ]);
-                                    if (FeignTool_popupWindow) PopupWin((columns.length - 4) / 2, nextState);
-                                    if (column.dataField === 'name' || row.id < 0) setTableRevision((revision) => revision + 1);
-                                }
-                            })}
-                            rowStyle={rowStyle}
-                        />
-                    </FeignTableErrorBoundary>
-                    <button onClick={AddRow} style={{ height:"fit-content" }}>メモ行追加</button>
-                </Container>
+                <BoardTable
+                    data={data}
+                    columns={columns}
+                    tableKey={`table-${PlayerIsIcon}-${NameIsIcon}-${tableRevision}`}
+                    onCellSave={onCellSave}
+                    rowStyle={rowStyle}
+                    onAddMemo={AddRow}
+                />
             </div>
             {MemeArea()}
-            {NameInputArea()}
+            <NameInputPanel
+                nameText={nameText}
+                onNameTextChange={onChangeText}
+                onOpenPopup={onOpenPopup}
+                playerIsIcon={PlayerIsIcon}
+                nameIsIcon={NameIsIcon}
+                onPlayerIconChange={playerIconChangeHandler}
+                onNameIconChange={nameIconChangeHandler}
+                onSetNames={onClickButton}
+                onReset={onClickReset}
+            />
         </div>
 
     );

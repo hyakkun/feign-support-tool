@@ -18,7 +18,6 @@
 type BoardState = {
   board: LegacyBoardRow[];       // 移行中の正本。将来は domain-model.md の Board へ変換する
   playerNames: string[];         // 入力順の参加者名。board から検証できるが編集操作に必要
-  colorByPlayerName: Record<string, LegacyColor>;
   display: {
     playerIsIcon: boolean;
     nameIsIcon: boolean;
@@ -41,7 +40,7 @@ type LegacyColor = [iconPath: string, hex: string];
 type LegacyCellItem = [label: string, displayType: number, itemType: number, playerRowId?: number];
 ```
 
-`colorByPlayerName` は `board` のプレイヤー行の `color` から再構築可能である。移行初期は既存 formatter との互換性を優先して保持し、色変更操作では `board` と辞書を同時に更新する。後段で `board` だけを正本にして selector で辞書を導出する。
+色辞書は `board` のプレイヤー行の `color` から `selectColorByPlayerName` で導出する。`BoardState` に重複して保持しない。
 
 ## 操作
 
@@ -95,27 +94,38 @@ FeignSupportToolRoot
 
 ## 段階的な移行
 
-1. 現行テストを基準として `BoardState` と selector の型・仕様をテストで定義する。
-2. `display` と `dayCount` を React state に寄せ、モジュール変数を読み取り専用にする。
-3. `board`、`playerNames`、色辞書を `useReducer` へ移す。既存テーブルには selector の結果を渡す。
-4. ポップアップ送信を `PopupBridge` へ分離する。
-5. `NameInputPanel`、`RoleSelect`、`DeadSelect` を props 契約に沿って分離する。
-6. legacy タプルと新しい `Board` モデルの変換関数を追加し、保存・テーブルを順に移行する。
+1. 完了: 現行テストを基準として `BoardState` と selector の仕様をテストで定義した。
+2. 完了: `display` と `dayCount` を reducer 管理へ移した。
+3. 完了: `board`、`playerNames`、色辞書の導出を `useReducer` と selector へ移した。テーブルに渡す個別の `data` state は廃止済みである。
+4. 完了: ポップアップ送信を `popupBridge` へ分離した。
+5. 完了: `BoardTable`、`NameInputPanel`、`RoleSelect`、`DeadSelect` を分離した。
+6. 未着手: legacy タプルと `domain-model.md` の `Board` を相互変換する関数を追加し、保存・描画を段階的に移行する。
 
 各段階で `npm test`、`npm run build`、名前設定・役職入力・自爆/道連れ・ポップアップのブラウザ確認を行う。段階 3 以前にテーブルライブラリや React の更新を開始しない。
 
 ## 現在の移行状況
 
-2026-09 時点で、次の操作は `boardReducer` を通じて `BoardState.board` を更新する。テーブルに渡す `data` の個別 state は廃止済みである。
+2026-09 時点で、盤面の正本は `BoardState` であり、次の操作は `boardReducer` を通じて更新する。テーブルに渡す `data` の個別 state は廃止済みである。
 
 - 新規盤面作成、参加者更新、色変更、通常セル更新
 - 追放・殺害・道連れの死亡役職記録、および自爆時の魔術師の自動記録
 - メモ行追加、翌日追加、リセット、表示設定
 - ポップアップ用スナップショットの生成・送信（`popupBridge`）
+- `BoardTable`、`NameInputPanel`、`RoleSelect`、`DeadSelect` の分離
 
-`FeignTool_tableData`、`FeignTool_nameList`、`FeignTool_colorNameDic` は、既存テーブルの formatter と editor の互換アダプターとして残る。これらは `syncLegacyBoard` で `BoardState` から同期する。ただしテーブルライブラリは編集途中に行データを可変更新するため、保存完了までは一時的に同じ盤面参照を利用する。
+`BoardTable` と `NameInputPanel` は callback の接続を、`popupBridge` は送信内容を単体テストで固定している。役職・死亡イベントの詳細な選択手順は既存の純粋関数テストとブラウザ確認で担保する。
 
-次の分割対象は、既存テーブルへの接続を担う `BoardTable`、名前設定・表示設定を担う `NameInputPanel`、および editor 群である。`RoleSelect` と `DeadSelect` は設定値を `FeignTool` から読む互換依存が残るため、親から props で渡す方式へ段階的に置き換える。
+`FeignTool_tableData`、`FeignTool_nameList`、`FeignTool_colorNameDic` は、既存テーブルの formatter と editor の互換アダプターとして残る。`syncLegacyBoard` で `BoardState` から同期し、`RoleSelect` と `DeadSelect` には getter を含む設定 props として渡す。テーブルライブラリは編集途中に行データを可変更新するため、保存完了までは一時的に同じ盤面参照を利用する。
+
+## 今後の作業
+
+優先順は次のとおりとする。
+
+1. `columns` の生成を selector または専用モジュールへ移し、`dayCount` と日別列の二重管理を解消する。あわせて `rowStyle` と formatter の設定依存を `BoardTable` 側へ集約する。
+2. `FeignTool_*` 互換アダプターを縮小する。まず formatter と editor が必要とする値を明示的な props／getter に置き換え、テーブル保存時の可変更新を `BoardTable` 内だけに閉じ込める。
+3. 役職・対象・行動・死亡イベントについて、主要な選択手順を UI テストで追加する。現在の reducer／純粋関数テストとブラウザ確認を補完する。
+4. 別ブランチで素の HTML `table` による `BoardTable` 試作を行い、現行アダプターとの機能比較と回帰確認を実施する。十分な同等性が得られるまで本線へは統合しない。
+5. テーブル置換の完了後に、React、`react-scripts`、周辺依存を別の変更として更新する。
 
 ## テーブルライブラリの将来方針
 
