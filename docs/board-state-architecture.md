@@ -135,6 +135,44 @@ FeignSupportToolRoot
 
 依存関係の更新とテーブル置換は同一変更に混在させない。
 
+## 将来のディレクトリ構成
+
+モジュール数の増加に対応し、テーブル置換の準備が整った段階で、責務ごとに次の構成へ段階的に移すことを検討する。現時点ではファイル移動を行わない。
+
+```text
+src/
+├─ app/
+│  └─ index.js                 # Root の組み立てだけ
+├─ board/
+│  ├─ state/
+│  │  ├─ boardState.js
+│  │  ├─ boardReducer.js
+│  │  └─ boardOperations.js
+│  ├─ model/
+│  │  ├─ boardConfig.js
+│  │  ├─ playerRows.js
+│  │  ├─ eventRows.js
+│  │  ├─ actionOptions.js
+│  │  └─ roleCatalog.js
+│  ├─ table/
+│  │  ├─ BoardTable.js
+│  │  ├─ tableFormatters.js
+│  │  └─ editors/
+│  │     ├─ RoleSelect.js
+│  │     ├─ DeadSelect.js
+│  │     ├─ ColorSelect.js
+│  │     └─ InsaneSelect.js
+│  └─ popup/
+│     └─ popupBridge.js
+├─ components/
+│  └─ NameInputPanel.js
+└─ test/                       # 共通テストヘルパーが必要になった場合のみ
+```
+
+テストは実装ファイルと同じディレクトリに置く。たとえば `boardReducer.js` と `boardReducer.test.js` を並べることで、変更対象と検証を近接させる。
+
+移動は一括で行わない。まず `board/table/` と `board/table/editors/`、次に `board/state/` と `board/model/`、最後に root を `app/` へ移す。各段階で import の更新、`npm test`、`npm run build`、必要なブラウザ確認を完了させてから次へ進む。
+
 ## 非目標
 
 - ゲーム上の真偽、秘匿情報、視点別可視性を state に追加しない。
