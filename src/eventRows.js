@@ -53,6 +53,24 @@ export const requiresDeathRoleSelection = (row) => Boolean(row.deadRole?.length)
 
 export const createDeathRoleAnimationToken = (roleToken, playerId) => [...roleToken, playerId];
 
+export const deathRoleRecordsFromEventCell = (eventLabel, cell, actionType) => {
+  const items = cell || [];
+  const fixedDeathRoleId = fixedDeathRoleIdForEventLabel(eventLabel);
+  if (fixedDeathRoleId) {
+    return items
+      .filter((item) => Array.isArray(item) && item[2] === actionType.name)
+      .map((item) => ({ playerName: item[0], fixedDeathRoleId }));
+  }
+
+  return items.flatMap((item, index) => {
+    if (!Array.isArray(item) || item[2] !== actionType.role || item.length < 4) return [];
+    const target = items.slice(0, index).reverse().find((previous) => (
+      Array.isArray(previous) && previous[2] === actionType.name
+    ));
+    return target ? [{ playerName: target[0], roleToken: item.slice(0, 3) }] : [];
+  });
+};
+
 const popupEventLabels = new Set([
   EVENT_ROWS.find((eventRow) => eventRow.type === EVENT_TYPE.SELF_DESTRUCT).label,
   EVENT_ROWS.find((eventRow) => eventRow.type === EVENT_TYPE.CHAIN_DEATH).label,

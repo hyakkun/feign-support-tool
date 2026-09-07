@@ -3,6 +3,7 @@ import {
   appendDeadRole,
   appendDeadRoleIfAbsent,
   createDeathRoleAnimationToken,
+  deathRoleRecordsFromEventCell,
   allowsReviveForEventLabel,
   createLegacyEventRows,
   fixedDeathRoleIdForEventLabel,
@@ -106,5 +107,19 @@ describe("event rows", () => {
     expect(requiresDeathRoleSelection({ deadRole: [["医者", 1, 1]] })).toBe(true);
     expect(requiresDeathRoleSelection({})).toBe(false);
     expect(createDeathRoleAnimationToken(["魔術師", 3, 1], 4)).toEqual(["魔術師", 3, 1, 4]);
+  });
+
+  test("derives manual and fixed death-role records from a saved event cell", () => {
+    const actionType = { role: 1, name: 2 };
+    expect(deathRoleRecordsFromEventCell("追放", [
+      ["アリス", 0, 2], ["医者", 1, 1, 0],
+      ["ボブ", 0, 2], ["トラッカ", 1, 1, 1],
+    ], actionType)).toEqual([
+      { playerName: "アリス", roleToken: ["医者", 1, 1] },
+      { playerName: "ボブ", roleToken: ["トラッカ", 1, 1] },
+    ]);
+    expect(deathRoleRecordsFromEventCell("自爆", [["アリス", 0, 2]], actionType)).toEqual([
+      { playerName: "アリス", fixedDeathRoleId: "magician" },
+    ]);
   });
 });
