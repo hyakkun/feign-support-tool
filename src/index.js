@@ -11,7 +11,6 @@ import {
 } from "./playerRows";
 import { createBoardConfig } from "./boardConfig";
 import { createBoardTableFormatters } from "./boardTableFormatters";
-import { RoleSelect } from "./RoleSelect";
 import {
     createBoardState,
     selectTableColumns,
@@ -25,11 +24,10 @@ import { createLegacyBoardRuntime } from "./legacyBoardRuntime";
 import { TUTORIAL_PLAYER_NAMES, TUTORIAL_ROWS } from "./tutorialBoardData";
 import {
     sortCellItems,
-    sortDeadRoles,
-    sortRoles,
 } from "./boardColumnSorts";
 import { createDayColumnDefinitions } from "./dayColumnDefinitions";
 import { createIdentityColumnDefinitions } from "./identityColumnDefinitions";
+import { createRoleColumnDefinitions } from "./roleColumnDefinitions";
 import './index.scss';
 
 
@@ -79,35 +77,14 @@ const identityColumns = createIdentityColumnDefinitions({
     config: FeignTool,
     runtime: legacyBoardRuntime,
 });
+const roleColumns = createRoleColumnDefinitions({
+    config: FeignTool,
+    columnTemplate: FeignTool.column_template,
+    formatters: tableFormatters,
+});
 FeignTool.defaultColumns = [
     ...identityColumns,
-    {
-        text: '役',
-        dataField: 'role',
-        ...FeignTool.column_template,
-        formatter: FeignTool.formatter_templete('role'),
-        sortFunc: sortRoles,
-        editorRenderer: (editorProps, value, row, column, rowIndex, columnIndex) => {
-            if (!(column.dataField in row)) row[column.dataField] = [];
-            const roleWithTrue = [...FeignTool.role, FeignTool.br, { id: 103, name: "バ", roletype: [true, false, false, false, false], actionType: 4 }, { id: 104, name: "真", roletype: [true, false, false, false, false], actionType: 4 }];
-            return (
-                <RoleSelect config={FeignTool} {...editorProps} value={value} row={row} options={roleWithTrue} dataField={column.dataField} text={column.text} />
-            );
-        },
-    },
-    {
-        text: '死',
-        dataField: 'deadRole',
-        formatter: FeignTool.formatter_templete('deadRole'),
-        ...FeignTool.column_template,
-        sortFunc: sortDeadRoles,
-        editorRenderer: (editorProps, value, row, column, rowIndex, columnIndex) => {
-            if (!(column.dataField in row)) row[column.dataField] = [];
-            return (
-                <RoleSelect config={FeignTool} {...editorProps} value={value} row={row} options={FeignTool.role} dataField={column.dataField} text={column.text} />
-            );
-        },
-    },
+    ...roleColumns,
     { ...FeignTool.target_day, formatter: FeignTool.dead_formatter('target_day1'), text: '1', dataField: 'target_day1', },
     { ...FeignTool.action_day, formatter: FeignTool.dead_formatter('action_day1'), dataField: 'action_day1', },
 ];
