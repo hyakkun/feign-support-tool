@@ -1,7 +1,4 @@
-import React from "react";
-import BootstrapTable from "react-bootstrap-table-next";
-import cellEditFactory from "react-bootstrap-table2-editor";
-import { Container } from "reactstrap";
+import React, { useEffect, useMemo, useState } from "react";
 
 class BoardTableErrorBoundary extends React.Component {
   constructor(props) {
@@ -44,20 +41,87 @@ export const BoardTable = ({
   onAddMemo,
 }) => {
   const rowStyle = createRowStyle(roleLabelBgColor);
+  const [editingCell, setEditingCell] = useState(null);
+  const [sort, setSort] = useState(null);
+
+  useEffect(() => {
+    setEditingCell(null);
+  }, [tableKey]);
+
+  const displayedData = useMemo(() => {
+    if (!sort) return data;
+    const column = columns.find((item) => item.dataField === sort.dataField);
+    if (!column) return data;
+    return [...data].sort((rowA, rowB) => {
+      if (column.sortFunc) {
+        return column.sortFunc(rowA[column.dataField], rowB[column.dataField], sort.order, column.dataField, rowA, rowB);
+      }
+      const valueA = rowA[column.dataField] ?? "";
+      const valueB = rowB[column.dataField] ?? "";
+      const result = valueA > valueB ? 1 : (valueA < valueB ? -1 : 0);
+      return sort.order === "asc" ? result : -result;
+    });
+  }, [columns, data, sort]);
+
+  const toggleSort = (column) => {
+    if (!column.sort) return;
+    setSort((current) => ({
+      dataField: column.dataField,
+      order: current?.dataField === column.dataField && current.order === "asc" ? "desc" : "asc",
+    }));
+  };
+
+  const renderCell = (row, column) => {
+    const isEditing = editingCell?.rowKey === row.keyid && editingCell.dataField === column.dataField;
+    if (isEditing && column.editable !== false && column.editorRenderer) {
+      return column.editorRenderer(
+        {
+          onUpdate: (newValue) => {
+            onCellSave(row[column.dataField], newValue, row, column);
+            setEditingCell(null);
+          },
+        },
+        row[column.dataField],
+        row,
+        column,
+      );
+    }
+    return column.formatter ? column.formatter(row[column.dataField], row) : row[column.dataField];
+  };
+
   return (
-    <Container style={{ whiteSpace: "nowrap", display: "flex", alignItems: "flex-end" }}>
+    <div style={{ whiteSpace: "nowrap", display: "flex", alignItems: "flex-end" }}>
       <BoardTableErrorBoundary fallbackData={data}>
-        <BootstrapTable
-          key={tableKey}
-          data={data}
-          columns={columns}
-          keyField="keyid"
-          bootstrap4={true}
-          cellEdit={cellEditFactory({ mode: "click", blurToSave: true, afterSaveCell: onCellSave })}
-          rowStyle={rowStyle}
-        />
+        <table>
+          <thead>
+            <tr>
+              {columns.map((column) => (
+                <th key={column.dataField} onClick={() => toggleSort(column)}>{column.text}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {displayedData.map((row) => (
+              <tr key={row.keyid} style={rowStyle(row)}>
+                {columns.map((column) => (
+                  <td
+                    key={column.dataField}
+                    onClick={() => {
+                      if (editingCell?.rowKey === row.keyid && editingCell.dataField === column.dataField) return;
+                      if (column.editable !== false && column.editorRenderer) {
+                        setEditingCell({ rowKey: row.keyid, dataField: column.dataField });
+                      }
+                    }}
+                  >
+                    {renderCell(row, column)}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </BoardTableErrorBoundary>
       <button onClick={onAddMemo} style={{ height: "fit-content" }}>メモ行追加</button>
-    </Container>
+    </div>
   );
 };

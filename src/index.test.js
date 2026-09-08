@@ -1,27 +1,5 @@
 import { fireEvent, screen } from "@testing-library/react";
 
-jest.mock("react-bootstrap-table-next", () => {
-  const React = require("react");
-  return ({ data, columns }) => (
-    <div data-testid="table">
-      {data.flatMap((row) => columns.map((column) => (
-        <React.Fragment key={`${row.keyid}-${column.dataField}`}>
-          {column.formatter?.(row[column.dataField], row)}
-        </React.Fragment>
-      )))}
-    </div>
-  );
-});
-
-jest.mock("react-bootstrap-table2-editor", () => () => ({}));
-
-jest.mock("reactstrap", () => {
-  const React = require("react");
-  return {
-    Container: ({ children }) => <div>{children}</div>,
-  };
-});
-
 document.body.innerHTML = '<div id="root"></div>';
 require("./index");
 

@@ -73,7 +73,7 @@ FeignTool.column_template = {
         const valueIsResultColor = (array) => (
             array && array.length && array[0][2] === 4);
         const newvalue = (value, row) => {
-            let nvalue = value.slice();
+            let nvalue = (value || []).slice();
             while (valueIsResultColor(nvalue)) nvalue.shift();
             return nvalue;
         }
