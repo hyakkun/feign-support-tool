@@ -29,7 +29,7 @@ export const boardReducer = (state, action) => {
         dayCount: 1,
       };
     case BOARD_ACTION.RESET_BOARD:
-      return { ...state, board: resetTableData(state.board, action.eventRows) };
+      return { ...state, board: resetTableData(state.board, action.eventRows), dayCount: 1 };
     case BOARD_ACTION.SET_DISPLAY_OPTION:
       return { ...state, display: { ...state.display, [action.option]: action.value } };
     case BOARD_ACTION.ADD_DAY:

@@ -70,4 +70,5 @@ test("resets the board through a reducer action while retaining colors", () => {
   const state = createBoardState({ board: [{ id: 0, keyid: 0, name: ["アリス", 19], color: ["yellow", "#ffe"], role: [["医者", 1, 1]] }], playerNames: ["アリス"] });
   const reset = boardReducer(state, { type: BOARD_ACTION.RESET_BOARD, eventRows: [{ id: -1, keyid: -1, name: ["追放", 19] }] });
   expect(reset.board).toEqual([{ id: 0, keyid: 0, name: ["アリス", 19], color: ["yellow", "#ffe"] }, { id: -1, keyid: -1, name: ["追放", 19] }]);
+  expect(reset.dayCount).toBe(1);
 });

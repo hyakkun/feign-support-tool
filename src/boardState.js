@@ -19,6 +19,29 @@ export const selectPlayerOptions = (state, actionType) => (
   createLegacyPlayerOptions(state.playerNames, actionType.name)
 );
 
+export const selectTableColumns = (state, tableDefinition) => {
+  const dayColumns = Array.from({ length: state.dayCount }, (_, index) => {
+    const day = index + 1;
+    return [
+      {
+        ...tableDefinition.targetDay,
+        formatter: tableDefinition.deadFormatter(`target_day${day}`),
+        text: `${day}`,
+        dataField: `target_day${day}`,
+      },
+      {
+        ...tableDefinition.actionDay,
+        formatter: tableDefinition.deadFormatter(`action_day${day}`),
+        dataField: `action_day${day}`,
+      },
+    ];
+  }).flat();
+  const baseColumns = state.isTutorial
+    ? tableDefinition.tutorialBaseColumns
+    : tableDefinition.playerBaseColumns;
+  return [...baseColumns, ...dayColumns];
+};
+
 export const selectPopupSnapshot = (state, day) => ({
   tableData: selectTableData(state),
   colorNameDic: selectColorByPlayerName(state),

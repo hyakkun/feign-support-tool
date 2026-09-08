@@ -1,4 +1,4 @@
-import React, { useReducer, useState } from 'react'
+import React, { useMemo, useReducer, useState } from 'react'
 import ReactDOM from 'react-dom';
 import {
     ACTION_ITEM,
@@ -16,16 +16,16 @@ import {
 } from "./playerRows";
 import { createBoardConfig } from "./boardConfig";
 import { actionOptionsForRoleLabels, roleLabelsForRow } from "./actionOptions";
-import { createTableFormatters } from "./tableFormatters";
+import { createBoardTableFormatters } from "./boardTableFormatters";
 import { ColorSelect } from "./ColorSelect";
 import { InsaneSelect } from "./InsaneSelect";
 import { RoleSelect } from "./RoleSelect";
 import { DeadSelect } from "./DeadSelect";
-import { nextDayNumber } from "./boardOperations";
 import {
     createBoardState,
     selectColorByPlayerName,
     selectPlayerOptions,
+    selectTableColumns,
     selectTableData,
 } from "./boardState";
 import { BOARD_ACTION, boardReducer } from "./boardReducer";
@@ -75,17 +75,14 @@ FeignTool.column_template = {
     editable: true,
 };
 
-const tableFormatters = createTableFormatters({
-    actionType: FeignTool.actionType,
+const tableFormatters = createBoardTableFormatters({
+    ...FeignTool,
     getColorNameDictionary: () => FeignTool_colorNameDic,
     getPlayerIsIcon: () => FeignTool_playerIsIcon,
-    isDeathEventLabel,
-    reviveImage: FeignTool.reviveImage,
-    roleImage: FeignTool.roleImage,
-    roletype: FeignTool.roletype,
 });
 FeignTool.formatter_templete = tableFormatters.cellFormatter;
 FeignTool.dead_formatter = tableFormatters.deathFormatter;
+FeignTool.deadFormatter = tableFormatters.deathFormatter;
 FeignTool.target_day = {
     ...FeignTool.column_template,
     editorRenderer: (editorProps, value, row, column, rowIndex, columnIndex) => {
@@ -276,6 +273,17 @@ FeignTool.defaultColumns = [
     { ...FeignTool.target_day, formatter: FeignTool.dead_formatter('target_day1'), text: '1', dataField: 'target_day1', },
     { ...FeignTool.action_day, formatter: FeignTool.dead_formatter('action_day1'), dataField: 'action_day1', },
 ];
+FeignTool.tutorialBaseColumns = FeignTool.defaultColumns.slice(0, -2);
+FeignTool.playerBaseColumns = FeignTool.tutorialBaseColumns.map((column, index) => (
+    index === 1 ? { ...column, text: "名前" } : column
+));
+FeignTool.tableDefinition = {
+    tutorialBaseColumns: FeignTool.tutorialBaseColumns,
+    playerBaseColumns: FeignTool.playerBaseColumns,
+    targetDay: FeignTool.target_day,
+    actionDay: FeignTool.action_day,
+    deadFormatter: FeignTool.deadFormatter,
+};
 
 
 let FeignTool_tableData = FeignTool.tutorialData;
@@ -299,9 +307,10 @@ const FeignSupportToolRoot = () => {
     const [nameText, setNameText] = useState("");
     const PlayerIsIcon = boardState.display.playerIsIcon;
     const NameIsIcon = boardState.display.nameIsIcon;
+    const { dayCount, isTutorial } = boardState;
     const [nameStringList, setNameStringList] = useState(FeignTool.tutorialNameStringList);
     const data = selectTableData(boardState);
-    const [columns, setColumns] = useState(FeignTool.defaultColumns.concat([{ ...FeignTool.target_day, formatter: FeignTool.dead_formatter('target_day2'), text: '2', dataField: 'target_day2', }, { ...FeignTool.action_day, formatter: FeignTool.dead_formatter('action_day2'), dataField: 'action_day2', }]));
+    const columns = useMemo(() => selectTableColumns({ dayCount, isTutorial }, FeignTool.tableDefinition), [dayCount, isTutorial]);
     const syncLegacyBoard = (nextState) => {
         FeignTool_tableData = nextState.board;
         FeignTool_colorNameDic = selectColorByPlayerName(nextState);
@@ -336,10 +345,6 @@ const FeignSupportToolRoot = () => {
                 playerNames: newNameStringList,
                 eventRows: FeignTool.ActionsNameList,
             });
-            const newColumns = FeignTool.defaultColumns.slice();
-            newColumns[0].text = "　";
-            newColumns[1].text = "名前";
-            setColumns(newColumns);
             dispatch({ type: BOARD_ACTION.REPLACE_STATE, state: nextState });
             syncLegacyBoard(nextState);
             setTableRevision((revision) => revision + 1);
@@ -354,28 +359,18 @@ const FeignSupportToolRoot = () => {
             dispatch({ type: BOARD_ACTION.REPLACE_STATE, state: nextState });
             syncLegacyBoard(nextState);
             setTableRevision((revision) => revision + 1);
-            PopupWin((columns.length - 4) / 2, nextState);
+            PopupWin(nextState.dayCount, nextState);
         }
     }
     const AddDay = () => {
-        const day = nextDayNumber(columns);
         const nextState = applyBoardAction({ type: BOARD_ACTION.ADD_DAY });
-        setColumns(columns.concat([{ ...FeignTool.target_day, formatter: FeignTool.dead_formatter('target_day' + day), text: '' + day, dataField: 'target_day' + day, }, { ...FeignTool.action_day, formatter: FeignTool.dead_formatter('action_day' + day), dataField: 'action_day' + day, }]));
-        PopupWin(day, nextState);
+        PopupWin(nextState.dayCount, nextState);
     }
     const AddRow = () => {
-        applyBoardAction({ type: BOARD_ACTION.ADD_MEMO_ROW });
-        PopupWin((columns.length - 4) / 2);
+        const nextState = applyBoardAction({ type: BOARD_ACTION.ADD_MEMO_ROW });
+        PopupWin(nextState.dayCount, nextState);
     }
 
-    const rowStyle = (row, rowIndex) => {
-        if (row.id < 0)
-            return { background: "#eee" };
-        if (row.name && row.name[1] < FeignTool.roleLabelBgColor.length)
-            return { background: FeignTool.roleLabelBgColor[row.name[1]] };
-        else if (row.name && row.name[1] > 4 && row.name[1] <= 11)
-            return { background: FeignTool.roleLabelBgColor[4] };
-    };
     const playerIconChangeHandler = (event) => {
         FeignTool_playerIsIcon = event.target.checked;
         dispatch({ type: BOARD_ACTION.SET_DISPLAY_OPTION, option: "playerIsIcon", value: event.target.checked });
@@ -387,10 +382,6 @@ const FeignSupportToolRoot = () => {
     const onClickReset = () => {
         if (window.confirm("入力内容をリセットしますか？")) {
             const nextState = boardReducer({ ...boardState, board: data }, { type: BOARD_ACTION.RESET_BOARD, eventRows: FeignTool.ActionsNameList });
-            const newColumns = FeignTool.defaultColumns.slice();
-            newColumns[0].text = "　";
-            newColumns[1].text = "名前";
-            setColumns(newColumns);
             dispatch({ type: BOARD_ACTION.REPLACE_STATE, state: nextState });
             syncLegacyBoard(nextState);
         }
@@ -408,7 +399,7 @@ const FeignSupportToolRoot = () => {
                 window.setTimeout(sendWhenReady, 100);
                 return;
             }
-            PopupWin((columns.length - 4) / 2);
+            PopupWin(boardState.dayCount);
         };
         window.setTimeout(sendWhenReady, 100);
     };
@@ -435,7 +426,7 @@ const FeignSupportToolRoot = () => {
             { type: BOARD_ACTION.UPDATE_CELL, rowId: row.id, field: column.dataField, value: newValue },
             ...deathRoleActions,
         ]);
-        if (FeignTool_popupWindow) PopupWin((columns.length - 4) / 2, nextState);
+        if (FeignTool_popupWindow) PopupWin(nextState.dayCount, nextState);
         if (column.dataField === 'name' || row.id < 0) setTableRevision((revision) => revision + 1);
     };
 
@@ -448,7 +439,7 @@ const FeignSupportToolRoot = () => {
                     columns={columns}
                     tableKey={`table-${PlayerIsIcon}-${NameIsIcon}-${tableRevision}`}
                     onCellSave={onCellSave}
-                    rowStyle={rowStyle}
+                    roleLabelBgColor={FeignTool.roleLabelBgColor}
                     onAddMemo={AddRow}
                 />
             </div>
