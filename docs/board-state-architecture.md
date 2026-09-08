@@ -67,26 +67,26 @@ React コンポーネントは可能な限り state 全体を受け取らず、�
 selectTableData(state): LegacyBoardRow[]
 selectPlayerOptions(state): LegacyOption[]
 selectColorByPlayerName(state): Record<string, LegacyColor>
-selectColumns(state, formatters): TableColumn[]
+selectTableColumns(state, tableDefinition): TableColumn[]
 selectPopupSnapshot(state, day): PopupSnapshot
 ```
 
-既存テーブルへの入力は `selectTableData`、ポップアップ送信は `selectPopupSnapshot` を使う。これにより、テーブルライブラリを将来置き換えても reducer とドメイン操作を維持できる。
+盤面描画は `selectTableData` と `selectTableColumns`、ポップアップ送信は `selectPopupSnapshot` を使う。これにより、描画実装を変更しても reducer とドメイン操作を維持できる。
 
 ## コンポーネント境界
 
-移行後の責務は次のように分ける。
+現在の責務は次のように分ける。
 
 ```text
 FeignSupportToolRoot
-├─ BoardToolbar        : 翌日、メモ行、表示設定
-├─ BoardTable          : ネイティブ HTML table とセル編集の管理
+├─ 盤面操作            : 翌日、表示設定
+├─ BoardTable          : ネイティブ HTML table、セル編集、メモ行追加
 │  ├─ ColorSelect
 │  ├─ InsaneSelect
 │  ├─ RoleSelect
 │  └─ DeadSelect
 ├─ NameInputPanel      : 名前入力、setName、リセット、補助表示起動
-├─ MemoArea
+├─ メモ入力            : textarea（Root 内のローカル実装）
 └─ PopupBridge         : ポップアップへ snapshot を送信
 ```
 
@@ -99,9 +99,10 @@ FeignSupportToolRoot
 3. 完了: `board`、`playerNames`、色辞書の導出を `useReducer` と selector へ移した。テーブルに渡す個別の `data` state は廃止済みである。
 4. 完了: ポップアップ送信を `popupBridge` へ分離した。
 5. 完了: `BoardTable`、`NameInputPanel`、`RoleSelect`、`DeadSelect` を分離した。
-6. 未着手: legacy タプルと `domain-model.md` の `Board` を相互変換する関数を追加し、保存・描画を段階的に移行する。
+6. 完了: ネイティブ HTML `table` へ置換し、旧テーブルライブラリと `reactstrap` を依存関係から削除した。
+7. 未着手: legacy タプルと `domain-model.md` の `Board` を相互変換する関数を追加し、保存・描画を段階的に移行する。
 
-各段階で `npm test`、`npm run build`、名前設定・役職入力・自爆/道連れ・ポップアップのブラウザ確認を行う。段階 3 以前にテーブルライブラリや React の更新を開始しない。
+各段階で `npm test`、`npm run build`、名前設定・役職入力・自爆/道連れ・ポップアップのブラウザ確認を行う。依存関係の更新は、状態・描画の変更と別コミットに分ける。
 
 ## 現在の移行状況
 
@@ -111,45 +112,47 @@ FeignSupportToolRoot
 - 追放・殺害・道連れの死亡役職記録、および自爆時の魔術師の自動記録
 - メモ行追加、翌日追加、リセット、表示設定
 - ポップアップ用スナップショットの生成・送信（`popupBridge`）
-- `BoardTable`、`NameInputPanel`、`RoleSelect`、`DeadSelect` の分離
+- `BoardTable`、`NameInputPanel`、`RoleSelect`、`DeadSelect` の分離と、ネイティブ HTML `table` による盤面描画
 
 `BoardTable` と `NameInputPanel` は callback の接続を、`popupBridge` は送信内容を単体テストで固定している。役職・死亡イベントの詳細な選択手順は既存の純粋関数テストとブラウザ確認で担保する。
 
 `legacyBoardRuntime` は、formatter と editor が必要とする既存タプル形式、参加者候補、色、表示設定を `BoardState` から導出する互換アダプターとして残る。`RoleSelect` と `DeadSelect` には getter を含む設定 props として渡す。セル編集の開始・終了は `BoardTable` のローカル state で管理し、保存時には reducer 操作へ集約する。
 
+## 完了済みの優先作業
+
+次の作業は完了している。
+
+1. `columns` の生成を `selectTableColumns` に集約し、`dayCount` と日別列の二重管理を解消した。行背景色と formatter の設定もテーブル用モジュールへ分離した。
+2. `legacyBoardRuntime` を導入し、`FeignTool_*` の可変盤面・参加者候補・色辞書・表示設定を導出値へ移した。セル編集の UI 状態は `BoardTable` に閉じ込めた。
+3. 役職・対象・行動・死亡イベントについて、主要な選択手順の UI テストを追加した。
+4. 素の HTML `table` による `BoardTable` を導入し、主要操作と周辺操作の回帰確認を実施した。
+5. `react-bootstrap-table-next`、`react-bootstrap-table2-editor`、`reactstrap` を依存関係から削除した。
+
 ## 今後の作業
 
-優先順は次のとおりとする。
-
-1. `columns` の生成を selector または専用モジュールへ移し、`dayCount` と日別列の二重管理を解消する。あわせて `rowStyle` と formatter の設定依存を `BoardTable` 側へ集約する。
-2. `FeignTool_*` 互換アダプターを縮小する。まず formatter と editor が必要とする値を明示的な props／getter に置き換え、テーブル保存時の可変更新を `BoardTable` 内だけに閉じ込める。
-3. 役職・対象・行動・死亡イベントについて、主要な選択手順を UI テストで追加する。現在の reducer／純粋関数テストとブラウザ確認を補完する。
-4. 完了: 素の HTML `table` による `BoardTable` を導入し、主要操作と周辺操作の回帰確認を実施した。
-5. テーブル置換の完了後に、React、`react-scripts`、周辺依存を別の変更として更新する。
-
-### 優先作業の進捗
-
-- 優先度1は完了。日別列は `dayCount` から導出し、行背景色と formatter の設定はテーブル用モジュールへ分離した。
-- 優先度2は完了。`legacyBoardRuntime` が `BoardState` から既存タプルの盤面、参加者候補、色、表示設定を導出し、セル編集の UI 状態は `BoardTable` に閉じ込めた。
-- 優先度3は主要手順を完了。通常の人物入力、自爆、人物→役職の死亡イベント入力を `RoleSelect`／`DeadSelect` の UI テストで検証する。
+1. legacy タプルと `domain-model.md` の `Board` の境界を具体化する。まず相互変換の必要性、保存形式、段階移行の対象を決める。現時点で保存形式を変更する実装には着手しない。
+2. `index.js` に残る `FeignTool` 設定と UI 組み立てを、設定・盤面操作・Root コンポーネントへ段階的に分離する。既存タプルの廃止は 1 の判断後に行う。
+3. 2 の責務分割が一段落した時点で、確定した責務境界に沿ってディレクトリ構成を整理する。ファイル移動は専用の変更として扱い、機能変更とは混在させない。
+4. UI テストを、日付ソート、リセット時のポップアップ更新、名前・色変更後の候補更新などの回帰事象へ拡充する。
+5. React、`react-scripts`、その他の古い依存関係を、互換性調査・更新方針の決定・段階更新に分けて扱う。
 
 ## テーブルライブラリの将来方針
 
-`react-bootstrap-table-next` と `react-bootstrap-table2-editor` はネイティブ `BoardTable` への置換完了に伴い、依存関係から削除する。盤面・列・セル更新操作は props 契約に限定されているため、状態管理とドメイン操作はテーブル実装に依存しない。
+ネイティブ `BoardTable` への置換完了に伴い、`react-bootstrap-table-next`、`react-bootstrap-table2-editor`、`reactstrap` は依存関係から削除済みである。盤面・列・セル更新操作は props 契約に限定されているため、状態管理とドメイン操作はテーブル実装に依存しない。
 
 列のリサイズ、フィルタ、ページングなど、ネイティブ実装にない汎用表機能が必要になった場合に限り、headless なテーブルライブラリを比較対象とする。
 
-### ネイティブテーブル試作の結果
+### ネイティブテーブル置換の結果
 
-`experiment/native-board-table` で、`react-bootstrap-table-next` に依存しない `BoardTable` を試作した。既存の formatter と editor の props 契約を維持しつつ、セル編集、日付ヘッダーの昇順・降順ソート、メモ行追加、行の背景色を素の HTML `table` で実装している。
+`experiment/native-board-table` で、`react-bootstrap-table-next` に依存しない `BoardTable` を試作した。既存の formatter と editor の props 契約を維持しつつ、セル編集、日付ヘッダーの昇順・降順ソート、メモ行追加、行の背景色を素の HTML `table` で実装した。
 
-主要操作と周辺操作はブラウザで確認済みであり、置換の実現性を確認後、`feature/board-state-foundation` へ統合した。依存パッケージの削除は、この置換コミットとは分けて実施する。
+主要操作と周辺操作はブラウザで確認済みであり、置換の実現性を確認後、`feature/board-state-foundation` へ統合した。依存パッケージの削除は置換コミットとは分離し、テスト・ビルド・ブラウザ回帰確認後に完了した。
 
 依存関係の更新とテーブル置換は同一変更に混在させない。
 
 ## 将来のディレクトリ構成
 
-モジュール数の増加に対応し、テーブル置換の準備が整った段階で、責務ごとに次の構成へ段階的に移すことを検討する。現時点ではファイル移動を行わない。
+モジュール数の増加に対応し、`index.js` の設定・盤面操作・Root 組み立ての責務分割が一段落した段階で、確定した責務ごとに次の構成へ段階的に移す。責務が変動している間はファイル移動を行わない。
 
 ```text
 src/
@@ -183,7 +186,7 @@ src/
 
 テストは実装ファイルと同じディレクトリに置く。たとえば `boardReducer.js` と `boardReducer.test.js` を並べることで、変更対象と検証を近接させる。
 
-移動は一括で行わない。まず `board/table/` と `board/table/editors/`、次に `board/state/` と `board/model/`、最後に root を `app/` へ移す。各段階で import の更新、`npm test`、`npm run build`、必要なブラウザ確認を完了させてから次へ進む。
+移動は一括で行わず、`index.js` の責務分割完了後に専用ブランチまたは専用コミットで実施する。まず `board/table/` と `board/table/editors/`、次に `board/state/` と `board/model/`、最後に root を `app/` へ移す。各段階で import の更新、`npm test`、`npm run build`、必要なブラウザ確認を完了させてから次へ進む。
 
 ## 非目標
 
