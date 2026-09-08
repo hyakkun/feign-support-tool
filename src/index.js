@@ -1,12 +1,8 @@
 import React, { useMemo, useReducer, useState } from 'react'
 import ReactDOM from 'react-dom';
-import {
-    ACTION_ITEM,
-    createLegacyRoleToken,
-} from "./roleCatalog";
+import { createLegacyRoleToken } from "./roleCatalog";
 import {
     deathRoleRecordsFromEventCell,
-    allowsReviveForEventLabel,
     fixedDeathRoleIdForEventLabel,
     isDeathEventLabel,
 } from "./eventRows";
@@ -14,12 +10,10 @@ import {
     parsePlayerNames,
 } from "./playerRows";
 import { createBoardConfig } from "./boardConfig";
-import { actionOptionsForRoleLabels, roleLabelsForRow } from "./actionOptions";
 import { createBoardTableFormatters } from "./boardTableFormatters";
 import { ColorSelect } from "./ColorSelect";
 import { InsaneSelect } from "./InsaneSelect";
 import { RoleSelect } from "./RoleSelect";
-import { DeadSelect } from "./DeadSelect";
 import {
     createBoardState,
     selectTableColumns,
@@ -38,6 +32,7 @@ import {
     sortNames,
     sortRoles,
 } from "./boardColumnSorts";
+import { createDayColumnDefinitions } from "./dayColumnDefinitions";
 import './index.scss';
 
 
@@ -76,51 +71,13 @@ const tableFormatters = createBoardTableFormatters({
 FeignTool.formatter_templete = tableFormatters.cellFormatter;
 FeignTool.dead_formatter = tableFormatters.deathFormatter;
 FeignTool.deadFormatter = tableFormatters.deathFormatter;
-FeignTool.target_day = {
-    ...FeignTool.column_template,
-    editorRenderer: (editorProps, value, row, column, rowIndex, columnIndex) => {
-        if (!(column.dataField in row)) row[column.dataField] = [];
-        let options = legacyBoardRuntime.getPlayerOptions();
-        if (row.id < 0) {
-            if (isDeathEventLabel(row.name[0]))
-                return (
-                    <DeadSelect config={FeignTool} {...editorProps} value={value} row={row} options={legacyBoardRuntime.getPlayerOptions().concat(FeignTool.actionRevive)} fixedDeathRole={FeignTool.fixedDeathRoleForEvent(row.name[0])} dataField={column.dataField} text={column.text} />
-                );
-            if (allowsReviveForEventLabel(row.name[0])) options = options.concat(FeignTool.actionRevive);
-        }
-        return (
-            <RoleSelect config={FeignTool} {...editorProps} value={value} row={row} options={options} dataField={column.dataField} text={column.text} />
-        );
-    },
-};
-FeignTool.action_day = {
-    text: '　',
-    ...FeignTool.column_template,
-    editorRenderer: (editorProps, value, row, column, rowIndex, columnIndex) => {
-        if (!(column.dataField in row)) row[column.dataField] = [];
-        let allrole = [];
-        if (row.id < 0 && isDeathEventLabel(row.name[0]))
-            return (
-                <DeadSelect config={FeignTool} {...editorProps} value={value} row={row} options={legacyBoardRuntime.getPlayerOptions().concat(FeignTool.actionRevive)} fixedDeathRole={FeignTool.fixedDeathRoleForEvent(row.name[0])} dataField={column.dataField} text={column.text} />
-            );
-        if (row.id < 0 && allowsReviveForEventLabel(row.name[0])) {
-            const newOptions = legacyBoardRuntime.getPlayerOptions().concat(FeignTool.actionRevive);
-            return (
-                <RoleSelect config={FeignTool} {...editorProps} value={value} row={row} options={newOptions} dataField={column.dataField} text={column.text} allRole={allrole} />
-            );
-        }
-        allrole = roleLabelsForRow(row);
-        const optionsByActionItem = {
-            [ACTION_ITEM.ROLE]: FeignTool.role,
-            [ACTION_ITEM.PLAYER]: legacyBoardRuntime.getPlayerOptions(),
-            [ACTION_ITEM.RESULT]: FeignTool.actionResult,
-        };
-        const newOptions = actionOptionsForRoleLabels(allrole, optionsByActionItem, FeignTool.hr);
-        return (
-            <RoleSelect config={FeignTool} {...editorProps} value={value} row={row} options={newOptions} dataField={column.dataField} text={column.text} allRole={allrole} />
-        );
-    },
-};
+const dayColumnDefinitions = createDayColumnDefinitions({
+    config: FeignTool,
+    runtime: legacyBoardRuntime,
+    columnTemplate: FeignTool.column_template,
+});
+FeignTool.target_day = dayColumnDefinitions.targetDay;
+FeignTool.action_day = dayColumnDefinitions.actionDay;
 FeignTool.defaultColumns = [
     {
         text: '　',
