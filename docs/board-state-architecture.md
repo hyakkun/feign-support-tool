@@ -8,7 +8,7 @@
 
 - React の `BoardState` を可変状態の唯一の正本にする。
 - `FeignTool_tableData`、`FeignTool_nameList`、`FeignTool_colorNameDic` のような可変モジュール変数は、段階移行後に廃止する。
-- `react-bootstrap-table-next` が必要とする既存タプル形式は、当面 `BoardState` から導出する互換ビューとして維持する。
+- 既存タプル形式は、当面 `BoardState` から導出する互換ビューとして維持する。
 - 役職・イベント・結果などの不変設定は `boardConfig`、`roleCatalog`、`eventRows` に置く。`BoardState` には複製しない。
 - ポップアップは別の状態を持たず、現在の `BoardState` から作ったスナップショットを受け取る。
 
@@ -80,7 +80,7 @@ selectPopupSnapshot(state, day): PopupSnapshot
 ```text
 FeignSupportToolRoot
 ├─ BoardToolbar        : 翌日、メモ行、表示設定
-├─ BoardTable          : テーブルライブラリとの互換アダプター
+├─ BoardTable          : ネイティブ HTML table とセル編集の管理
 │  ├─ ColorSelect
 │  ├─ InsaneSelect
 │  ├─ RoleSelect
@@ -115,7 +115,7 @@ FeignSupportToolRoot
 
 `BoardTable` と `NameInputPanel` は callback の接続を、`popupBridge` は送信内容を単体テストで固定している。役職・死亡イベントの詳細な選択手順は既存の純粋関数テストとブラウザ確認で担保する。
 
-`FeignTool_tableData`、`FeignTool_nameList`、`FeignTool_colorNameDic` は、既存テーブルの formatter と editor の互換アダプターとして残る。`syncLegacyBoard` で `BoardState` から同期し、`RoleSelect` と `DeadSelect` には getter を含む設定 props として渡す。テーブルライブラリは編集途中に行データを可変更新するため、保存完了までは一時的に同じ盤面参照を利用する。
+`legacyBoardRuntime` は、formatter と editor が必要とする既存タプル形式、参加者候補、色、表示設定を `BoardState` から導出する互換アダプターとして残る。`RoleSelect` と `DeadSelect` には getter を含む設定 props として渡す。セル編集の開始・終了は `BoardTable` のローカル state で管理し、保存時には reducer 操作へ集約する。
 
 ## 今後の作業
 
@@ -124,26 +124,26 @@ FeignSupportToolRoot
 1. `columns` の生成を selector または専用モジュールへ移し、`dayCount` と日別列の二重管理を解消する。あわせて `rowStyle` と formatter の設定依存を `BoardTable` 側へ集約する。
 2. `FeignTool_*` 互換アダプターを縮小する。まず formatter と editor が必要とする値を明示的な props／getter に置き換え、テーブル保存時の可変更新を `BoardTable` 内だけに閉じ込める。
 3. 役職・対象・行動・死亡イベントについて、主要な選択手順を UI テストで追加する。現在の reducer／純粋関数テストとブラウザ確認を補完する。
-4. 別ブランチで素の HTML `table` による `BoardTable` 試作を行い、現行アダプターとの機能比較と回帰確認を実施する。十分な同等性が得られるまで本線へは統合しない。
+4. 完了: 素の HTML `table` による `BoardTable` を導入し、主要操作と周辺操作の回帰確認を実施した。
 5. テーブル置換の完了後に、React、`react-scripts`、周辺依存を別の変更として更新する。
 
 ### 優先作業の進捗
 
 - 優先度1は完了。日別列は `dayCount` から導出し、行背景色と formatter の設定はテーブル用モジュールへ分離した。
-- 優先度2は getter 化まで完了。`legacyBoardRuntime` が `BoardState` から旧テーブル用の盤面、参加者候補、色、表示設定を導出する。テーブルライブラリによる編集途中の可変更新は、アニメーション用トークンとの互換性があるため、優先度4の置換試作で解消する。
+- 優先度2は完了。`legacyBoardRuntime` が `BoardState` から既存タプルの盤面、参加者候補、色、表示設定を導出し、セル編集の UI 状態は `BoardTable` に閉じ込めた。
 - 優先度3は主要手順を完了。通常の人物入力、自爆、人物→役職の死亡イベント入力を `RoleSelect`／`DeadSelect` の UI テストで検証する。
 
 ## テーブルライブラリの将来方針
 
-`react-bootstrap-table-next` と `react-bootstrap-table2-editor` は現時点では維持する。ただし、編集完了フックとテーブルの再マウントに依存する実装は盤面固有のセル編集と相性がよくないため、将来は取り除く方向とする。
+`react-bootstrap-table-next` と `react-bootstrap-table2-editor` はネイティブ `BoardTable` への置換完了に伴い、依存関係から削除する。盤面・列・セル更新操作は props 契約に限定されているため、状態管理とドメイン操作はテーブル実装に依存しない。
 
-置換を始める前に `BoardTable` を互換アダプターとして分離し、盤面、列、セル更新操作を props 契約へ限定する。その後、別ブランチで素の HTML `table` と React 管理のセルコンポーネントを試作し、役職入力、死亡イベント、メモ、表示切替、補助ウィンドウ表示の回帰を確認する。ソートなど汎用表機能の拡張が必要になった場合に限り、headless なテーブルライブラリも比較対象とする。
+列のリサイズ、フィルタ、ページングなど、ネイティブ実装にない汎用表機能が必要になった場合に限り、headless なテーブルライブラリを比較対象とする。
 
 ### ネイティブテーブル試作の結果
 
 `experiment/native-board-table` で、`react-bootstrap-table-next` に依存しない `BoardTable` を試作した。既存の formatter と editor の props 契約を維持しつつ、セル編集、日付ヘッダーの昇順・降順ソート、メモ行追加、行の背景色を素の HTML `table` で実装している。
 
-主要操作と周辺操作はブラウザで確認済みであり、置換の実現性は確認できた。一方、この試作は本線へ未統合であり、依存パッケージも意図的に残している。統合を決めた場合は、試作ブランチを `feature/board-state-foundation` に取り込んだ後、依存削除を別コミットで行い、ビルド・自動テスト・ブラウザ回帰確認を改めて実施する。
+主要操作と周辺操作はブラウザで確認済みであり、置換の実現性を確認後、`feature/board-state-foundation` へ統合した。依存パッケージの削除は、この置換コミットとは分けて実施する。
 
 依存関係の更新とテーブル置換は同一変更に混在させない。
 
