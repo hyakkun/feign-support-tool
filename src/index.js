@@ -11,8 +11,6 @@ import {
 } from "./playerRows";
 import { createBoardConfig } from "./boardConfig";
 import { createBoardTableFormatters } from "./boardTableFormatters";
-import { ColorSelect } from "./ColorSelect";
-import { InsaneSelect } from "./InsaneSelect";
 import { RoleSelect } from "./RoleSelect";
 import {
     createBoardState,
@@ -27,12 +25,11 @@ import { createLegacyBoardRuntime } from "./legacyBoardRuntime";
 import { TUTORIAL_PLAYER_NAMES, TUTORIAL_ROWS } from "./tutorialBoardData";
 import {
     sortCellItems,
-    sortColors,
     sortDeadRoles,
-    sortNames,
     sortRoles,
 } from "./boardColumnSorts";
 import { createDayColumnDefinitions } from "./dayColumnDefinitions";
+import { createIdentityColumnDefinitions } from "./identityColumnDefinitions";
 import './index.scss';
 
 
@@ -78,47 +75,12 @@ const dayColumnDefinitions = createDayColumnDefinitions({
 });
 FeignTool.target_day = dayColumnDefinitions.targetDay;
 FeignTool.action_day = dayColumnDefinitions.actionDay;
+const identityColumns = createIdentityColumnDefinitions({
+    config: FeignTool,
+    runtime: legacyBoardRuntime,
+});
 FeignTool.defaultColumns = [
-    {
-        text: '　',
-        dataField: 'color',
-        editable: true,
-        sort: true,
-        sortFunc: sortColors,
-        formatter: (cell, row) => {
-            if (cell && cell.length > 1) {
-                if (legacyBoardRuntime.getNameIsIcon() && row.id >= 0) {
-                    return <div className="tableCell" id={"color_tableid_" + row.id}><div className="colorIconContainer"><img src={cell[0]} alt={`${row.name[0]}の色`} /></div></div>;
-                }
-                return <div className="tableCell" id={"color_tableid_" + row.id}><div className="colorpicker" style={{ display: "block", backgroundColor: cell[1] }}>　</div></div>;
-            }
-                    return <div className="tableCell" id={"color_tableid_" + row.id}>　</div>;
-        },
-        editorRenderer: (editorProps, value, row, column, rowIndex, columnIndex) => {
-            if (!(column.dataField in row)) row[column.dataField] = false;
-            return (
-                <ColorSelect {...editorProps} value={value} row={row} options={FeignTool.colorList} dataField={column.dataField} text={column.text} onColorChange={(name, color) => legacyBoardRuntime.handleColorChange(name, color)} />
-            );
-        },
-    },
-    {
-        text: '名',
-        dataField: 'name',
-        sort: true,
-        sortFunc: sortNames,
-        editable: true,
-        formatter: (cell, row) => {
-            if (cell) {
-                return <div className="tableCell" id={"name_tableid_" + row.id}><span className="might" style={FeignTool.optionbackground[cell[1]]}>{cell[0]}</span></div>;
-            }
-            return <div className="tableCell" id={"name_tableid_" + row.id}>　</div>;
-        },
-        editorRenderer: (editorProps, value, row, column, rowIndex, columnIndex) => {
-            return (
-                <InsaneSelect {...editorProps} value={value} row={row} options={FeignTool.roleLabel} optionBackgrounds={FeignTool.optionbackground} insaneRoleOptions={FeignTool.insaneRoleLabel} allRoleLabels={FeignTool.allRoleLabel} dataField={column.dataField} text={column.text} />
-            );
-        },
-    },
+    ...identityColumns,
     {
         text: '役',
         dataField: 'role',
