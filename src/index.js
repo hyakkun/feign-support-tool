@@ -128,23 +128,6 @@ FeignTool.action_day = {
         );
     },
 };
-FeignTool.colorList = [
-    [process.env.PUBLIC_URL + "/icon/White.png", "#ffffff"],
-    [process.env.PUBLIC_URL + "/icon/Orange.png", "#ff871f"],
-    [process.env.PUBLIC_URL + "/icon/Purple.png", "#71348b"],
-    [process.env.PUBLIC_URL + "/icon/Green.png", "#2a7b0c"],
-    [process.env.PUBLIC_URL + "/icon/Blue.png", "#4b6fd7"],
-    [process.env.PUBLIC_URL + "/icon/Red.png", "#b3000b"],
-    [process.env.PUBLIC_URL + "/icon/Yellow.png", "#ffe352"],
-    [process.env.PUBLIC_URL + "/icon/Lime.png", "#83ff46"],
-    [process.env.PUBLIC_URL + "/icon/Cyan.png", "#31d7c7"],
-    [process.env.PUBLIC_URL + "/icon/Pink.png", "#ff8fb3"],
-    [process.env.PUBLIC_URL + "/icon/Brown.png", "#654321"],
-    [process.env.PUBLIC_URL + "/icon/Magenta.png", "#ff00df"],
-    [process.env.PUBLIC_URL + "/icon/DarkBlue.png", "#3817e3"],
-    [process.env.PUBLIC_URL + "/icon/DarkGreen.png", "#2a5b2b"],
-    [process.env.PUBLIC_URL + "/icon/DarkOrange.png", "#ff4406"],
-];
 FeignTool.defaultColumns = [
     {
         text: '　',

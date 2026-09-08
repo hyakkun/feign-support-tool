@@ -15,6 +15,9 @@ describe("board configuration", () => {
       "追放", "殺害", "爆発", "道連れ", "自爆", "医者", "対立", "ﾗｲﾝ",
     ]);
     expect(config.roleImage["スニッチ"]).toBe("/tool/image/Snitch.png");
+    expect(config.colorList).toHaveLength(15);
+    expect(config.colorList[0]).toEqual(["/tool/icon/White.png", "#ffffff"]);
+    expect(config.colorList[14]).toEqual(["/tool/icon/DarkOrange.png", "#ff4406"]);
   });
 
   test("keeps background colors aligned with every role type number", () => {

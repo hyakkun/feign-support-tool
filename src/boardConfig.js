@@ -10,6 +10,13 @@ export const ACTION_TYPE = Object.freeze({ action: 0, role: 1, name: 2, created:
 export const createBoardConfig = (publicUrl) => {
   const roleLabelBgColor = ["#fdd", "#ddf", "#dfd", "linear-gradient(#ffd 0%, #ffd 50%, #dfd 50%, #dfd 100%)", "#ffd"];
   const actionType = ACTION_TYPE;
+  const colorList = [
+    ["White", "#ffffff"], ["Orange", "#ff871f"], ["Purple", "#71348b"],
+    ["Green", "#2a7b0c"], ["Blue", "#4b6fd7"], ["Red", "#b3000b"],
+    ["Yellow", "#ffe352"], ["Lime", "#83ff46"], ["Cyan", "#31d7c7"],
+    ["Pink", "#ff8fb3"], ["Brown", "#654321"], ["Magenta", "#ff00df"],
+    ["DarkBlue", "#3817e3"], ["DarkGreen", "#2a5b2b"], ["DarkOrange", "#ff4406"],
+  ].map(([name, hex]) => [`${publicUrl}/icon/${name}.png`, hex]);
 
   return {
     allRoleLabel: [
@@ -50,6 +57,7 @@ export const createBoardConfig = (publicUrl) => {
     roletype: ["role unknown", "role crew", "role imp", "role neutral", "role insane", "role sane"],
     roletypeColor: ["#ddd", "#8f8", "#f88", "#88f", "#ff8", "#8ff", "#888"],
     actionType,
+    colorList,
     role: createLegacyRoleOptions(actionType).concat({ id: -1, name: "？", roletype: [true, true, true, true, true], actionType: actionType.role }),
     roleImage: createRoleImageMap(publicUrl),
     actionResult: [
