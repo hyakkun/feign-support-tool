@@ -31,6 +31,13 @@ import { BoardTable } from "./BoardTable";
 import { NameInputPanel } from "./NameInputPanel";
 import { createLegacyBoardRuntime } from "./legacyBoardRuntime";
 import { TUTORIAL_PLAYER_NAMES, TUTORIAL_ROWS } from "./tutorialBoardData";
+import {
+    sortCellItems,
+    sortColors,
+    sortDeadRoles,
+    sortNames,
+    sortRoles,
+} from "./boardColumnSorts";
 import './index.scss';
 
 
@@ -57,21 +64,7 @@ FeignTool.getTableData = () => legacyBoardRuntime.getTableData();
 FeignTool.getPlayerOptions = () => legacyBoardRuntime.getPlayerOptions();
 FeignTool.column_template = {
     sort: true,
-    sortFunc: (a, b, order, dataField, rowA, rowB) => {
-        if (rowA.id < 0 || rowB.id < 0) return rowB.id - rowA.id;
-        const valueIsResultColor = (array) => (
-            array && array.length && array[0][2] === 4);
-        const newvalue = (value, row) => {
-            let nvalue = (value || []).slice();
-            while (valueIsResultColor(nvalue)) nvalue.shift();
-            return nvalue;
-        }
-        const newa = newvalue(a, rowA);
-        const newb = newvalue(b, rowB);
-        const res = newa > newb ? 1 : (newa < newb ? -1 : 0);
-        if (order === 'asc') return res;
-        else return -res;
-    },
+    sortFunc: sortCellItems,
     editable: true,
 };
 
@@ -134,12 +127,7 @@ FeignTool.defaultColumns = [
         dataField: 'color',
         editable: true,
         sort: true,
-        sortFunc: (a, b, order, dataField, rowA, rowB) => {
-            if (rowA.id < 0 || rowB.id < 0) return rowB.id - rowA.id;
-            const res = a > b ? 1 : (a < b ? -1 : 0);
-            if (order === 'asc') return res;
-            else return -res;
-        },
+        sortFunc: sortColors,
         formatter: (cell, row) => {
             if (cell && cell.length > 1) {
                 if (legacyBoardRuntime.getNameIsIcon() && row.id >= 0) {
@@ -160,13 +148,7 @@ FeignTool.defaultColumns = [
         text: '名',
         dataField: 'name',
         sort: true,
-        sortFunc: (a, b, order, dataField, rowA, rowB) => {
-            if (rowA.id < 0 || rowB.id < 0) return rowB.id - rowA.id;
-            let res = a[1] > b[1] ? 1 : (a[1] < b[1] ? -1 : 0);
-            if (res === 0) res = a[0] > b[0] ? 1 : (a[0] < b[0] ? -1 : 0);
-            if (order === 'asc') return res;
-            else return -res;
-        },
+        sortFunc: sortNames,
         editable: true,
         formatter: (cell, row) => {
             if (cell) {
@@ -185,30 +167,7 @@ FeignTool.defaultColumns = [
         dataField: 'role',
         ...FeignTool.column_template,
         formatter: FeignTool.formatter_templete('role'),
-        sortFunc: (a, b, order, dataField, rowA, rowB) => {
-            if (rowA.id < 0 || rowB.id < 0) return rowB.id - rowA.id;
-            const valueIsResultColor = (array) => {
-                return (array && array.length && array[0][2] === 4);
-            };
-            const newvalue = (value, row) => {
-                if (value && value.length) {
-                    let nvalue = value.slice();
-                    while (valueIsResultColor(nvalue)) nvalue.shift();
-                    if (nvalue.length) return nvalue[0][0] + "z" + nvalue[0][1];
-                }
-                if (row.deadRole && row.deadRole.length) {
-                    let nvalue = row.deadRole.slice();
-                    while (valueIsResultColor(nvalue)) nvalue.shift();
-                    if (nvalue.length) return nvalue[0][0] + "0" + nvalue[0][1];
-                }
-                return "";
-            }
-            const newa = newvalue(a, rowA);
-            const newb = newvalue(b, rowB);
-            const res = newa > newb ? 1 : (newa < newb ? -1 : 0);
-            if (order === 'asc') return res;
-            else return -res;
-        },
+        sortFunc: sortRoles,
         editorRenderer: (editorProps, value, row, column, rowIndex, columnIndex) => {
             if (!(column.dataField in row)) row[column.dataField] = [];
             const roleWithTrue = [...FeignTool.role, FeignTool.br, { id: 103, name: "バ", roletype: [true, false, false, false, false], actionType: 4 }, { id: 104, name: "真", roletype: [true, false, false, false, false], actionType: 4 }];
@@ -222,30 +181,7 @@ FeignTool.defaultColumns = [
         dataField: 'deadRole',
         formatter: FeignTool.formatter_templete('deadRole'),
         ...FeignTool.column_template,
-        sortFunc: (a, b, order, dataField, rowA, rowB) => {
-            if (rowA.id < 0 || rowB.id < 0) return rowB.id - rowA.id;
-            const valueIsResultColor = (array) => {
-                return (array && array.length && array[0][2] === 4);
-            };
-            const newvalue = (value, row) => {
-                if (value && value.length) {
-                    let nvalue = value.slice();
-                    while (valueIsResultColor(nvalue)) nvalue.shift();
-                    if (nvalue.length) return "0" + nvalue[0][0] + nvalue[0][1];
-                }
-                if (row.role && row.role.length) {
-                    let nvalue = row.role.slice();
-                    while (valueIsResultColor(nvalue)) nvalue.shift();
-                    if (nvalue.length) return "2" + nvalue[0][0] + nvalue[0][1];
-                }
-                return "1";
-            }
-            const newa = newvalue(a, rowA);
-            const newb = newvalue(b, rowB);
-            const res = newa > newb ? 1 : (newa < newb ? -1 : 0);
-            if (order === 'asc') return res;
-            else return -res;
-        },
+        sortFunc: sortDeadRoles,
         editorRenderer: (editorProps, value, row, column, rowIndex, columnIndex) => {
             if (!(column.dataField in row)) row[column.dataField] = [];
             return (
