@@ -1,16 +1,12 @@
 import React, { useMemo, useReducer, useState } from 'react'
 import ReactDOM from 'react-dom';
-import { createLegacyRoleToken } from "./roleCatalog";
 import {
     deathRoleRecordsFromEventCell,
-    fixedDeathRoleIdForEventLabel,
     isDeathEventLabel,
 } from "./eventRows";
 import {
     parsePlayerNames,
 } from "./playerRows";
-import { createBoardConfig } from "./boardConfig";
-import { createBoardTableFormatters } from "./boardTableFormatters";
 import {
     createBoardState,
     selectTableColumns,
@@ -20,85 +16,22 @@ import { BOARD_ACTION, boardReducer } from "./boardReducer";
 import { sendPopupSnapshot } from "./popupBridge";
 import { BoardTable } from "./BoardTable";
 import { NameInputPanel } from "./NameInputPanel";
-import { createLegacyBoardRuntime } from "./legacyBoardRuntime";
 import { TUTORIAL_PLAYER_NAMES, TUTORIAL_ROWS } from "./tutorialBoardData";
-import {
-    sortCellItems,
-} from "./boardColumnSorts";
-import { createDayColumnDefinitions } from "./dayColumnDefinitions";
-import { createIdentityColumnDefinitions } from "./identityColumnDefinitions";
-import { createRoleColumnDefinitions } from "./roleColumnDefinitions";
+import { createBoardTableSetup } from "./boardTableSetup";
 import './index.scss';
 
 
 
-const FeignTool = {};
-
-Object.assign(FeignTool, createBoardConfig(process.env.PUBLIC_URL));
-FeignTool.fixedDeathRoleForEvent = (eventLabel) => {
-    const roleId = fixedDeathRoleIdForEventLabel(eventLabel);
-    return roleId ? createLegacyRoleToken(roleId, FeignTool.actionType) : undefined;
-};
 const initialBoardState = createBoardState({
     board: TUTORIAL_ROWS,
     playerNames: TUTORIAL_PLAYER_NAMES,
     isTutorial: true,
     dayCount: 2,
 });
-const legacyBoardRuntime = createLegacyBoardRuntime({
+const { config: FeignTool, runtime: legacyBoardRuntime, tableDefinition } = createBoardTableSetup({
+    publicUrl: process.env.PUBLIC_URL,
     initialState: initialBoardState,
-    actionType: FeignTool.actionType,
 });
-FeignTool.getColorNameDictionary = () => legacyBoardRuntime.getColorNameDictionary();
-FeignTool.getTableData = () => legacyBoardRuntime.getTableData();
-FeignTool.getPlayerOptions = () => legacyBoardRuntime.getPlayerOptions();
-FeignTool.column_template = {
-    sort: true,
-    sortFunc: sortCellItems,
-    editable: true,
-};
-
-const tableFormatters = createBoardTableFormatters({
-    ...FeignTool,
-    getColorNameDictionary: () => legacyBoardRuntime.getColorNameDictionary(),
-    getPlayerIsIcon: () => legacyBoardRuntime.getPlayerIsIcon(),
-});
-FeignTool.formatter_templete = tableFormatters.cellFormatter;
-FeignTool.dead_formatter = tableFormatters.deathFormatter;
-FeignTool.deadFormatter = tableFormatters.deathFormatter;
-const dayColumnDefinitions = createDayColumnDefinitions({
-    config: FeignTool,
-    runtime: legacyBoardRuntime,
-    columnTemplate: FeignTool.column_template,
-});
-FeignTool.target_day = dayColumnDefinitions.targetDay;
-FeignTool.action_day = dayColumnDefinitions.actionDay;
-const identityColumns = createIdentityColumnDefinitions({
-    config: FeignTool,
-    runtime: legacyBoardRuntime,
-});
-const roleColumns = createRoleColumnDefinitions({
-    config: FeignTool,
-    columnTemplate: FeignTool.column_template,
-    formatters: tableFormatters,
-});
-FeignTool.defaultColumns = [
-    ...identityColumns,
-    ...roleColumns,
-    { ...FeignTool.target_day, formatter: FeignTool.dead_formatter('target_day1'), text: '1', dataField: 'target_day1', },
-    { ...FeignTool.action_day, formatter: FeignTool.dead_formatter('action_day1'), dataField: 'action_day1', },
-];
-FeignTool.tutorialBaseColumns = FeignTool.defaultColumns.slice(0, -2);
-FeignTool.playerBaseColumns = FeignTool.tutorialBaseColumns.map((column, index) => (
-    index === 1 ? { ...column, text: "名前" } : column
-));
-FeignTool.tableDefinition = {
-    tutorialBaseColumns: FeignTool.tutorialBaseColumns,
-    playerBaseColumns: FeignTool.playerBaseColumns,
-    targetDay: FeignTool.target_day,
-    actionDay: FeignTool.action_day,
-    deadFormatter: FeignTool.deadFormatter,
-};
 
 
 let FeignTool_popupWindow = null;
@@ -112,7 +45,7 @@ const FeignSupportToolRoot = () => {
     const { dayCount, isTutorial } = boardState;
     const [nameStringList, setNameStringList] = useState(TUTORIAL_PLAYER_NAMES);
     const data = selectTableData(boardState);
-    const columns = useMemo(() => selectTableColumns({ dayCount, isTutorial }, FeignTool.tableDefinition), [dayCount, isTutorial]);
+    const columns = useMemo(() => selectTableColumns({ dayCount, isTutorial }, tableDefinition), [dayCount, isTutorial]);
     const syncLegacyBoard = (nextState) => {
         legacyBoardRuntime.sync(nextState);
     };
