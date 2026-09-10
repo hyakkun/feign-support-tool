@@ -87,6 +87,14 @@ src/
 
 `App.js`、`App.css`、`logo.svg`、`index.css` は Create React App の初期生成物で、現在の起動経路では利用していない。ファイル移動には含めず、参照の再確認とブラウザ確認を行った別コミットで削除可否を判断する。`reportWebVitals.js` も、計測を再導入する予定がない限り同じ監査対象とする。
 
+### 初期生成物の監査結果（2026-09-10）
+
+- `App.js`、`App.css`、`logo.svg`、`index.css`、`reportWebVitals.js` は、現行の `src/index.js` から始まる import 経路で参照されていない。`App.js` が `logo.svg` と `App.css` を参照するだけである。
+- `web-vitals` は `reportWebVitals.js` の動的 import でのみ使用されている。計測を導入しない方針であれば、初期生成物の削除後に依存関係からも除去できる。
+- `public/manifest.json` が参照する `logo192.png`、`logo512.png`、および `public/index.html` が参照する favicon は公開物の一部である。今回の未使用 source 監査・削除対象には含めない。
+
+削除する場合は、まず source の5ファイルを専用コミットで除去してテスト・ビルド・ブラウザ確認を行う。`web-vitals` と lockfile の変更は依存関係変更として別コミットに分ける。
+
 ## 現行モジュールの責務と移行先
 
 | 現行モジュール | 現在の責務 | 移行先 |
