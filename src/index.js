@@ -15,10 +15,11 @@ import { NameInputPanel } from "./NameInputPanel";
 import { TUTORIAL_PLAYER_NAMES, TUTORIAL_ROWS } from "./tutorialBoardData";
 import { createBoardTableSetup } from "./boardTableSetup";
 import { createCellSaveActions } from "./boardActionSequence";
-import { addDay, addMemoRow, initializeBoard, resetBoard, setDisplayOption, setPlayerNames } from "./boardCommands";
+import { initializeBoard, resetBoard, setPlayerNames } from "./boardCommands";
 import { useBoardStateCommit } from "./useBoardStateCommit";
 import { createPopupWindowController } from "./popupWindowController";
 import { MemoArea } from "./MemoArea";
+import { useBoardToolbarActions } from "./useBoardToolbarActions";
 import './index.scss';
 
 
@@ -83,21 +84,7 @@ const FeignSupportToolRoot = () => {
             PopupWin(nextState.dayCount, nextState);
         }
     }
-    const AddDay = () => {
-        const nextState = applyBoardAction(addDay());
-        PopupWin(nextState.dayCount, nextState);
-    }
-    const AddRow = () => {
-        const nextState = applyBoardAction(addMemoRow());
-        PopupWin(nextState.dayCount, nextState);
-    }
-
-    const playerIconChangeHandler = (event) => {
-        applyBoardAction(setDisplayOption("playerIsIcon", event.target.checked));
-    };
-    const nameIconChangeHandler = (event) => {
-        applyBoardAction(setDisplayOption("nameIsIcon", event.target.checked));
-    };
+    const toolbarActions = useBoardToolbarActions({ applyAction: applyBoardAction, sendPopup: PopupWin });
     const onClickReset = () => {
         if (window.confirm("入力内容をリセットしますか？")) {
             const nextState = boardReducer({ ...boardState, board: data }, resetBoard(FeignTool.ActionsNameList));
@@ -110,7 +97,7 @@ const FeignSupportToolRoot = () => {
     const onOpenPopup = () => {
         popupWindowController.open(() => PopupWin(boardState.dayCount));
     };
-    const PopupWin = (day, state = { ...boardState, board: data }) => {
+    function PopupWin(day, state = { ...boardState, board: data }) {
         sendPopupSnapshot({ popupWindow: popupWindowController.getWindow(), state, day, origin: window.location.origin });
     }
     const onCellSave = (oldValue, newValue, row, column) => {
@@ -125,14 +112,14 @@ const FeignSupportToolRoot = () => {
     return (
         <div>
             <div >
-                <button onClick={AddDay}>翌日</button>
+                <button onClick={toolbarActions.onAddDay}>翌日</button>
                 <BoardTable
                     data={data}
                     columns={columns}
                     tableKey={`table-${PlayerIsIcon}-${NameIsIcon}-${tableRevision}`}
                     onCellSave={onCellSave}
                     roleLabelBgColor={FeignTool.roleLabelBgColor}
-                    onAddMemo={AddRow}
+                    onAddMemo={toolbarActions.onAddMemo}
                 />
             </div>
             <MemoArea />
@@ -142,8 +129,8 @@ const FeignSupportToolRoot = () => {
                 onOpenPopup={onOpenPopup}
                 playerIsIcon={PlayerIsIcon}
                 nameIsIcon={NameIsIcon}
-                onPlayerIconChange={playerIconChangeHandler}
-                onNameIconChange={nameIconChangeHandler}
+                onPlayerIconChange={toolbarActions.onPlayerIconChange}
+                onNameIconChange={toolbarActions.onNameIconChange}
                 onSetNames={onClickButton}
                 onReset={onClickReset}
             />
