@@ -15,6 +15,7 @@ import { NameInputPanel } from "./NameInputPanel";
 import { TUTORIAL_PLAYER_NAMES, TUTORIAL_ROWS } from "./tutorialBoardData";
 import { createBoardTableSetup } from "./boardTableSetup";
 import { applyBoardActions as applyBoardActionSequence, createCellSaveActions } from "./boardActionSequence";
+import { addDay, addMemoRow, initializeBoard, resetBoard, setDisplayOption, setPlayerNames } from "./boardCommands";
 import './index.scss';
 
 
@@ -68,9 +69,7 @@ const FeignSupportToolRoot = () => {
             const newNameStringList = parsePlayerNames(nameText);
             setNameStringList(newNameStringList);
             const nextState = boardReducer(boardState, {
-                type: BOARD_ACTION.INITIALIZE_BOARD,
-                playerNames: newNameStringList,
-                eventRows: FeignTool.ActionsNameList,
+                ...initializeBoard(newNameStringList, FeignTool.ActionsNameList),
             });
             dispatch({ type: BOARD_ACTION.REPLACE_STATE, state: nextState });
             syncLegacyBoard(nextState);
@@ -80,7 +79,7 @@ const FeignSupportToolRoot = () => {
             const newNameStringList = parsePlayerNames(nameText);
             const nextState = boardReducer(
                 { ...boardState, board: data, playerNames: nameStringList },
-                { type: BOARD_ACTION.SET_PLAYER_NAMES, playerNames: newNameStringList },
+                setPlayerNames(newNameStringList),
             );
             setNameStringList(newNameStringList);
             dispatch({ type: BOARD_ACTION.REPLACE_STATE, state: nextState });
@@ -90,23 +89,23 @@ const FeignSupportToolRoot = () => {
         }
     }
     const AddDay = () => {
-        const nextState = applyBoardAction({ type: BOARD_ACTION.ADD_DAY });
+        const nextState = applyBoardAction(addDay());
         PopupWin(nextState.dayCount, nextState);
     }
     const AddRow = () => {
-        const nextState = applyBoardAction({ type: BOARD_ACTION.ADD_MEMO_ROW });
+        const nextState = applyBoardAction(addMemoRow());
         PopupWin(nextState.dayCount, nextState);
     }
 
     const playerIconChangeHandler = (event) => {
-        applyBoardAction({ type: BOARD_ACTION.SET_DISPLAY_OPTION, option: "playerIsIcon", value: event.target.checked });
+        applyBoardAction(setDisplayOption("playerIsIcon", event.target.checked));
     };
     const nameIconChangeHandler = (event) => {
-        applyBoardAction({ type: BOARD_ACTION.SET_DISPLAY_OPTION, option: "nameIsIcon", value: event.target.checked });
+        applyBoardAction(setDisplayOption("nameIsIcon", event.target.checked));
     };
     const onClickReset = () => {
         if (window.confirm("入力内容をリセットしますか？")) {
-            const nextState = boardReducer({ ...boardState, board: data }, { type: BOARD_ACTION.RESET_BOARD, eventRows: FeignTool.ActionsNameList });
+            const nextState = boardReducer({ ...boardState, board: data }, resetBoard(FeignTool.ActionsNameList));
             dispatch({ type: BOARD_ACTION.REPLACE_STATE, state: nextState });
             syncLegacyBoard(nextState);
             PopupWin(1, nextState);
