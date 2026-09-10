@@ -17,6 +17,7 @@ import { createBoardTableSetup } from "./boardTableSetup";
 import { createCellSaveActions } from "./boardActionSequence";
 import { addDay, addMemoRow, initializeBoard, resetBoard, setDisplayOption, setPlayerNames } from "./boardCommands";
 import { useBoardStateCommit } from "./useBoardStateCommit";
+import { createPopupWindowController } from "./popupWindowController";
 import './index.scss';
 
 
@@ -33,7 +34,7 @@ const { config: FeignTool, runtime: legacyBoardRuntime, tableDefinition } = crea
 });
 
 
-let FeignTool_popupWindow = null;
+const popupWindowController = createPopupWindowController({ windowObject: window, publicUrl: process.env.PUBLIC_URL });
 
 const FeignSupportToolRoot = () => {
     const [boardState, dispatch] = useReducer(boardReducer, initialBoardState);
@@ -106,20 +107,7 @@ const FeignSupportToolRoot = () => {
         PopupWin(1);
     };
     const onOpenPopup = () => {
-        FeignTool_popupWindow = window.open(
-            process.env.PUBLIC_URL + '/popup.html',
-            'FeignTool_popupWindow',
-            'width=1000, height=300'
-        );
-        const sendWhenReady = () => {
-            if (!FeignTool_popupWindow || FeignTool_popupWindow.closed) return;
-            if (FeignTool_popupWindow.document.readyState !== "complete") {
-                window.setTimeout(sendWhenReady, 100);
-                return;
-            }
-            PopupWin(boardState.dayCount);
-        };
-        window.setTimeout(sendWhenReady, 100);
+        popupWindowController.open(() => PopupWin(boardState.dayCount));
     };
     const MemeArea = () => {
         return (
@@ -129,14 +117,14 @@ const FeignSupportToolRoot = () => {
         );
     }
     const PopupWin = (day, state = { ...boardState, board: data }) => {
-        sendPopupSnapshot({ popupWindow: FeignTool_popupWindow, state, day, origin: window.location.origin });
+        sendPopupSnapshot({ popupWindow: popupWindowController.getWindow(), state, day, origin: window.location.origin });
     }
     const onCellSave = (oldValue, newValue, row, column) => {
         const nextState = applyActions(createCellSaveActions({
             row, column, value: newValue, actionType: FeignTool.actionType,
             fixedDeathRoleForEvent: FeignTool.fixedDeathRoleForEvent,
         }));
-        if (FeignTool_popupWindow) PopupWin(nextState.dayCount, nextState);
+        if (popupWindowController.getWindow()) PopupWin(nextState.dayCount, nextState);
         if (column.dataField === 'name' || row.id < 0) setTableRevision((revision) => revision + 1);
     };
 
