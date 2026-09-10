@@ -114,6 +114,7 @@ FeignSupportToolRoot
 - ポップアップ用スナップショットの生成・送信（`popupBridge`）
 - `BoardTable`、`NameInputPanel`、`RoleSelect`、`DeadSelect` の分離と、ネイティブ HTML `table` による盤面描画
 - チュートリアル盤面テンプレート、色候補、列のソート規則、日別列、色・名前列、役・死亡役職列の分離
+- テーブル構成、盤面操作、セル操作、ツールバー操作、名前操作、ポップアップ操作をそれぞれ専用モジュールまたは hook へ分離
 
 `BoardTable` と `NameInputPanel` は callback の接続を、`popupBridge` は送信内容を単体テストで固定している。役職・死亡イベントの詳細な選択手順は既存の純粋関数テストとブラウザ確認で担保する。
 
@@ -132,10 +133,10 @@ FeignSupportToolRoot
 ## 今後の作業
 
 1. 完了: legacy タプルと `domain-model.md` の `Board` の境界を整理した。現時点では保存・共有・新しいドメイン機能の利用経路がないため、相互変換は実装しない。着手条件と変換対象は `domain-model.md` に記録する。
-2. `index.js` に残る `FeignTool` 設定とテーブル定義の最終組み立てを専用モジュールへ移す。formatter、列定義、互換 runtime の結線を Root から除外する。
-3. `FeignSupportToolRoot` の盤面操作を分離する。名前設定、リセット、翌日、メモ行、セル保存、表示切替を hook または操作モジュールへ移し、reducer 操作とポップアップ送信の重複をなくす。
-4. ポップアップのライフサイクルを分離する。`window.open`、起動待ち、ポップアップ参照の保持を Root から外し、既存の `popupBridge` は送信専用として維持する。
-5. 2〜4 の責務分割が一段落した時点で、確定した責務境界に沿ってディレクトリ構成を整理する。ファイル移動は専用の変更として扱い、機能変更とは混在させない。
+2. 完了: テーブル構成の最終組み立てを `boardTableSetup` へ移した。formatter、列定義、互換 runtime の結線は Root から除外済みである。
+3. 完了: `FeignSupportToolRoot` の盤面操作を hook／操作モジュールへ分離した。名前設定、リセット、翌日、メモ行、セル保存、表示切替は reducer 操作とポップアップ送信を共有する。
+4. 完了: ポップアップのライフサイクルを `popupWindowController` と `usePopupActions` へ分離した。`popupBridge` は送信専用として維持する。
+5. ディレクトリ構成を整理する。確定した責務境界に沿ってファイルを移し、Root の entry point は組み立てだけにする。ファイル移動は専用の変更として扱い、機能変更とは混在させない。
 6. UI テストを、日付ソート、リセット時のポップアップ更新、名前・色変更後の候補更新、各 editor の候補選択へ拡充する。
 7. React、`react-scripts`、その他の古い依存関係を、互換性調査・更新方針の決定・段階更新に分けて扱う。source の ESLint 警告は解消済みであり、build 時の警告は古い依存関係と Browserslist の更新課題として扱う。
 
@@ -155,41 +156,9 @@ FeignSupportToolRoot
 
 ## 将来のディレクトリ構成
 
-モジュール数の増加に対応し、`index.js` の設定・盤面操作・Root 組み立ての責務分割が一段落した段階で、確定した責務ごとに次の構成へ段階的に移す。責務が変動している間はファイル移動を行わない。
+`index.js` の責務分割が一段落したため、次の作業として確定した責務ごとにファイルを段階移行する。具体的なモジュール対応表、依存方向、目標ツリー、移行順序は [モジュール責務とディレクトリ移行設計](module-directory-design.md) に記録する。
 
-```text
-src/
-├─ app/
-│  └─ index.js                 # Root の組み立てだけ
-├─ board/
-│  ├─ state/
-│  │  ├─ boardState.js
-│  │  ├─ boardReducer.js
-│  │  └─ boardOperations.js
-│  ├─ model/
-│  │  ├─ boardConfig.js
-│  │  ├─ playerRows.js
-│  │  ├─ eventRows.js
-│  │  ├─ actionOptions.js
-│  │  └─ roleCatalog.js
-│  ├─ table/
-│  │  ├─ BoardTable.js
-│  │  ├─ tableFormatters.js
-│  │  └─ editors/
-│  │     ├─ RoleSelect.js
-│  │     ├─ DeadSelect.js
-│  │     ├─ ColorSelect.js
-│  │     └─ InsaneSelect.js
-│  └─ popup/
-│     └─ popupBridge.js
-├─ components/
-│  └─ NameInputPanel.js
-└─ test/                       # 共通テストヘルパーが必要になった場合のみ
-```
-
-テストは実装ファイルと同じディレクトリに置く。たとえば `boardReducer.js` と `boardReducer.test.js` を並べることで、変更対象と検証を近接させる。
-
-移動は一括で行わず、`index.js` の責務分割完了後に専用ブランチまたは専用コミットで実施する。まず `board/table/` と `board/table/editors/`、次に `board/state/` と `board/model/`、最後に root を `app/` へ移す。各段階で import の更新、`npm test`、`npm run build`、必要なブラウザ確認を完了させてから次へ進む。
+機能変更とファイル移動を同じコミットに混在させず、移動する実装とテストは常に同じ段階で扱う。
 
 ## 非目標
 
