@@ -1,4 +1,4 @@
-import { selectPopupSnapshot } from "./board/state/boardState";
+import { selectPopupSnapshot } from "../state/boardState";
 
 export const sendPopupSnapshot = ({ popupWindow, state, day, origin }) => {
   if (!popupWindow || popupWindow.closed) return false;

@@ -7,17 +7,17 @@ import {
 } from "./board/state/boardState";
 import { boardReducer } from "./board/state/boardReducer";
 import { BoardTable } from "./board/table/BoardTable";
-import { NameInputPanel } from "./NameInputPanel";
+import { NameInputPanel } from "./components/NameInputPanel";
 import { TUTORIAL_PLAYER_NAMES, TUTORIAL_ROWS } from "./board/model/tutorialBoardData";
 import { createBoardTableSetup } from "./board/table/boardTableSetup";
 import { useBoardStateCommit } from "./board/state/hooks/useBoardStateCommit";
-import { createPopupWindowController } from "./popupWindowController";
-import { MemoArea } from "./MemoArea";
+import { createPopupWindowController } from "./board/popup/popupWindowController";
+import { MemoArea } from "./components/MemoArea";
 import { useBoardToolbarActions } from "./board/state/hooks/useBoardToolbarActions";
 import { useNameBoardActions } from "./board/state/hooks/useNameBoardActions";
 import { useBoardCellActions } from "./board/state/hooks/useBoardCellActions";
-import { usePopupActions } from "./usePopupActions";
-import './index.scss';
+import { usePopupActions } from "./board/popup/usePopupActions";
+import './styles/index.scss';
 
 
 
