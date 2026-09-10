@@ -1,10 +1,6 @@
 import React, { useMemo, useReducer, useState } from 'react'
 import ReactDOM from 'react-dom';
 import {
-    deathRoleRecordsFromEventCell,
-    isDeathEventLabel,
-} from "./eventRows";
-import {
     parsePlayerNames,
 } from "./playerRows";
 import {
@@ -18,6 +14,7 @@ import { BoardTable } from "./BoardTable";
 import { NameInputPanel } from "./NameInputPanel";
 import { TUTORIAL_PLAYER_NAMES, TUTORIAL_ROWS } from "./tutorialBoardData";
 import { createBoardTableSetup } from "./boardTableSetup";
+import { applyBoardActions as applyBoardActionSequence, createCellSaveActions } from "./boardActionSequence";
 import './index.scss';
 
 
@@ -53,10 +50,7 @@ const FeignSupportToolRoot = () => {
         return applyBoardActions([action]);
     };
     const applyBoardActions = (actions) => {
-        const nextState = actions.reduce(
-            (state, action) => boardReducer(state, action),
-            { ...boardState, board: data },
-        );
+        const nextState = applyBoardActionSequence({ ...boardState, board: data }, actions);
         dispatch({ type: BOARD_ACTION.REPLACE_STATE, state: nextState });
         syncLegacyBoard(nextState);
         return nextState;
@@ -147,18 +141,10 @@ const FeignSupportToolRoot = () => {
         sendPopupSnapshot({ popupWindow: FeignTool_popupWindow, state, day, origin: window.location.origin });
     }
     const onCellSave = (oldValue, newValue, row, column) => {
-        const deathRoleActions = isDeathEventLabel(row.name[0])
-            ? deathRoleRecordsFromEventCell(row.name[0], newValue, FeignTool.actionType).map((record) => ({
-                type: BOARD_ACTION.RECORD_DEATH_ROLE,
-                playerName: record.playerName,
-                roleToken: record.roleToken || FeignTool.fixedDeathRoleForEvent(row.name[0]),
-                preventDuplicate: Boolean(record.fixedDeathRoleId),
-            }))
-            : [];
-        const nextState = applyBoardActions([
-            { type: BOARD_ACTION.UPDATE_CELL, rowId: row.id, field: column.dataField, value: newValue },
-            ...deathRoleActions,
-        ]);
+        const nextState = applyBoardActions(createCellSaveActions({
+            row, column, value: newValue, actionType: FeignTool.actionType,
+            fixedDeathRoleForEvent: FeignTool.fixedDeathRoleForEvent,
+        }));
         if (FeignTool_popupWindow) PopupWin(nextState.dayCount, nextState);
         if (column.dataField === 'name' || row.id < 0) setTableRevision((revision) => revision + 1);
     };
