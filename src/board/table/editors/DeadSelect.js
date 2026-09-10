@@ -1,8 +1,8 @@
 import React from "react";
 import { components } from "react-select";
 import CreatableSelect from "react-select/creatable";
-import { LEGACY_SELECTOR } from "../../../roleCatalog";
-import { createDeathRoleAnimationToken, requiresDeathRoleSelection } from "../../../eventRows";
+import { LEGACY_SELECTOR } from "../../model/roleCatalog";
+import { createDeathRoleAnimationToken, requiresDeathRoleSelection } from "../../model/eventRows";
 
 export class DeadSelect extends React.Component {
   constructor(props) {

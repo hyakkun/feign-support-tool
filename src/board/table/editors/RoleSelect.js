@@ -1,9 +1,9 @@
 import React from "react";
 import { components } from "react-select";
 import CreatableSelect from "react-select/creatable";
-import { LEGACY_SELECTOR } from "../../../roleCatalog";
+import { LEGACY_SELECTOR } from "../../model/roleCatalog";
 import { createRoleSelectState } from "./roleSelectState";
-import { createRoleOptionToken } from "../../../roleOptionTokens";
+import { createRoleOptionToken } from "../../model/roleOptionTokens";
 
 export class RoleSelect extends React.Component {
   constructor(props) {

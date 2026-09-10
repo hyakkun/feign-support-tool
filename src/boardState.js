@@ -1,5 +1,5 @@
-import { popupEventsByPlayerName } from "./eventRows";
-import { createLegacyPlayerOptions } from "./playerRows";
+import { popupEventsByPlayerName } from "./board/model/eventRows";
+import { createLegacyPlayerOptions } from "./board/model/playerRows";
 
 export const createBoardState = ({ board, playerNames, display, isTutorial = false, dayCount = 1 }) => ({
   board,

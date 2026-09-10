@@ -1,10 +1,10 @@
 import React from "react";
-import { ACTION_ITEM } from "../../roleCatalog";
-import { actionOptionsForRoleLabels, roleLabelsForRow } from "../../actionOptions";
+import { ACTION_ITEM } from "../model/roleCatalog";
+import { actionOptionsForRoleLabels, roleLabelsForRow } from "../model/actionOptions";
 import {
   allowsReviveForEventLabel,
   isDeathEventLabel,
-} from "../../eventRows";
+} from "../model/eventRows";
 import { RoleSelect } from "./editors/RoleSelect";
 import { DeadSelect } from "./editors/DeadSelect";
 

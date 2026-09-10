@@ -1,6 +1,6 @@
 import React from "react";
 import Select, { components } from "react-select";
-import { LEGACY_SELECTOR } from "../../../roleCatalog";
+import { LEGACY_SELECTOR } from "../../model/roleCatalog";
 
 export class InsaneSelect extends React.Component {
   constructor(props) {

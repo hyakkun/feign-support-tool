@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { boardReducer } from "./boardReducer";
-import { parsePlayerNames } from "./playerRows";
+import { parsePlayerNames } from "./board/model/playerRows";
 import { initializeBoard, resetBoard, setPlayerNames } from "./boardCommands";
 
 export const useNameBoardActions = ({ boardState, data, playerNames, eventRows, commitState, sendPopup, setTableRevision, windowObject }) => {

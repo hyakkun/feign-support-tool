@@ -1,6 +1,6 @@
-import { createBoardConfig } from "../../boardConfig";
-import { createLegacyRoleToken } from "../../roleCatalog";
-import { fixedDeathRoleIdForEventLabel } from "../../eventRows";
+import { createBoardConfig } from "../model/boardConfig";
+import { createLegacyRoleToken } from "../model/roleCatalog";
+import { fixedDeathRoleIdForEventLabel } from "../model/eventRows";
 import { createBoardTableFormatters } from "./boardTableFormatters";
 import { createLegacyBoardRuntime } from "../../legacyBoardRuntime";
 import { sortCellItems } from "./boardColumnSorts";

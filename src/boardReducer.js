@@ -1,7 +1,7 @@
 import { createMemoRow } from "./boardOperations";
 import { resetTableData } from "./boardOperations";
-import { createInitialTableData, reconcilePlayerRows } from "./playerRows";
-import { appendDeadRole, appendDeadRoleIfAbsent } from "./eventRows";
+import { createInitialTableData, reconcilePlayerRows } from "./board/model/playerRows";
+import { appendDeadRole, appendDeadRoleIfAbsent } from "./board/model/eventRows";
 
 export const BOARD_ACTION = Object.freeze({
   SET_DISPLAY_OPTION: "set-display-option",

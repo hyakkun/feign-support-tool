@@ -8,7 +8,7 @@ import {
 import { boardReducer } from "./boardReducer";
 import { BoardTable } from "./board/table/BoardTable";
 import { NameInputPanel } from "./NameInputPanel";
-import { TUTORIAL_PLAYER_NAMES, TUTORIAL_ROWS } from "./tutorialBoardData";
+import { TUTORIAL_PLAYER_NAMES, TUTORIAL_ROWS } from "./board/model/tutorialBoardData";
 import { createBoardTableSetup } from "./board/table/boardTableSetup";
 import { useBoardStateCommit } from "./useBoardStateCommit";
 import { createPopupWindowController } from "./popupWindowController";
