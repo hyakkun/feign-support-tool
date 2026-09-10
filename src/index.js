@@ -14,8 +14,9 @@ import { BoardTable } from "./BoardTable";
 import { NameInputPanel } from "./NameInputPanel";
 import { TUTORIAL_PLAYER_NAMES, TUTORIAL_ROWS } from "./tutorialBoardData";
 import { createBoardTableSetup } from "./boardTableSetup";
-import { applyBoardActions as applyBoardActionSequence, createCellSaveActions } from "./boardActionSequence";
+import { createCellSaveActions } from "./boardActionSequence";
 import { addDay, addMemoRow, initializeBoard, resetBoard, setDisplayOption, setPlayerNames } from "./boardCommands";
+import { useBoardStateCommit } from "./useBoardStateCommit";
 import './index.scss';
 
 
@@ -44,17 +45,11 @@ const FeignSupportToolRoot = () => {
     const [nameStringList, setNameStringList] = useState(TUTORIAL_PLAYER_NAMES);
     const data = selectTableData(boardState);
     const columns = useMemo(() => selectTableColumns({ dayCount, isTutorial }, tableDefinition), [dayCount, isTutorial]);
-    const syncLegacyBoard = (nextState) => {
-        legacyBoardRuntime.sync(nextState);
-    };
+    const { commitState, applyActions } = useBoardStateCommit({
+        boardState, data, dispatch, runtime: legacyBoardRuntime,
+    });
     const applyBoardAction = (action) => {
-        return applyBoardActions([action]);
-    };
-    const applyBoardActions = (actions) => {
-        const nextState = applyBoardActionSequence({ ...boardState, board: data }, actions);
-        dispatch({ type: BOARD_ACTION.REPLACE_STATE, state: nextState });
-        syncLegacyBoard(nextState);
-        return nextState;
+        return applyActions([action]);
     };
     legacyBoardRuntime.setColorChangeHandler((playerName, color) => {
         applyBoardAction({ type: BOARD_ACTION.SET_PLAYER_COLOR, playerName, color });
@@ -71,8 +66,7 @@ const FeignSupportToolRoot = () => {
             const nextState = boardReducer(boardState, {
                 ...initializeBoard(newNameStringList, FeignTool.ActionsNameList),
             });
-            dispatch({ type: BOARD_ACTION.REPLACE_STATE, state: nextState });
-            syncLegacyBoard(nextState);
+            commitState(nextState);
             setTableRevision((revision) => revision + 1);
             PopupWin(1, nextState);
         } else if (window.confirm("名前リストを更新しますか？（名前が削除・変更されたデータは消去されます）")) {
@@ -82,8 +76,7 @@ const FeignSupportToolRoot = () => {
                 setPlayerNames(newNameStringList),
             );
             setNameStringList(newNameStringList);
-            dispatch({ type: BOARD_ACTION.REPLACE_STATE, state: nextState });
-            syncLegacyBoard(nextState);
+            commitState(nextState);
             setTableRevision((revision) => revision + 1);
             PopupWin(nextState.dayCount, nextState);
         }
@@ -106,8 +99,7 @@ const FeignSupportToolRoot = () => {
     const onClickReset = () => {
         if (window.confirm("入力内容をリセットしますか？")) {
             const nextState = boardReducer({ ...boardState, board: data }, resetBoard(FeignTool.ActionsNameList));
-            dispatch({ type: BOARD_ACTION.REPLACE_STATE, state: nextState });
-            syncLegacyBoard(nextState);
+            commitState(nextState);
             PopupWin(1, nextState);
             return;
         }
@@ -140,7 +132,7 @@ const FeignSupportToolRoot = () => {
         sendPopupSnapshot({ popupWindow: FeignTool_popupWindow, state, day, origin: window.location.origin });
     }
     const onCellSave = (oldValue, newValue, row, column) => {
-        const nextState = applyBoardActions(createCellSaveActions({
+        const nextState = applyActions(createCellSaveActions({
             row, column, value: newValue, actionType: FeignTool.actionType,
             fixedDeathRoleForEvent: FeignTool.fixedDeathRoleForEvent,
         }));
