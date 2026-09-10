@@ -1,47 +1,46 @@
 import React from "react";
 import { components } from "react-select";
 import CreatableSelect from "react-select/creatable";
-import { LEGACY_SELECTOR } from "./roleCatalog";
-import { createRoleSelectState } from "./roleSelectState";
-import { createRoleOptionToken } from "./roleOptionTokens";
+import { LEGACY_SELECTOR } from "../../../roleCatalog";
+import { createDeathRoleAnimationToken, requiresDeathRoleSelection } from "../../../eventRows";
 
-export class RoleSelect extends React.Component {
+export class DeadSelect extends React.Component {
   constructor(props) {
     super(props);
-    const roleSelectState = createRoleSelectState({ dataField: props.dataField, roleLabels: props.allRole, value: props.row[props.dataField], actionType: props.config.actionType });
-    this.state = { value: props.row[props.dataField] ?? [], ...roleSelectState };
+    this.state = { value: props.row[props.dataField] ?? [], roleTypeNum: -2, nameSelected: false };
   }
 
   getValue() {
     return "newValue" in this ? this.newValue : this.state.value;
   }
 
-  checkFinish() {
-    const { actionType } = this.props.config;
-    if (this.newValue.length <= this.state.value.length) {
-      return !(this.state.isLook && this.newValue.length > 0);
-    }
-    const newItem = this.newValue[this.newValue.length - 1];
-    if (this.state.isLook) return newItem[2] !== actionType.name;
-    if (!this.state.isInv) return true;
-    if (newItem[2] !== actionType.role) return true;
-    const roles = this.newValue.filter((item) => item[2] === actionType.role);
-    if (roles.length !== 1) return true;
-    this.setState({ roleTypeNum: roles[0][1] === 1 ? -3 : -2 });
-    return false;
-  }
-
   handleOnUpdate(event) {
     if (!event) return true;
+    const { actionType, getTableData } = this.props.config;
     this.newValue = event.map((item) => item.value);
-    const finish = this.checkFinish();
+    if (event.length > this.state.value.length) {
+      const newItem = event[event.length - 1].value;
+      if (this.state.nameSelected && newItem[2] === actionType.role) {
+        const player = getTableData().find((item) => item.name[0] === this.state.nameSelected && item.id >= 0);
+        this.setState({ nameSelected: false });
+        if (player) this.newValue[this.newValue.length - 1] = createDeathRoleAnimationToken(newItem, player.id);
+      } else if (!this.state.nameSelected && newItem[2] === actionType.name) {
+        if (this.props.fixedDeathRole) {
+          this.setState({ value: this.newValue, nameSelected: false });
+          return true;
+        }
+        const player = getTableData().find((item) => item.name[0] === newItem[0] && item.id >= 0);
+        this.setState({ value: this.newValue, nameSelected: newItem[0] });
+        return Boolean(player && requiresDeathRoleSelection(player));
+      }
+    }
     this.setState({ value: this.newValue });
-    return finish;
+    return true;
   }
 
   render() {
     const { value, onUpdate, config, ...rest } = this.props;
-    const { actionType, roleImage, roletypeColor } = config;
+    const { actionType, actionRevive, role, roleImage, roletypeColor } = config;
     const colorNameDic = config.getColorNameDictionary();
     const customStyles = {
       option: (provided, state) => {
@@ -70,9 +69,7 @@ export class RoleSelect extends React.Component {
       menuList: (provided) => ({ ...provided, width: "18rem", marginLeft: "auto", marginRight: "auto" }),
       container: (provided) => ({ ...provided, whiteSpace: "normal", width: "fit-content" }),
     };
-    const toggleRoleTypeNum = (typeNum) => {
-      this.setState({ roleTypeNum: typeNum === this.state.roleTypeNum ? this.state.defaultRoleTypeNum : typeNum });
-    };
+    const toggleRoleTypeNum = (typeNum) => this.setState({ roleTypeNum: typeNum === this.state.roleTypeNum ? -2 : typeNum });
     const typeButton = (optionProps) => {
       if (optionProps.data.value?.length >= 2 && optionProps.data.value[2] !== actionType.name) {
         if (optionProps.data.value[0] === LEGACY_SELECTOR.FACTION) {
@@ -83,31 +80,35 @@ export class RoleSelect extends React.Component {
       }
       return <components.Option {...optionProps} />;
     };
+    const roleOptions = role.map((option) => {
+      let label = option.name;
+      let roleTypeNum = this.state.roleTypeNum < 0 ? (option[`defaultRoletype${-this.state.roleTypeNum}`] ?? 0) : (option.roletype[this.state.roleTypeNum] ? this.state.roleTypeNum : 0);
+      if (option.actionType !== actionType.name && option.name in roleImage) {
+        label = <span className="selectImg"><img className={option.actionType === actionType.role ? "roleImg" : undefined} src={roleImage[option.name]} alt={option.name} /></span>;
+      }
+      if (option.actionType === actionType.option) {
+        if (option.name === "バ") return { value: ["バカ結果？", 4, 4], label: <span className="roleOption">バ</span> };
+        if (option.name === "真") return { value: ["真結果", 5, 4], label: <span className="roleOption">真</span> };
+        if (option.name === "バカ結果？") roleTypeNum = 4;
+        if (option.name === "真結果") roleTypeNum = 5;
+      }
+      return { value: [option.name, roleTypeNum, option.actionType], label };
+    });
+    const nameOptions = config.getPlayerOptions().concat(actionRevive).map((option) => ({ value: [option.name, 0, option.actionType], label: option.name }));
     return <CreatableSelect
       {...rest}
       isMulti
+      isClearable={false}
       key={this.props.dataField}
       name={this.props.text}
       onChange={(event) => { if (this.handleOnUpdate(event)) return onUpdate(this.getValue()); }}
       className="selectRole"
-      defaultValue={this.props.row[this.props.dataField].map((role) => ({
-        value: role,
-        label: role[2] !== actionType.name && role[0] in roleImage ? <img src={roleImage[role[0]]} alt={role[0]} /> : role[0],
-      }))}
-      options={this.props.options.map((option) => {
-        let label = option.name;
-        const token = createRoleOptionToken(option, this.state.roleTypeNum, actionType);
-        if (option.actionType !== actionType.name && option.name in roleImage) {
-          label = <span className="selectImg"><img className={option.actionType === actionType.role ? "roleImg" : undefined} src={roleImage[option.name]} alt={option.name} /></span>;
-        }
-        if (option.actionType === actionType.option && (option.name === "バ" || option.name === "真")) return { value: token, label: <span className="roleOption">{option.name}</span> };
-        return { value: token, label };
-      })}
+      defaultValue={this.props.row[this.props.dataField].map((item) => ({ value: item, label: item[2] !== actionType.name && item[0] in roleImage ? <img src={roleImage[item[0]]} alt={item[0]} /> : item[0] }))}
+      options={this.state.nameSelected ? [...roleOptions, { value: ["蘇生", 0, actionType.option], label: <span className="roleOption">蘇</span> }] : nameOptions}
       components={{ Option: typeButton }}
       styles={customStyles}
       menuIsOpen={true}
       autoFocus={true}
-      isClearable={true}
       getNewOptionData={(newOptionString) => ({ value: [newOptionString, 0, 3], label: newOptionString })}
       closeMenuOnSelect={false}
       blurInputOnSelect={false}

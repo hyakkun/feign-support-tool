@@ -1,8 +1,8 @@
-import { createBoardConfig } from "./boardConfig";
-import { createLegacyRoleToken } from "./roleCatalog";
-import { fixedDeathRoleIdForEventLabel } from "./eventRows";
+import { createBoardConfig } from "../../boardConfig";
+import { createLegacyRoleToken } from "../../roleCatalog";
+import { fixedDeathRoleIdForEventLabel } from "../../eventRows";
 import { createBoardTableFormatters } from "./boardTableFormatters";
-import { createLegacyBoardRuntime } from "./legacyBoardRuntime";
+import { createLegacyBoardRuntime } from "../../legacyBoardRuntime";
 import { sortCellItems } from "./boardColumnSorts";
 import { createDayColumnDefinitions } from "./dayColumnDefinitions";
 import { createIdentityColumnDefinitions } from "./identityColumnDefinitions";

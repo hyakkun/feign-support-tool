@@ -1,5 +1,5 @@
 import { createTableFormatters } from "./tableFormatters";
-import { isDeathEventLabel } from "./eventRows";
+import { isDeathEventLabel } from "../../eventRows";
 
 export const createBoardTableFormatters = (config) => createTableFormatters({
   actionType: config.actionType,

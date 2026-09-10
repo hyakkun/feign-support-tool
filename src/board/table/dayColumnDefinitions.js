@@ -1,12 +1,12 @@
 import React from "react";
-import { ACTION_ITEM } from "./roleCatalog";
-import { actionOptionsForRoleLabels, roleLabelsForRow } from "./actionOptions";
+import { ACTION_ITEM } from "../../roleCatalog";
+import { actionOptionsForRoleLabels, roleLabelsForRow } from "../../actionOptions";
 import {
   allowsReviveForEventLabel,
   isDeathEventLabel,
-} from "./eventRows";
-import { RoleSelect } from "./RoleSelect";
-import { DeadSelect } from "./DeadSelect";
+} from "../../eventRows";
+import { RoleSelect } from "./editors/RoleSelect";
+import { DeadSelect } from "./editors/DeadSelect";
 
 export const createDayColumnDefinitions = ({ config, runtime, columnTemplate }) => {
   const targetDay = {

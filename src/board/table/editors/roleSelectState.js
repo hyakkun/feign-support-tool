@@ -1,4 +1,4 @@
-import { roleIdsForRoleLabels } from "./roleCatalog";
+import { roleIdsForRoleLabels } from "../../../roleCatalog";
 
 export const createRoleSelectState = ({ dataField, roleLabels = [], value = [], actionType }) => {
   let defaultRoleTypeNum = dataField === "role" ? -1 : -2;

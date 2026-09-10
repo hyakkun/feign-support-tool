@@ -1,6 +1,6 @@
 import React from "react";
-import { ColorSelect } from "./ColorSelect";
-import { InsaneSelect } from "./InsaneSelect";
+import { ColorSelect } from "./editors/ColorSelect";
+import { InsaneSelect } from "./editors/InsaneSelect";
 import { sortColors, sortNames } from "./boardColumnSorts";
 
 export const createIdentityColumnDefinitions = ({ config, runtime }) => ([

@@ -1,5 +1,5 @@
 import React from "react";
-import { RoleSelect } from "./RoleSelect";
+import { RoleSelect } from "./editors/RoleSelect";
 import { sortDeadRoles, sortRoles } from "./boardColumnSorts";
 
 const roleWithMarkers = (config) => [
