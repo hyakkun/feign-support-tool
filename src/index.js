@@ -6,7 +6,6 @@ import {
     selectTableData,
 } from "./boardState";
 import { boardReducer } from "./boardReducer";
-import { sendPopupSnapshot } from "./popupBridge";
 import { BoardTable } from "./BoardTable";
 import { NameInputPanel } from "./NameInputPanel";
 import { TUTORIAL_PLAYER_NAMES, TUTORIAL_ROWS } from "./tutorialBoardData";
@@ -17,6 +16,7 @@ import { MemoArea } from "./MemoArea";
 import { useBoardToolbarActions } from "./useBoardToolbarActions";
 import { useNameBoardActions } from "./useNameBoardActions";
 import { useBoardCellActions } from "./useBoardCellActions";
+import { usePopupActions } from "./usePopupActions";
 import './index.scss';
 
 
@@ -50,16 +50,11 @@ const FeignSupportToolRoot = () => {
         return applyActions([action]);
     };
 
-    const nameActions = useNameBoardActions({ boardState, data, playerNames: TUTORIAL_PLAYER_NAMES, eventRows: FeignTool.ActionsNameList, commitState, sendPopup: PopupWin, setTableRevision, windowObject: window });
-    const toolbarActions = useBoardToolbarActions({ applyAction: applyBoardAction, sendPopup: PopupWin });
-    const cellActions = useBoardCellActions({ applyAction: applyBoardAction, applyActions, config: FeignTool, hasPopup: () => Boolean(popupWindowController.getWindow()), sendPopup: PopupWin, setTableRevision });
+    const { openPopup, sendPopup } = usePopupActions({ controller: popupWindowController, boardState, data, origin: window.location.origin });
+    const nameActions = useNameBoardActions({ boardState, data, playerNames: TUTORIAL_PLAYER_NAMES, eventRows: FeignTool.ActionsNameList, commitState, sendPopup, setTableRevision, windowObject: window });
+    const toolbarActions = useBoardToolbarActions({ applyAction: applyBoardAction, sendPopup });
+    const cellActions = useBoardCellActions({ applyAction: applyBoardAction, applyActions, config: FeignTool, hasPopup: () => Boolean(popupWindowController.getWindow()), sendPopup, setTableRevision });
     legacyBoardRuntime.setColorChangeHandler(cellActions.onColorChange);
-    const onOpenPopup = () => {
-        popupWindowController.open(() => PopupWin(boardState.dayCount));
-    };
-    function PopupWin(day, state = { ...boardState, board: data }) {
-        sendPopupSnapshot({ popupWindow: popupWindowController.getWindow(), state, day, origin: window.location.origin });
-    }
 
     return (
         <div>
@@ -78,7 +73,7 @@ const FeignSupportToolRoot = () => {
             <NameInputPanel
                 nameText={nameActions.nameText}
                 onNameTextChange={nameActions.onNameTextChange}
-                onOpenPopup={onOpenPopup}
+                onOpenPopup={openPopup}
                 playerIsIcon={PlayerIsIcon}
                 nameIsIcon={NameIsIcon}
                 onPlayerIconChange={toolbarActions.onPlayerIconChange}
