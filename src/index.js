@@ -18,6 +18,7 @@ import { createCellSaveActions } from "./boardActionSequence";
 import { addDay, addMemoRow, initializeBoard, resetBoard, setDisplayOption, setPlayerNames } from "./boardCommands";
 import { useBoardStateCommit } from "./useBoardStateCommit";
 import { createPopupWindowController } from "./popupWindowController";
+import { MemoArea } from "./MemoArea";
 import './index.scss';
 
 
@@ -109,13 +110,6 @@ const FeignSupportToolRoot = () => {
     const onOpenPopup = () => {
         popupWindowController.open(() => PopupWin(boardState.dayCount));
     };
-    const MemeArea = () => {
-        return (
-            <div>
-                <textarea style={{ width: "100vw", height: "20rem", border: "solid #ddd", outline: "none" }} placeholder="メモ" />
-            </div>
-        );
-    }
     const PopupWin = (day, state = { ...boardState, board: data }) => {
         sendPopupSnapshot({ popupWindow: popupWindowController.getWindow(), state, day, origin: window.location.origin });
     }
@@ -141,7 +135,7 @@ const FeignSupportToolRoot = () => {
                     onAddMemo={AddRow}
                 />
             </div>
-            {MemeArea()}
+            <MemoArea />
             <NameInputPanel
                 nameText={nameText}
                 onNameTextChange={onChangeText}
