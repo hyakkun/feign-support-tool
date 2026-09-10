@@ -1,9 +1,6 @@
 import React, { useMemo, useReducer, useState } from 'react'
 import ReactDOM from 'react-dom';
 import {
-    parsePlayerNames,
-} from "./playerRows";
-import {
     createBoardState,
     selectTableColumns,
     selectTableData,
@@ -15,11 +12,11 @@ import { NameInputPanel } from "./NameInputPanel";
 import { TUTORIAL_PLAYER_NAMES, TUTORIAL_ROWS } from "./tutorialBoardData";
 import { createBoardTableSetup } from "./boardTableSetup";
 import { createCellSaveActions } from "./boardActionSequence";
-import { initializeBoard, resetBoard, setPlayerNames } from "./boardCommands";
 import { useBoardStateCommit } from "./useBoardStateCommit";
 import { createPopupWindowController } from "./popupWindowController";
 import { MemoArea } from "./MemoArea";
 import { useBoardToolbarActions } from "./useBoardToolbarActions";
+import { useNameBoardActions } from "./useNameBoardActions";
 import './index.scss';
 
 
@@ -41,11 +38,9 @@ const popupWindowController = createPopupWindowController({ windowObject: window
 const FeignSupportToolRoot = () => {
     const [boardState, dispatch] = useReducer(boardReducer, initialBoardState);
     const [tableRevision, setTableRevision] = useState(0);
-    const [nameText, setNameText] = useState("");
     const PlayerIsIcon = boardState.display.playerIsIcon;
     const NameIsIcon = boardState.display.nameIsIcon;
     const { dayCount, isTutorial } = boardState;
-    const [nameStringList, setNameStringList] = useState(TUTORIAL_PLAYER_NAMES);
     const data = selectTableData(boardState);
     const columns = useMemo(() => selectTableColumns({ dayCount, isTutorial }, tableDefinition), [dayCount, isTutorial]);
     const { commitState, applyActions } = useBoardStateCommit({
@@ -59,41 +54,8 @@ const FeignSupportToolRoot = () => {
         setTableRevision((revision) => revision + 1);
     });
 
-    const onChangeText = (e) => {
-        setNameText(e.target.value);
-    }
-    const onClickButton = () => {
-        if (!boardState.playerNames.length || boardState.isTutorial || window.confirm("現在の内容を消去して、新しい名前リストを設定しますか？")) {
-            const newNameStringList = parsePlayerNames(nameText);
-            setNameStringList(newNameStringList);
-            const nextState = boardReducer(boardState, {
-                ...initializeBoard(newNameStringList, FeignTool.ActionsNameList),
-            });
-            commitState(nextState);
-            setTableRevision((revision) => revision + 1);
-            PopupWin(1, nextState);
-        } else if (window.confirm("名前リストを更新しますか？（名前が削除・変更されたデータは消去されます）")) {
-            const newNameStringList = parsePlayerNames(nameText);
-            const nextState = boardReducer(
-                { ...boardState, board: data, playerNames: nameStringList },
-                setPlayerNames(newNameStringList),
-            );
-            setNameStringList(newNameStringList);
-            commitState(nextState);
-            setTableRevision((revision) => revision + 1);
-            PopupWin(nextState.dayCount, nextState);
-        }
-    }
+    const nameActions = useNameBoardActions({ boardState, data, playerNames: TUTORIAL_PLAYER_NAMES, eventRows: FeignTool.ActionsNameList, commitState, sendPopup: PopupWin, setTableRevision, windowObject: window });
     const toolbarActions = useBoardToolbarActions({ applyAction: applyBoardAction, sendPopup: PopupWin });
-    const onClickReset = () => {
-        if (window.confirm("入力内容をリセットしますか？")) {
-            const nextState = boardReducer({ ...boardState, board: data }, resetBoard(FeignTool.ActionsNameList));
-            commitState(nextState);
-            PopupWin(1, nextState);
-            return;
-        }
-        PopupWin(1);
-    };
     const onOpenPopup = () => {
         popupWindowController.open(() => PopupWin(boardState.dayCount));
     };
@@ -124,15 +86,15 @@ const FeignSupportToolRoot = () => {
             </div>
             <MemoArea />
             <NameInputPanel
-                nameText={nameText}
-                onNameTextChange={onChangeText}
+                nameText={nameActions.nameText}
+                onNameTextChange={nameActions.onNameTextChange}
                 onOpenPopup={onOpenPopup}
                 playerIsIcon={PlayerIsIcon}
                 nameIsIcon={NameIsIcon}
                 onPlayerIconChange={toolbarActions.onPlayerIconChange}
                 onNameIconChange={toolbarActions.onNameIconChange}
-                onSetNames={onClickButton}
-                onReset={onClickReset}
+                onSetNames={nameActions.onSetNames}
+                onReset={nameActions.onReset}
             />
         </div>
 
