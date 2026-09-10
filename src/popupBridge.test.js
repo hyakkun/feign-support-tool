@@ -1,4 +1,4 @@
-import { createBoardState } from "./boardState";
+import { createBoardState } from "./board/state/boardState";
 import { sendPopupSnapshot } from "./popupBridge";
 
 test("sends a derived board snapshot to an open popup window", () => {

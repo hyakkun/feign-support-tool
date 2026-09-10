@@ -1,6 +1,6 @@
 import { useCallback } from "react";
-import { BOARD_ACTION } from "./boardReducer";
-import { createCellSaveActions } from "./boardActionSequence";
+import { BOARD_ACTION } from "../boardReducer";
+import { createCellSaveActions } from "../boardActionSequence";
 
 export const useBoardCellActions = ({ applyAction, applyActions, config, hasPopup, sendPopup, setTableRevision }) => {
   const onColorChange = useCallback((playerName, color) => {

@@ -1,5 +1,5 @@
 import { BOARD_ACTION, boardReducer } from "./boardReducer";
-import { deathRoleRecordsFromEventCell, isDeathEventLabel } from "./board/model/eventRows";
+import { deathRoleRecordsFromEventCell, isDeathEventLabel } from "../model/eventRows";
 
 export const applyBoardActions = (state, actions) => actions.reduce(boardReducer, state);
 

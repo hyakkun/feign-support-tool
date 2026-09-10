@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { addDay, addMemoRow, setDisplayOption } from "./boardCommands";
+import { addDay, addMemoRow, setDisplayOption } from "../boardCommands";
 
 export const useBoardToolbarActions = ({ applyAction, sendPopup }) => ({
   onAddDay: useCallback(() => { const state = applyAction(addDay()); sendPopup(state.dayCount, state); }, [applyAction, sendPopup]),

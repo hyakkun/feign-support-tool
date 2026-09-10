@@ -1,4 +1,4 @@
-import { createBoardState } from "../../boardState";
+import { createBoardState } from "../state/boardState";
 import { createBoardTableSetup } from "./boardTableSetup";
 
 test("creates runtime-backed table definitions from board configuration", () => {

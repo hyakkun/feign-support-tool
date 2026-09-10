@@ -4,18 +4,18 @@ import {
     createBoardState,
     selectTableColumns,
     selectTableData,
-} from "./boardState";
-import { boardReducer } from "./boardReducer";
+} from "./board/state/boardState";
+import { boardReducer } from "./board/state/boardReducer";
 import { BoardTable } from "./board/table/BoardTable";
 import { NameInputPanel } from "./NameInputPanel";
 import { TUTORIAL_PLAYER_NAMES, TUTORIAL_ROWS } from "./board/model/tutorialBoardData";
 import { createBoardTableSetup } from "./board/table/boardTableSetup";
-import { useBoardStateCommit } from "./useBoardStateCommit";
+import { useBoardStateCommit } from "./board/state/hooks/useBoardStateCommit";
 import { createPopupWindowController } from "./popupWindowController";
 import { MemoArea } from "./MemoArea";
-import { useBoardToolbarActions } from "./useBoardToolbarActions";
-import { useNameBoardActions } from "./useNameBoardActions";
-import { useBoardCellActions } from "./useBoardCellActions";
+import { useBoardToolbarActions } from "./board/state/hooks/useBoardToolbarActions";
+import { useNameBoardActions } from "./board/state/hooks/useNameBoardActions";
+import { useBoardCellActions } from "./board/state/hooks/useBoardCellActions";
 import { usePopupActions } from "./usePopupActions";
 import './index.scss';
 

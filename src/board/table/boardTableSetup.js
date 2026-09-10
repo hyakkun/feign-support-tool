@@ -2,7 +2,7 @@ import { createBoardConfig } from "../model/boardConfig";
 import { createLegacyRoleToken } from "../model/roleCatalog";
 import { fixedDeathRoleIdForEventLabel } from "../model/eventRows";
 import { createBoardTableFormatters } from "./boardTableFormatters";
-import { createLegacyBoardRuntime } from "../../legacyBoardRuntime";
+import { createLegacyBoardRuntime } from "../state/legacyBoardRuntime";
 import { sortCellItems } from "./boardColumnSorts";
 import { createDayColumnDefinitions } from "./dayColumnDefinitions";
 import { createIdentityColumnDefinitions } from "./identityColumnDefinitions";
