@@ -1,4 +1,6 @@
-# 公開版との差分と基準機能
+# 公開版差分の調査記録
+
+> この文書は回復フェーズで実施した比較の記録である。記載したブランチ・コミットは調査時点の参照情報であり、現在の仕様や作業優先度を表すものではない。現行の設計は [盤面状態アーキテクチャ](../design/board-state-architecture.md) と [盤面データモデル](../design/domain-model.md)、後続作業は [Quality Foundation 後続作業ロードマップ](quality-foundation-roadmap.md) を参照する。
 
 ## 参照した版
 

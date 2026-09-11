@@ -118,6 +118,8 @@ usePopupActions ──> popupWindowController / popupBridge
 3. React、`react-scripts`、その他の古い依存関係は、互換性調査、更新方針の決定、段階更新に分けて扱う。build 時の Node 非推奨警告と Browserslist 更新通知もこの課題に含める。
 4. `legacyBoardRuntime` は editor・formatter が legacy getter を必要としなくなった時点で削除候補とする。先に UI の props 契約を保ったまま置換範囲を見極める。
 
+各課題の推奨ブランチ、優先度、着手条件、完了条件は [Quality Foundation 後続作業ロードマップ](../plans/quality-foundation-roadmap.md) に定義する。
+
 ## テーブル実装の方針
 
 盤面はネイティブ `BoardTable` で表示する。状態管理と盤面操作はテーブル実装から独立しているため、列のリサイズ、フィルタ、ページングなどの汎用機能が必要になった場合に限り、headless なテーブルライブラリを比較対象とする。
