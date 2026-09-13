@@ -50,6 +50,13 @@ Create React App は公式に新規利用非推奨となり、アクティブな
 
 この段階では React の major、`user-event` 14、`gh-pages` 6、build tool は更新しない。更新ごとに lockfile をコミットし、選択 UI、色・役職入力、popup をブラウザで確認する。
 
+#### 実施記録: `react-scripts` 5.0.1（2026-09-13）
+
+- `react-scripts` を 5.0.0 から 5.0.1 へ更新した。
+- npm が `eslint-plugin-jest` 25.7.0 を解決すると、CRA が使用する ESLint 8.6.0 で `Environment key "jest/globals" is unknown` が発生した。既知の 25.7.0 の互換性問題であるため、`package.json` の `overrides` により 25.6.0 を固定した。これは CRA 5.0.1 の許容範囲内であり、直接依存には追加していない。
+- `CI=true npm test -- --watchAll=false` は 32 スイート・77 件、`npm run build` は成功した。盤面、名前・色、役職・行動、自爆・道連れ、popup、リセットをブラウザで確認済みである。
+- `npm audit --omit=dev` は 87 件から 80 件へ減少した。ただし CRA / webpack 系の根本的な解消は Vite 移行まで持ち越す。`fs.F_OK` の Node 非推奨警告も残る。
+
 ### 2. GitHub Pages リリース補助の更新
 
 候補ブランチ: `chore/gh-pages-v6`
