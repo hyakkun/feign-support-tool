@@ -34,6 +34,8 @@ feature/quality-foundation
 
 完了条件は、workflow が GitHub 上で成功し、`quality-foundation` と将来の `master` / `gh-pages` 向け ruleset に必要な status check として設定できる状態になることとする。ruleset の UI 設定変更はリポジトリ内の workflow 追加とは別に扱う。
 
+**状態（2026-09-13）:** `Verify / test-and-build` の GitHub Actions 実行が成功した。workflow は `feature/quality-foundation` へ統合済みであり、ruleset の必須 status check 設定は必要な保護対象を決めた時点で行う。
+
 ### `feature/quality-integration-tests`
 
 現在の reducer・純粋関数・個別 UI 部品のテストを補完し、複数 UI 部品をまたぐ回帰を自動化する。優先するシナリオは次のとおり。
