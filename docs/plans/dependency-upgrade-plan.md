@@ -11,7 +11,7 @@
 ### 実行環境と直接依存
 
 - Node は `mise.toml` と CI で **24.14.0** に固定している。現 lockfile で `npm ci`、全テスト、production build は成功している。
-- React / React DOM は 17.0.2、`react-scripts` は 5.0.0、Sass は 1.47.0 である。
+- React / React DOM は 17.0.2、`react-scripts` は 5.0.1、`react-select` は 5.10.2、`react-transition-group` は 4.4.5、Sass は 1.47.0 である。
 - Testing Library は React 17 と互換の `@testing-library/react` 12 系で固定されている。公式 README でも 13 以降は React 18 を要し、React 17 以下では 12 系を使うよう案内されている。[React Testing Library README](https://github.com/testing-library/react-testing-library/blob/main/README.md)
 - `npm outdated` 時点で、互換範囲内の候補は `react-scripts` 5.0.1、`react-select` 5.10.2、`react-transition-group` 4.4.5、Sass 1.104.1、Testing Library の一部 patch である。React、`gh-pages`、`user-event`、Testing Library の最新 major は互換性確認を要する。
 
@@ -63,6 +63,13 @@ Create React App は公式に新規利用非推奨となり、アクティブな
 - `CI=true npm test -- --watchAll=false` は 32 スイート・77 件、`npm run build` は成功した。
 - 役職・行動・対象・死亡役職・色の選択 UI、陣営切替、自爆・道連れ、候補一覧の開閉・選択後のセル終了、popup をブラウザで確認済みである。
 - `npm audit --omit=dev` は 80 件から 79 件へ減少した。gzip 後の JavaScript bundle は約 3.05 kB 増加したため、以後の UI ライブラリ更新でも build サイズを確認する。
+
+#### 実施記録: `react-transition-group` 4.4.5（2026-09-13）
+
+- `react-transition-group` を 4.4.2 から 4.4.5 へ更新した。ほかの直接依存は同時に更新していない。
+- ブラウザ確認で、色列・名前列の編集メニューだけがテーブル外のクリックで閉じない回帰を検出した。両 editor に、既存の役職・死亡役職 editor と同じ `onMenuClose` によるセル編集終了処理を追加した。
+- Root の end-to-end テストに、色列・名前列でフォーカスを失ったときにメニューが閉じるシナリオを追加した。`CI=true npm test -- --watchAll=false` は 32 スイート・79 件、`npm run build` は成功した。
+- 色・名前のメニューをテーブル外クリックで閉じられること、および選択時に従来どおり値が反映されて閉じることをブラウザで確認済みである。`npm audit --omit=dev` の報告件数は 79 件のまま変化しない。
 
 ### 2. GitHub Pages リリース補助の更新
 
