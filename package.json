@@ -14,7 +14,7 @@
     "react-scripts": "5.0.1",
     "react-select": "^5.10.2",
     "react-transition-group": "^4.4.5",
-    "sass": "^1.47.0"
+    "sass": "^1.104.1"
   },
   "scripts": {
     "start": "react-scripts start",

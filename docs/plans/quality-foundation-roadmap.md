@@ -65,7 +65,7 @@ feature/quality-foundation
 
 実際の更新は、依存グループごとに別ブランチへ分割する。各更新では `package-lock.json` を更新し、テスト・ビルド・ブラウザ確認を必須とする。
 
-**状態（2026-09-13）:** [依存関係更新計画](./dependency-upgrade-plan.md) を作成し、直接依存の小規模更新として `react-scripts` 5.0.1、`react-select` 5.10.2、`react-transition-group` 4.4.5 を適用した。各更新のテスト、build、ブラウザ確認は完了している。`react-transition-group` 更新時に検出した色列・名前列のメニュー終了回帰は、Root の end-to-end テストを追加して修正済みである。次は Sass または React 17 向け Testing Library patch を一つずつ更新する。
+**状態（2026-09-13）:** [依存関係更新計画](./dependency-upgrade-plan.md) を作成し、直接依存の小規模更新として `react-scripts` 5.0.1、`react-select` 5.10.2、`react-transition-group` 4.4.5、Sass 1.104.1 を適用した。各更新のテスト、build、ブラウザ確認は完了している。`react-transition-group` 更新時に検出した色列・名前列のメニュー終了回帰は、Root の end-to-end テストを追加して修正済みである。次は React 17 向け Testing Library patch を一つずつ更新する。
 
 ## 優先度 3: legacy 互換境界の縮小
 

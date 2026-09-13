@@ -11,7 +11,7 @@
 ### 実行環境と直接依存
 
 - Node は `mise.toml` と CI で **24.14.0** に固定している。現 lockfile で `npm ci`、全テスト、production build は成功している。
-- React / React DOM は 17.0.2、`react-scripts` は 5.0.1、`react-select` は 5.10.2、`react-transition-group` は 4.4.5、Sass は 1.47.0 である。
+- React / React DOM は 17.0.2、`react-scripts` は 5.0.1、`react-select` は 5.10.2、`react-transition-group` は 4.4.5、Sass は 1.104.1 である。
 - Testing Library は React 17 と互換の `@testing-library/react` 12 系で固定されている。公式 README でも 13 以降は React 18 を要し、React 17 以下では 12 系を使うよう案内されている。[React Testing Library README](https://github.com/testing-library/react-testing-library/blob/main/README.md)
 - `npm outdated` 時点で、互換範囲内の候補は `react-scripts` 5.0.1、`react-select` 5.10.2、`react-transition-group` 4.4.5、Sass 1.104.1、Testing Library の一部 patch である。React、`gh-pages`、`user-event`、Testing Library の最新 major は互換性確認を要する。
 
@@ -70,6 +70,13 @@ Create React App は公式に新規利用非推奨となり、アクティブな
 - ブラウザ確認で、色列・名前列の編集メニューだけがテーブル外のクリックで閉じない回帰を検出した。両 editor に、既存の役職・死亡役職 editor と同じ `onMenuClose` によるセル編集終了処理を追加した。
 - Root の end-to-end テストに、色列・名前列でフォーカスを失ったときにメニューが閉じるシナリオを追加した。`CI=true npm test -- --watchAll=false` は 32 スイート・79 件、`npm run build` は成功した。
 - 色・名前のメニューをテーブル外クリックで閉じられること、および選択時に従来どおり値が反映されて閉じることをブラウザで確認済みである。`npm audit --omit=dev` の報告件数は 79 件のまま変化しない。
+
+#### 実施記録: Sass 1.104.1（2026-09-13）
+
+- Sass を 1.47.0 から 1.104.1 へ更新した。Node 24.14.0 は Sass 1.104.1 の要件（20.19.0 以上）を満たす。
+- Sass が採用する `chokidar` 5、`immutable` 5、および任意依存の `@parcel/watcher`（OS 別バイナリを含む）が lockfile に加わった。これらは Sass の更新に伴う推移依存であり、ほかの直接依存は更新していない。
+- `CI=true npm test -- --watchAll=false` は 32 スイート・79 件、`npm run build` は成功した。gzip 後の JavaScript / CSS bundle サイズに変化はなかった。
+- 盤面、各セレクト、popup を含むスタイル表示をブラウザで確認済みである。`npm audit --omit=dev` の報告件数は 79 件から 78 件へ減少した。
 
 ### 2. GitHub Pages リリース補助の更新
 
