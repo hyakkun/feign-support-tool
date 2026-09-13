@@ -27,7 +27,7 @@ feature/quality-foundation
 
 リポジトリには GitHub Actions workflow がないため、PR 前提の運用でも test/build がローカル確認だけに依存している。GitHub Actions を追加し、push と pull request で次を実行する。
 
-1. `.nvmrc` に従う Node を用意する。
+1. `mise.toml` で固定している Node 24.14.0 を用意する。
 2. `npm ci` で lockfile どおりに依存関係を復元する。
 3. `CI=true npm test -- --watchAll=false` を実行する。
 4. `npm run build` を実行する。
