@@ -65,6 +65,8 @@ feature/quality-foundation
 
 実際の更新は、依存グループごとに別ブランチへ分割する。各更新では `package-lock.json` を更新し、テスト・ビルド・ブラウザ確認を必須とする。
 
+**状態（2026-09-13）:** [依存関係更新計画](./dependency-upgrade-plan.md) を作成した。調査・文書化が完了した後は、直接依存の小規模更新、React 18 とテスト基盤、CRA から Vite への移行を、それぞれ別ブランチで進める。
+
 ## 優先度 3: legacy 互換境界の縮小
 
 ### `refactor/legacy-runtime-boundary`

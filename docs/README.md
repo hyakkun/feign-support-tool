@@ -11,6 +11,7 @@
 ## 計画・調査記録 (`plans/`)
 
 - [Quality Foundation 後続作業ロードマップ](plans/quality-foundation-roadmap.md): 派生ブランチ、優先度、着手条件、完了条件。
+- [依存関係更新計画](plans/dependency-upgrade-plan.md): 調査結果、更新順序、互換性確認、CRA からの移行方針。
 - [公開版差分の調査記録](plans/published-version-analysis.md): 回復フェーズでの公開版との差分調査。現行仕様ではなく、判断の背景資料として参照する。
 
 ## ポリシー (`policies/`)
