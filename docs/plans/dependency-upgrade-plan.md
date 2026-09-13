@@ -57,6 +57,13 @@ Create React App は公式に新規利用非推奨となり、アクティブな
 - `CI=true npm test -- --watchAll=false` は 32 スイート・77 件、`npm run build` は成功した。盤面、名前・色、役職・行動、自爆・道連れ、popup、リセットをブラウザで確認済みである。
 - `npm audit --omit=dev` は 87 件から 80 件へ減少した。ただし CRA / webpack 系の根本的な解消は Vite 移行まで持ち越す。`fs.F_OK` の Node 非推奨警告も残る。
 
+#### 実施記録: `react-select` 5.10.2（2026-09-13）
+
+- `react-select` を 5.2.1 から 5.10.2 へ更新した。`react-transition-group` はこの時点では 4.4.2 のままとした。
+- `CI=true npm test -- --watchAll=false` は 32 スイート・77 件、`npm run build` は成功した。
+- 役職・行動・対象・死亡役職・色の選択 UI、陣営切替、自爆・道連れ、候補一覧の開閉・選択後のセル終了、popup をブラウザで確認済みである。
+- `npm audit --omit=dev` は 80 件から 79 件へ減少した。gzip 後の JavaScript bundle は約 3.05 kB 増加したため、以後の UI ライブラリ更新でも build サイズを確認する。
+
 ### 2. GitHub Pages リリース補助の更新
 
 候補ブランチ: `chore/gh-pages-v6`

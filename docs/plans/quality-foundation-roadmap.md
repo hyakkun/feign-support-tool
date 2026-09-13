@@ -65,7 +65,7 @@ feature/quality-foundation
 
 実際の更新は、依存グループごとに別ブランチへ分割する。各更新では `package-lock.json` を更新し、テスト・ビルド・ブラウザ確認を必須とする。
 
-**状態（2026-09-13）:** [依存関係更新計画](./dependency-upgrade-plan.md) を作成し、最初の小規模更新として `react-scripts` 5.0.1 を適用した。テスト、build、ブラウザ確認は完了している。次は他の直接依存を一つずつ更新するか、React 18 とテスト基盤の更新へ進む。
+**状態（2026-09-13）:** [依存関係更新計画](./dependency-upgrade-plan.md) を作成し、直接依存の小規模更新として `react-scripts` 5.0.1 と `react-select` 5.10.2 を適用した。各更新のテスト、build、ブラウザ確認は完了している。次は `react-transition-group`、Sass、React 17 向け Testing Library patch のいずれかを一つずつ更新する。
 
 ## 優先度 3: legacy 互換境界の縮小
 
