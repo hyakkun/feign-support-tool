@@ -12,7 +12,7 @@
 
 - Node は `mise.toml` と CI で **24.14.0** に固定している。現 lockfile で `npm ci`、全テスト、production build は成功している。
 - React / React DOM は 17.0.2、`react-scripts` は 5.0.1、`react-select` は 5.10.2、`react-transition-group` は 4.4.5、Sass は 1.104.1 である。
-- Testing Library は React 17 と互換の `@testing-library/react` 12 系で固定されている。公式 README でも 13 以降は React 18 を要し、React 17 以下では 12 系を使うよう案内されている。[React Testing Library README](https://github.com/testing-library/react-testing-library/blob/main/README.md)
+- Testing Library は React 17 と互換の `@testing-library/react` 12.1.5、`@testing-library/jest-dom` 5.17.0、`@testing-library/user-event` 13.5.0 を使用している。公式 README でも 13 以降は React 18 を要し、React 17 以下では 12 系を使うよう案内されている。[React Testing Library README](https://github.com/testing-library/react-testing-library/blob/main/README.md)
 - `npm outdated` 時点で、互換範囲内の候補は `react-scripts` 5.0.1、`react-select` 5.10.2、`react-transition-group` 4.4.5、Sass 1.104.1、Testing Library の一部 patch である。React、`gh-pages`、`user-event`、Testing Library の最新 major は互換性確認を要する。
 
 ### ツールチェーンのリスク
@@ -77,6 +77,13 @@ Create React App は公式に新規利用非推奨となり、アクティブな
 - Sass が採用する `chokidar` 5、`immutable` 5、および任意依存の `@parcel/watcher`（OS 別バイナリを含む）が lockfile に加わった。これらは Sass の更新に伴う推移依存であり、ほかの直接依存は更新していない。
 - `CI=true npm test -- --watchAll=false` は 32 スイート・79 件、`npm run build` は成功した。gzip 後の JavaScript / CSS bundle サイズに変化はなかった。
 - 盤面、各セレクト、popup を含むスタイル表示をブラウザで確認済みである。`npm audit --omit=dev` の報告件数は 79 件から 78 件へ減少した。
+
+#### 実施記録: React 17 向け Testing Library patch（2026-09-13）
+
+- `@testing-library/jest-dom` を 5.16.1 から 5.17.0、`@testing-library/react` を 12.1.2 から 12.1.5 へ更新した。`@testing-library/user-event` 13.5.0 はすでに React 17 互換範囲の最終版であるため変更していない。
+- `@testing-library/react` 12.1.5 の peer dependency は React / React DOM 18 未満であり、React 17.0.2 と整合する。lockfile では旧 `css` 系の推移依存が削除され、新しい CSS parser と React DOM 型定義が追加された。
+- `CI=true npm test -- --watchAll=false` は 32 スイート・79 件、`npm run build` は成功した。bundle サイズに変化はない。テスト実行時のみの依存更新でアプリ実行コード・生成物に変更がないため、ブラウザ確認は追加していない。
+- `npm audit --omit=dev` の報告件数は 78 件から 74 件へ減少した。
 
 ### 2. GitHub Pages リリース補助の更新
 
