@@ -9,6 +9,7 @@ export const sendPopupSnapshot = ({ popupWindow, state, day, origin }) => {
     tableData: JSON.parse(JSON.stringify(snapshot.tableData)),
     colorNameDic: JSON.parse(JSON.stringify(snapshot.colorNameDic)),
     playerEvents: snapshot.playerEvents,
+    playerEventsByDay: snapshot.playerEventsByDay,
     day: snapshot.day,
   }, origin);
   return true;

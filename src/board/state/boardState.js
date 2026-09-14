@@ -42,9 +42,19 @@ export const selectTableColumns = (state, tableDefinition) => {
   return [...baseColumns, ...dayColumns];
 };
 
-export const selectPopupSnapshot = (state, day) => ({
-  tableData: selectTableData(state),
-  colorNameDic: selectColorByPlayerName(state),
-  playerEvents: popupEventsByPlayerName(state.board, day),
-  day,
-});
+export const selectPopupSnapshot = (state, day) => {
+  const playerEventsByDay = Object.fromEntries(
+    Array.from({ length: day }, (_, index) => {
+      const eventDay = index + 1;
+      return [eventDay, popupEventsByPlayerName(state.board, eventDay)];
+    }),
+  );
+
+  return {
+    tableData: selectTableData(state),
+    colorNameDic: selectColorByPlayerName(state),
+    playerEvents: playerEventsByDay[day],
+    playerEventsByDay,
+    day,
+  };
+};
