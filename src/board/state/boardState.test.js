@@ -13,6 +13,7 @@ test("derives legacy table, options, colors, and popup data from one board state
   expect(selectPopupSnapshot(state, 1)).toMatchObject({
     colorNameDic: { "アリス": ["yellow", "#ffe352"] },
     playerEvents: { "アリス": ["自爆"] },
+    playerEventsByDay: { 1: { "アリス": ["自爆"] } },
     day: 1,
   });
 });

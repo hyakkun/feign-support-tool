@@ -3,7 +3,7 @@ export const createPopupWindowController = ({ windowObject, publicUrl }) => {
 
   return {
     open(onReady) {
-      popupWindow = windowObject.open(`${publicUrl}/popup.html`, "FeignTool_popupWindow", "width=1000, height=300");
+      popupWindow = windowObject.open(`${publicUrl}/popup.html`, "FeignTool_popupWindow", "width=320, height=300");
       const waitForReady = () => {
         if (!popupWindow || popupWindow.closed) return;
         if (popupWindow.document.readyState !== "complete") {

@@ -16,6 +16,7 @@ test("sends a derived board snapshot to an open popup window", () => {
     tableData: state.board,
     colorNameDic: { "アリス": ["yellow", "#ffe352"] },
     playerEvents: { "アリス": ["自爆"] },
+    playerEventsByDay: { 1: { "アリス": ["自爆"] } },
     day: 1,
   }), "https://example.test");
 });
