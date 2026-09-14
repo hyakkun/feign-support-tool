@@ -15,7 +15,7 @@ const playerNamesInRenderedOrder = () => [...document.querySelectorAll("tbody tr
 
 describe("FeignSupportToolRoot end-to-end cell editing", () => {
   beforeEach(() => {
-    jest.spyOn(window, "confirm").mockReturnValue(true);
+    vi.spyOn(window, "confirm").mockReturnValue(true);
   });
 
   afterEach(() => {
@@ -62,5 +62,27 @@ describe("FeignSupportToolRoot end-to-end cell editing", () => {
 
     fireEvent.click(colorOptions[0]);
     expect(screen.getByAltText("名前例の色")).toHaveAttribute("src", expect.stringContaining("/icon/White.png"));
+  });
+
+  test("closes the color editor when clicking outside the table", () => {
+    render(<FeignSupportToolRoot />);
+
+    const firstPlayerRow = document.querySelector("tbody tr");
+    fireEvent.click(firstPlayerRow.cells[0]);
+    expect(document.querySelectorAll('[id^="react-select-"][id*="-option-"]')).not.toHaveLength(0);
+
+    fireEvent.blur(document.querySelector('input[role="combobox"]'));
+    expect(document.querySelectorAll('[id^="react-select-"][id*="-option-"]')).toHaveLength(0);
+  });
+
+  test("closes the name editor when clicking outside the table", () => {
+    render(<FeignSupportToolRoot />);
+
+    const firstPlayerRow = document.querySelector("tbody tr");
+    fireEvent.click(firstPlayerRow.cells[1]);
+    expect(document.querySelectorAll('[id^="react-select-"][id*="-option-"]')).not.toHaveLength(0);
+
+    fireEvent.blur(document.querySelector('input[role="combobox"]'));
+    expect(document.querySelectorAll('[id^="react-select-"][id*="-option-"]')).toHaveLength(0);
   });
 });

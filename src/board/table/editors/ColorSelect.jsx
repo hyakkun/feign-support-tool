@@ -59,6 +59,7 @@ export class ColorSelect extends React.Component {
         options={this.props.options.map((option) => ({ value: option, label: "　" }))}
         menuIsOpen
         autoFocus
+        onMenuClose={() => onUpdate(this.getValue())}
         styles={customStyles}
       />
     );

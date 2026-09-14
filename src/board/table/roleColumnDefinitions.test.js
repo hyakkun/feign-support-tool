@@ -4,7 +4,7 @@ test("creates role and dead-role columns with shared editor settings", () => {
   const columns = createRoleColumnDefinitions({
     config: { role: [], br: {} },
     columnTemplate: { editable: true, sort: true },
-    formatters: { cellFormatter: jest.fn(() => jest.fn()) },
+    formatters: { cellFormatter: vi.fn(() => vi.fn()) },
   });
 
   expect(columns.map((column) => column.dataField)).toEqual(["role", "deadRole"]);

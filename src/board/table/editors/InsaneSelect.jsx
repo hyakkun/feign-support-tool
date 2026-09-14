@@ -39,6 +39,6 @@ export class InsaneSelect extends React.Component {
         const selected = this.state.insane ? insaneRoleOptions[option.index] : option;
         return { value: selected.roletypeNum, label: selected.name };
       })}
-      menuIsOpen autoFocus styles={styles} components={{ Option: optionRenderer }} />;
+      menuIsOpen autoFocus onMenuClose={() => onUpdate(this.getValue())} styles={styles} components={{ Option: optionRenderer }} />;
   }
 }

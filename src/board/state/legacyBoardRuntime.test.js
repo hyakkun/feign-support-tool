@@ -7,7 +7,7 @@ test("derives legacy table values from the synchronized board state", () => {
     playerNames: ["アリス"],
   });
   const runtime = createLegacyBoardRuntime({ initialState, actionType: { name: 2 } });
-  const colorHandler = jest.fn();
+  const colorHandler = vi.fn();
   runtime.setColorChangeHandler(colorHandler);
 
   expect(runtime.getTableData()).toBe(initialState.board);

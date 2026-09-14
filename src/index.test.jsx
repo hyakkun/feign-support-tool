@@ -1,9 +1,20 @@
-import { fireEvent, screen } from "@testing-library/react";
-
-document.body.innerHTML = '<div id="root"></div>';
-require("./index");
+import { act, fireEvent, screen } from "@testing-library/react";
+import { mountFeignSupportTool } from "./app/bootstrap";
 
 describe("display options", () => {
+  let root;
+
+  beforeEach(() => {
+    document.body.innerHTML = '<div id="root"></div>';
+    act(() => {
+      root = mountFeignSupportTool(document.getElementById("root"));
+    });
+  });
+
+  afterEach(() => {
+    act(() => root.unmount());
+  });
+
   test("updates existing color cells when the name icon option is toggled", () => {
     const checkbox = screen.getByLabelText("名前欄アイコン");
 

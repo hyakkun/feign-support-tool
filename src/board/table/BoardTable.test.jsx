@@ -3,8 +3,8 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { BoardTable, createRowStyle } from "./BoardTable";
 
 test("forwards table save and memo actions through the adapter contract", () => {
-  const onCellSave = jest.fn();
-  const onAddMemo = jest.fn();
+  const onCellSave = vi.fn();
+  const onAddMemo = vi.fn();
   const row = { id: 0, keyid: 0, action_day1: [] };
   const column = {
     text: "行動",
@@ -33,7 +33,7 @@ test("derives event and player row backgrounds from role labels", () => {
 });
 
 test("keeps the selected sort order when an edited board is rendered again", () => {
-  const onCellSave = jest.fn();
+  const onCellSave = vi.fn();
   const rows = [
     { id: 1, keyid: 1, name: ["Bravo", 0], note: "before" },
     { id: 2, keyid: 2, name: ["Alpha", 0], note: "before" },
@@ -49,7 +49,7 @@ test("keeps the selected sort order when an edited board is rendered again", () 
     },
   ];
   const { container, rerender } = render(
-    <BoardTable data={rows} columns={columns} tableKey="board" onCellSave={onCellSave} roleLabelBgColor={[]} onAddMemo={jest.fn()} />,
+    <BoardTable data={rows} columns={columns} tableKey="board" onCellSave={onCellSave} roleLabelBgColor={[]} onAddMemo={vi.fn()} />,
   );
 
   fireEvent.click(screen.getByText("名前"));
@@ -66,7 +66,7 @@ test("keeps the selected sort order when an edited board is rendered again", () 
       tableKey="board"
       onCellSave={onCellSave}
       roleLabelBgColor={[]}
-      onAddMemo={jest.fn()}
+      onAddMemo={vi.fn()}
     />,
   );
   expect([...container.querySelectorAll("tbody tr")].map((row) => row.cells[0].textContent)).toEqual(["Alpha", "Bravo"]);
