@@ -1,9 +1,6 @@
 import React from "react";
-import ReactDOM from "react-dom";
+import { createRoot } from "react-dom/client";
 import { FeignSupportToolRoot } from "./FeignSupportToolRoot";
 import "../styles/index.scss";
 
-ReactDOM.render(
-  <FeignSupportToolRoot />,
-  document.getElementById("root")
-);
+createRoot(document.getElementById("root")).render(<FeignSupportToolRoot />);

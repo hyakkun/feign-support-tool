@@ -1,7 +1,9 @@
-import { fireEvent, screen } from "@testing-library/react";
+import { act, fireEvent, screen } from "@testing-library/react";
 
 document.body.innerHTML = '<div id="root"></div>';
-require("./index");
+act(() => {
+  require("./index");
+});
 
 describe("display options", () => {
   test("updates existing color cells when the name icon option is toggled", () => {

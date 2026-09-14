@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { Transition } from "react-transition-group";
 
 const MoveItem = ({ num, startId, endId, item }) => {
   const [animate, setAnimate] = useState(true);
+  const nodeRef = useRef(null);
   const startTransform = `translate(${1.67 * num}rem,0)`;
   const endTransform = () => {
     const startElement = document.getElementById(startId);
@@ -15,8 +16,8 @@ const MoveItem = ({ num, startId, endId, item }) => {
   };
 
   return (
-    <Transition in={animate} appear timeout={{ enter: 10, exit: 1100 }} unmountOnExit onEntered={() => setAnimate(false)}>
-      {(state) => <span className="moveItem" style={{ transform: state === "entering" ? startTransform : endTransform() }}>{item}</span>}
+    <Transition nodeRef={nodeRef} in={animate} appear timeout={{ enter: 10, exit: 1100 }} unmountOnExit onEntered={() => setAnimate(false)}>
+      {(state) => <span ref={nodeRef} className="moveItem" style={{ transform: state === "entering" ? startTransform : endTransform() }}>{item}</span>}
     </Transition>
   );
 };

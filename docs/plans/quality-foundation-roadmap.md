@@ -13,6 +13,7 @@ feature/quality-foundation
 ├─ feature/quality-ci                 # 継続的な test/build 実行
 ├─ feature/quality-integration-tests  # 複数 UI をまたぐ回帰テスト
 ├─ chore/dependency-upgrade-plan       # 更新方針と互換性調査
+├─ upgrade/react-18-test-stack         # React 18・テスト基盤更新
 ├─ refactor/legacy-runtime-boundary    # legacyBoardRuntime の縮小・撤去
 └─ feature/board-persistence           # 保存・共有を決めた後だけ作成
 ```
@@ -54,7 +55,7 @@ feature/quality-foundation
 
 ### `chore/dependency-upgrade-plan`
 
-`package.json` の React 17、`react-scripts` 5、周辺ライブラリを対象に、更新前に互換性調査と移行順序を文書化する。特に Node 24.14.0、テスト基盤、Sass、GitHub Pages のビルド・デプロイへの影響を確認する。
+`package.json` の React、`react-scripts` 5、周辺ライブラリを対象に、更新前に互換性調査と移行順序を文書化する。特に Node 24.14.0、テスト基盤、Sass、GitHub Pages のビルド・デプロイへの影響を確認する。
 
 このブランチでは依存パッケージを更新しない。次を決めるための調査・文書化だけを行う。
 
@@ -65,7 +66,7 @@ feature/quality-foundation
 
 実際の更新は、依存グループごとに別ブランチへ分割する。各更新では `package-lock.json` を更新し、テスト・ビルド・ブラウザ確認を必須とする。
 
-**状態（2026-09-13）:** [依存関係更新計画](./dependency-upgrade-plan.md) を作成し、直接依存の小規模更新として `react-scripts` 5.0.1、`react-select` 5.10.2、`react-transition-group` 4.4.5、Sass 1.104.1、React 17 向け Testing Library patch を適用した。各更新のテストと build は完了し、実行コードに影響する更新はブラウザ確認も完了している。`react-transition-group` 更新時に検出した色列・名前列のメニュー終了回帰は、Root の end-to-end テストを追加して修正済みである。直接依存の小規模更新は完了したため、次は `gh-pages` 6 のリリース方式を決めるか、React 18 / テスト基盤更新の準備に進む。
+**状態（2026-09-14）:** [依存関係更新計画](./dependency-upgrade-plan.md) に従い、直接依存の小規模更新と React 18 / テスト基盤更新を完了した。React 18.3.1 の `createRoot` 移行、Testing Library 15 / user-event 14 / jest-dom 6 への更新、死亡役職アニメーションの `findDOMNode` 警告解消を含む。全テスト・build と主要操作のブラウザ確認は成功している。次は `gh-pages` 6 のリリース方式を決めるか、Vite 移行の準備に進む。
 
 ## 優先度 3: legacy 互換境界の縮小
 

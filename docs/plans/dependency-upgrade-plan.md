@@ -6,14 +6,14 @@
 
 対象は、React、`react-scripts`、テスト基盤、Sass、`react-select`、`react-transition-group`、`gh-pages` と、その推移依存である。
 
-## 現状（2026-09-13）
+## 現状（2026-09-14）
 
 ### 実行環境と直接依存
 
 - Node は `mise.toml` と CI で **24.14.0** に固定している。現 lockfile で `npm ci`、全テスト、production build は成功している。
-- React / React DOM は 17.0.2、`react-scripts` は 5.0.1、`react-select` は 5.10.2、`react-transition-group` は 4.4.5、Sass は 1.104.1 である。
-- Testing Library は React 17 と互換の `@testing-library/react` 12.1.5、`@testing-library/jest-dom` 5.17.0、`@testing-library/user-event` 13.5.0 を使用している。公式 README でも 13 以降は React 18 を要し、React 17 以下では 12 系を使うよう案内されている。[React Testing Library README](https://github.com/testing-library/react-testing-library/blob/main/README.md)
-- `npm outdated` 時点で、互換範囲内の候補は `react-scripts` 5.0.1、`react-select` 5.10.2、`react-transition-group` 4.4.5、Sass 1.104.1、Testing Library の一部 patch である。React、`gh-pages`、`user-event`、Testing Library の最新 major は互換性確認を要する。
+- React / React DOM は 18.3.1、`react-scripts` は 5.0.1、`react-select` は 5.10.2、`react-transition-group` は 4.4.5、Sass は 1.104.1 である。
+- Testing Library は React 18 と互換の `@testing-library/react` 15.0.7、`@testing-library/jest-dom` 6.9.1、`@testing-library/user-event` 14.6.7 を使用している。
+- `npm audit --omit=dev` の報告は 74 件である。`react-scripts`、`gh-pages`、build tool の major 更新は、互換性・リリース方式の検討を要する。
 
 ### ツールチェーンのリスク
 
@@ -116,6 +116,14 @@ React 18 の移行では root API を含む互換性変更があるため、公�
 
 完了条件は、全テストの更新、CI 成功、主要盤面操作と popup のブラウザ確認である。React 19 は React 18 で安定運用でき、依存ライブラリの peer dependency と build tool が対応した後の別タスクとする。
 
+#### 実施記録: React 18 とテスト基盤（2026-09-14）
+
+- React / React DOM を 17.0.2 から 18.3.1 へ更新し、起動処理を `ReactDOM.render` から `createRoot` へ置換した。起動テストは Testing Library の `act` を用いて concurrent root の描画完了を待つ形に修正した。
+- `@testing-library/react` を 15.0.7、`@testing-library/user-event` を 14.6.7、`@testing-library/jest-dom` を 6.9.1 へ更新した。`jest-dom` 6.10.0 は破壊的変更を含む誤った minor release としてパッケージ自身が 6.9.1 の利用を案内しているため採用しなかった。既存テストに `userEvent` の直接利用はないため、`userEvent.setup()` / `await` への書き換えは不要だった。
+- ブラウザ確認で死亡役職アニメーション時に `findDOMNode` 非推奨警告を検出した。`MoveItem` の `Transition` に `nodeRef` を渡し、対象の `<span>` へ同じ ref を設定してライブラリのフォールバックを除去した。アニメーション描画と警告非表示を検証するテストを追加した。
+- `CI=true npm test -- --watchAll=false` は 32 スイート・80 件、`npm run build` は成功した。gzip 後の JavaScript bundle は React 17 時点から約 2.83 kB 増加した。主要盤面操作、各種セル編集、自爆・道連れ、popup、死亡役職アニメーションをブラウザで確認済みであり、React 関連・`findDOMNode` 警告は表示されない。
+- `npm audit --omit=dev` の報告件数は 74 件のまま変化しない。`fs.F_OK` の非推奨警告は CRA 由来として残る。
+
 ### 4. CRA から Vite への移行
 
 候補ブランチ: `refactor/vite-build-migration`
@@ -141,9 +149,9 @@ build tool の安定後、`npx update-browserslist-db@latest` を単独で実行
 
 | 作業 | 着手条件 | 優先度 |
 | --- | --- | --- |
-| 直接依存の patch / minor | 現行 CI が green | 高 |
+| 直接依存の patch / minor | 完了（2026-09-13） | - |
 | `gh-pages` 6 | リリース PR の作り方を合意済み | 中 |
-| React 18 | 直接依存更新後、React 18 対応確認を開始できる | 高 |
+| React 18 | 完了（2026-09-14） | - |
 | Vite | React 18 とテスト基盤が安定、公開テストを行える | 高 |
 | React 19 | React 18 を安定運用後 | 低 |
 | Browserslist データ | build tool の方針決定後 | 低 |
