@@ -11,42 +11,25 @@
     "@testing-library/user-event": "^14.6.7",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-scripts": "5.0.1",
     "react-select": "^5.10.2",
     "react-transition-group": "^4.4.5",
     "sass": "^1.104.1"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject",
+    "dev": "vite",
+    "start": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest",
+    "test:run": "vitest run",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d build"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
+    "deploy": "gh-pages -d dist"
   },
   "devDependencies": {
-    "gh-pages": "^3.2.3"
-  },
-  "overrides": {
-    "eslint-plugin-jest": "25.6.0"
-  },
-  "homepage": "https://sawa90.github.io/feign-support-tool/"
+    "@vitejs/plugin-react": "^6.1.1",
+    "gh-pages": "^3.2.3",
+    "jsdom": "^29.1.1",
+    "vite": "^8.3.0",
+    "vitest": "^5.0.0"
+  }
 }

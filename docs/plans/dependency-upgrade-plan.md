@@ -4,28 +4,29 @@
 
 この文書は、品質基盤を整備した後に行う依存関係更新の順序、判断基準、確認方法を定める。ここでは依存パッケージ、`package-lock.json`、Node の設定を変更しない。実際の更新は、リスク単位で別ブランチ・別 PR として実施する。
 
-対象は、React、`react-scripts`、テスト基盤、Sass、`react-select`、`react-transition-group`、`gh-pages` と、その推移依存である。
+対象は、React、Vite、Vitest、テスト基盤、Sass、`react-select`、`react-transition-group`、`gh-pages` と、その推移依存である。
 
 ## 現状（2026-09-14）
 
 ### 実行環境と直接依存
 
-- Node は `mise.toml` と CI で **24.14.0** に固定している。現 lockfile で `npm ci`、全テスト、production build は成功している。
-- React / React DOM は 18.3.1、`react-scripts` は 5.0.1、`react-select` は 5.10.2、`react-transition-group` は 4.4.5、Sass は 1.104.1 である。
+- Node は `mise.toml` と CI で **24.14.0** に固定している。現 lockfile で `npm ci`、`npm run test:run`、production build は成功している。
+- React / React DOM は 18.3.1、Vite は 8.3.0、`@vitejs/plugin-react` は 6.1.1、Vitest は 5.0.0、jsdom は 29.1.1、`react-select` は 5.10.2、`react-transition-group` は 4.4.5、Sass は 1.104.1 である。
 - Testing Library は React 18 と互換の `@testing-library/react` 15.0.7、`@testing-library/jest-dom` 6.9.1、`@testing-library/user-event` 14.6.7 を使用している。
-- `npm audit --omit=dev` の報告は 74 件である。`react-scripts`、`gh-pages`、build tool の major 更新は、互換性・リリース方式の検討を要する。
+- `npm audit --omit=dev` は **0 vulnerabilities** を報告している。`gh-pages` 3 系の major 更新と公開手順は、別途互換性・リリース方式の検討を要する。
 
 ### ツールチェーンのリスク
 
-- `npm audit --omit=dev` は 87 件（critical 8 / high 46 / moderate 18 / low 15）を報告した。多くは `react-scripts` が保持する webpack、開発サーバー、Babel、Workbox 系の推移依存である。`react-scripts` 自体は production bundle に同梱されないが、開発環境・CI・ビルド時のリスクとして扱う。
-- `react-scripts` 5.0.0 から 5.0.1 への patch 更新だけでは、audit の主要な推移依存問題を解消できない。`npm audit fix --force` はビルド基盤を実質置換し得るため、このリポジトリでは使用しない。
-- build 時の `fs.F_OK` 非推奨警告と Browserslist のデータ更新通知はアプリコードではなく旧ツールチェーンから出ている。前者は build 基盤移行まで許容し、後者は lockfile を更新する保守作業として分離する。
+- CRA とその webpack、development server、Babel、Workbox 系の推移依存は Vite 移行により lockfile から除去された。CRA 由来だった `fs.F_OK` 非推奨警告と Browserslist 更新通知も解消している。
+- Vite は GitHub Pages の project site に対応するため `base: "/feign-support-tool/"` を明示する。アプリ内で静的 asset を組み立てる箇所は `import.meta.env.BASE_URL` を利用する。
+- Vitest は Jest と互換性のある assertion API を提供するが、mock API は `vi` を使う。JSX を含む実装・テストは `.jsx` 拡張子として、Vite の標準変換対象に合わせる。
+- `npm audit fix --force` による一括更新は、意図しない major 更新を招くため引き続き使用しない。
 
 ### ビルド基盤の判断
 
 Create React App は公式に新規利用非推奨となり、アクティブなメンテナーがいないため既存アプリは framework または Vite / Parcel / Rsbuild などの build tool へ移行するよう案内されている。[React: Sunsetting Create React App](https://react.dev/blog/2025/02/14/sunsetting-create-react-app)
 
-本ツールは GitHub Pages で公開するクライアント専用の単一画面アプリであり、サーバー、ルーティング、データ取得を必要としていない。このため現時点の第一候補は **Vite による SPA build** とする。これは公式が CRA の既存アプリに build tool への移行を案内していることと、現行の静的公開方式からの影響が最も小さい、という本プロジェクト固有の判断である。framework 導入は、複数 URL・サーバー処理・データ取得を将来導入する場合に再評価する。
+本ツールは GitHub Pages で公開するクライアント専用の単一画面アプリであり、サーバー、ルーティング、データ取得を必要としていない。このため **Vite による SPA build** を採用した。これは公式が CRA の既存アプリに build tool への移行を案内していることと、現行の静的公開方式からの影響が最も小さい、という本プロジェクト固有の判断である。framework 導入は、複数 URL・サーバー処理・データ取得を将来導入する場合に再評価する。
 
 ## 更新順序
 
@@ -34,7 +35,7 @@ Create React App は公式に新規利用非推奨となり、アクティブな
 各更新ブランチは `feature/quality-foundation` の最新 HEAD から作成する。開始前後に必ず次を実施する。
 
 1. `npm ci`
-2. `CI=true npm test -- --watchAll=false`
+2. `npm run test:run`
 3. `npm run build`
 4. 変更対象に応じたブラウザ確認（盤面セル編集、名前・色、popup、GitHub Pages の asset path）
 
@@ -94,7 +95,7 @@ Create React App は公式に新規利用非推奨となり、アクティブな
 このブランチで先に決めること:
 
 - 公開を GitHub Actions に集約するか、PR 用の release branch に build 成果物をコミットするか
-- `homepage`（CRA）から Vite の `base` へ移るまでの二重管理を避ける方法
+- Vite の `base` を GitHub Pages の repository path の唯一の定義として維持する方法
 - `gh-pages` package を残す必要があるか
 
 実際に公開する検証は、`master` へ統合後、`gh-pages` の PR と GitHub Pages 実 URL で行う。GitHub Pages は branch を公開元にでき、外部 CI が `gh-pages` へ build 成果物を commit する運用も公式に案内されている。[GitHub Pages publishing source](https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site)
@@ -128,22 +129,18 @@ React 18 の移行では root API を含む互換性変更があるため、公�
 
 候補ブランチ: `refactor/vite-build-migration`
 
-これは最大リスクの変更であり、他の依存更新と混在させない。以下を順に行う。
+CRA 依存を Vite に置き換える変更は完了した。実施内容と確認結果は次のとおりである。
 
-1. CRA 固有の `react-scripts` scripts、`process.env.PUBLIC_URL`、`%PUBLIC_URL%`、Jest 設定を列挙する。
-2. Vite の scripts・設定・テストランナーを導入する。テストランナー選定は既存 Jest テストの移植量を比較して決定する。
-3. GitHub Pages の repository path を Vite `base` へ設定し、role 画像、`popup.html`、CSS、静的 asset の URL を確認する。`gh-pages` package も project site では CRA の `homepage`、Vite の `base` が必要と説明している。[gh-pages README](https://github.com/tschaub/gh-pages/blob/main/readme.md)
-4. CI を新しい install / test / build 手順へ更新する。
-5. preview URL と公開 URL の両方でブラウザ確認する。
-6. `react-scripts` と不要になった設定・推移依存を削除する。
+- `vite` 8.3.0、`@vitejs/plugin-react` 6.1.1、`vitest` 5.0.0、`jsdom` 29.1.1 を導入し、`react-scripts` を除去した。
+- `dev`、`start`、`build`、`preview`、`test`、`test:run` を Vite / Vitest 用の script に置き換えた。deploy の build 出力先も `build` から `dist` に変更した。
+- root の `index.html` を Vite entry document に移し、CRA 専用の `public/index.html`、`process.env.PUBLIC_URL`、CRA の ESLint 設定・互換 override、`homepage`、Browserslist 設定を除去した。
+- GitHub Pages の repository path を `vite.config.mjs` の `base: "/feign-support-tool/"` で定義した。role 画像、`popup.html`、`popup.css`、`popup.js` を含む `public/` の静的ファイルが `dist/` に出力され、生成 HTML の asset URL も同じ base を持つことを確認した。
+- JSX を含む実装・テストを `.jsx` に統一し、Jest の `jest.*` mock API を Vitest の `vi.*` へ置換した。`@testing-library/jest-dom/vitest` をテスト設定として読み込む。
+- GitHub Actions のテスト手順を `npm run test:run` に変更した。
+- `npm ci` 後に `npm run test:run`（32 ファイル・80 件）と `npm run build` が成功した。`http://127.0.0.1:5173/feign-support-tool/` で、盤面編集、自爆・道連れ、popup、リセット、翌日追加、メモ行、画像・スタイルをブラウザ確認済みである。
+- `npm audit --omit=dev` は 0 vulnerabilities を報告した。
 
-完了後に audit を再評価し、残る問題だけを独立して扱う。CRA の撤去が、旧 webpack / development server 系の多くの audit 問題を解消する主要な契機となる。
-
-### 5. Browserslist データ更新
-
-候補ブランチ: `chore/browserslist-data`
-
-build tool の安定後、`npx update-browserslist-db@latest` を単独で実行し、`package-lock.json` の差分と browser support 条件をレビューする。警告を消すことだけを目的に、別の依存更新へ混ぜない。
+`gh-pages` package の更新や公開ブランチへの反映はこの変更に含めない。現行の `gh-pages` 3 系と保護済み release branch の整合は、次の GitHub Pages リリース補助更新で確認する。
 
 ## 着手判断
 
@@ -152,9 +149,9 @@ build tool の安定後、`npx update-browserslist-db@latest` を単独で実行
 | 直接依存の patch / minor | 完了（2026-09-13） | - |
 | `gh-pages` 6 | リリース PR の作り方を合意済み | 中 |
 | React 18 | 完了（2026-09-14） | - |
-| Vite | React 18 とテスト基盤が安定、公開テストを行える | 高 |
+| Vite | 完了（2026-09-14） | - |
 | React 19 | React 18 を安定運用後 | 低 |
-| Browserslist データ | build tool の方針決定後 | 低 |
+| ブラウザ対応範囲の再定義 | Vite の既定 target 以外を必要とするとき | 低 |
 
 ## 非目標
 

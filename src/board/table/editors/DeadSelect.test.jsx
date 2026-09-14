@@ -2,18 +2,20 @@ import React from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { DeadSelect } from "./DeadSelect";
 
-jest.mock("react-select", () => ({ components: { Option: ({ children }) => <div>{children}</div> } }));
+vi.mock("react-select", () => ({ components: { Option: ({ children }) => <div>{children}</div> } }));
 
-jest.mock("react-select/creatable", () => (props) => {
-  const roleOption = props.options.find((option) => option.value?.[2] === 1);
-  const selected = roleOption
-    ? [{ value: ["アリス", 0, 2] }, { value: roleOption.value }]
-    : [{ value: ["アリス", 0, 2] }];
-  return <button onClick={() => props.onChange(selected)}>死亡者を選択</button>;
-});
+vi.mock("react-select/creatable", () => ({
+  default: (props) => {
+    const roleOption = props.options.find((option) => option.value?.[2] === 1);
+    const selected = roleOption
+      ? [{ value: ["アリス", 0, 2] }, { value: roleOption.value }]
+      : [{ value: ["アリス", 0, 2] }];
+    return <button onClick={() => props.onChange(selected)}>死亡者を選択</button>;
+  },
+}));
 
 test("forwards a fixed-role death target without requiring role selection", () => {
-  const onUpdate = jest.fn();
+  const onUpdate = vi.fn();
   render(<DeadSelect
     row={{ target_day1: [] }}
     dataField="target_day1"
@@ -39,7 +41,7 @@ test("forwards a fixed-role death target without requiring role selection", () =
 });
 
 test("records a manually selected death role after selecting the player", () => {
-  const onUpdate = jest.fn();
+  const onUpdate = vi.fn();
   render(<DeadSelect
     row={{ target_day1: [] }}
     dataField="target_day1"

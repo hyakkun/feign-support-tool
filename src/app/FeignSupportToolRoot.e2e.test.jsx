@@ -15,7 +15,7 @@ const playerNamesInRenderedOrder = () => [...document.querySelectorAll("tbody tr
 
 describe("FeignSupportToolRoot end-to-end cell editing", () => {
   beforeEach(() => {
-    jest.spyOn(window, "confirm").mockReturnValue(true);
+    vi.spyOn(window, "confirm").mockReturnValue(true);
   });
 
   afterEach(() => {

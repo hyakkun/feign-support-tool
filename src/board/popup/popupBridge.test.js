@@ -2,7 +2,7 @@ import { createBoardState } from "../state/boardState";
 import { sendPopupSnapshot } from "./popupBridge";
 
 test("sends a derived board snapshot to an open popup window", () => {
-  const popupWindow = { closed: false, postMessage: jest.fn() };
+  const popupWindow = { closed: false, postMessage: vi.fn() };
   const state = createBoardState({
     board: [
       { id: 0, keyid: 0, name: ["アリス", 19], color: ["yellow", "#ffe352"] },

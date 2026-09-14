@@ -25,13 +25,14 @@ const initialBoardState = createBoardState({
     isTutorial: true,
     dayCount: 2,
 });
+const publicUrl = import.meta.env.BASE_URL.replace(/\/$/, "");
 const { config: FeignTool, runtime: legacyBoardRuntime, tableDefinition } = createBoardTableSetup({
-    publicUrl: process.env.PUBLIC_URL,
+    publicUrl,
     initialState: initialBoardState,
 });
 
 
-const popupWindowController = createPopupWindowController({ windowObject: window, publicUrl: process.env.PUBLIC_URL });
+const popupWindowController = createPopupWindowController({ windowObject: window, publicUrl });
 
 export const FeignSupportToolRoot = () => {
     const [boardState, dispatch] = useReducer(boardReducer, initialBoardState);

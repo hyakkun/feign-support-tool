@@ -115,7 +115,7 @@ usePopupActions ──> popupWindowController / popupBridge
 
 1. 複数の UI 部品をまたぐ操作（名前・色変更後の候補更新、リセット後のポップアップ更新、日付ソート）を統合テストとして拡充する。
 2. legacy タプルと [`domain-model.md`](domain-model.md) の `Board` の相互変換は、盤面の保存・復元・共有、または新しいドメイン機能を導入すると決めた時点で設計する。
-3. React、`react-scripts`、その他の古い依存関係は、互換性調査、更新方針の決定、段階更新に分けて扱う。build 時の Node 非推奨警告と Browserslist 更新通知もこの課題に含める。
+3. React、Vite、Vitest、その他の依存関係は、互換性調査、更新方針の決定、段階更新に分けて扱う。ブラウザ対応範囲を変える場合は、Vite の build target と実機確認を独立した課題として扱う。
 4. `legacyBoardRuntime` は editor・formatter が legacy getter を必要としなくなった時点で削除候補とする。先に UI の props 契約を保ったまま置換範囲を見極める。
 
 各課題の推奨ブランチ、優先度、着手条件、完了条件は [Quality Foundation 後続作業ロードマップ](../plans/quality-foundation-roadmap.md) に定義する。

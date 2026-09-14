@@ -8,7 +8,7 @@
 
 ## 依存関係の原則
 
-- `src/index.js` は `react-scripts` が要求する固定の entry point とし、`app/bootstrap.js` を読み込むだけにする。
+- `index.html` は Vite の entry document とし、`src/index.js` を読み込む。`src/index.js` は `app/bootstrap.jsx` を読み込むだけにする。
 - `app/` は React の起動と各領域の組み立てを担当する。ゲーム規則、テーブル列、ポップアップ通信の詳細を持たない。
 - `board/model/` は不変設定、初期データ、純粋なデータ変換を担当する。React、DOM、ポップアップに依存しない。
 - `board/state/` は `BoardState`、reducer、操作、互換 runtime、盤面操作 hook を担当する。テーブルの描画実装に依存しない。
@@ -29,16 +29,16 @@ src/index.js ──> app
 
 ## ディレクトリ構成
 
-テストファイルは実装ファイルに隣接して置く。以下のツリーでは `.test.js` を省略する。
+テストファイルは実装ファイルに隣接して置く。以下のツリーでは `.test.*` を省略する。
 
 ```text
 src/
-├─ index.js                           # react-scripts 用の固定 entry point
-├─ index.test.js                      # entry point を通す統合テスト
+├─ index.js                           # Vite entry document から読む起動モジュール
+├─ index.test.jsx                     # entry point を通す統合テスト
 ├─ setupTests.js                      # テスト共通設定
 ├─ app/
-│  ├─ bootstrap.js                    # ReactDOM の起動と全体スタイルの読み込み
-│  └─ FeignSupportToolRoot.js         # 状態・hook・画面部品の組み立て
+│  ├─ bootstrap.jsx                   # ReactDOM の起動と全体スタイルの読み込み
+│  └─ FeignSupportToolRoot.jsx        # 状態・hook・画面部品の組み立て
 ├─ board/
 │  ├─ model/
 │  │  ├─ boardConfig.js               # 固定設定と legacy 設定の生成
@@ -61,27 +61,27 @@ src/
 │  │     ├─ useBoardCellActions.js    # セル保存・色変更
 │  │     └─ useNameBoardActions.js    # 名前設定・リセット
 │  ├─ table/
-│  │  ├─ BoardTable.js                # HTML table とセル編集状態
+│  │  ├─ BoardTable.jsx               # HTML table とセル編集状態
 │  │  ├─ boardTableSetup.js           # テーブル構成の組み立て
 │  │  ├─ boardTableFormatters.js      # legacy 値をテーブル表示へ変換
-│  │  ├─ tableFormatters.js           # 汎用 formatter 部品
+│  │  ├─ tableFormatters.jsx          # 汎用 formatter 部品
 │  │  ├─ boardColumnSorts.js          # 列ソート規則
-│  │  ├─ identityColumnDefinitions.js # 色・名前列
-│  │  ├─ roleColumnDefinitions.js     # 役・死亡役職列
-│  │  ├─ dayColumnDefinitions.js      # 日別の行動・対象列
+│  │  ├─ identityColumnDefinitions.jsx # 色・名前列
+│  │  ├─ roleColumnDefinitions.jsx     # 役・死亡役職列
+│  │  ├─ dayColumnDefinitions.jsx      # 日別の行動・対象列
 │  │  └─ editors/
-│  │     ├─ ColorSelect.js
-│  │     ├─ InsaneSelect.js
-│  │     ├─ RoleSelect.js
+│  │     ├─ ColorSelect.jsx
+│  │     ├─ InsaneSelect.jsx
+│  │     ├─ RoleSelect.jsx
 │  │     ├─ roleSelectState.js        # RoleSelect 専用の選択状態
-│  │     └─ DeadSelect.js
+│  │     └─ DeadSelect.jsx
 │  └─ popup/
 │     ├─ popupBridge.js               # snapshot の整形・postMessage
 │     ├─ popupWindowController.js     # window.open と window 参照管理
 │     └─ usePopupActions.js           # ポップアップ UI 操作 hook
 ├─ components/
-│  ├─ NameInputPanel.js               # 名前入力・リセット・表示設定 UI
-│  └─ MemoArea.js                     # 盤面外メモ UI
+│  ├─ NameInputPanel.jsx              # 名前入力・リセット・表示設定 UI
+│  └─ MemoArea.jsx                    # 盤面外メモ UI
 └─ styles/
    └─ index.scss                      # 全体スタイル
 ```

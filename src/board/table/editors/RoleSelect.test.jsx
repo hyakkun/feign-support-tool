@@ -2,14 +2,16 @@ import React from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { RoleSelect } from "./RoleSelect";
 
-jest.mock("react-select", () => ({ components: { Option: ({ children }) => <div>{children}</div> } }));
+vi.mock("react-select", () => ({ components: { Option: ({ children }) => <div>{children}</div> } }));
 
-jest.mock("react-select/creatable", () => (props) => (
-  <button onClick={() => props.onChange([{ value: ["アリス", 0, 2] }])}>候補を選択</button>
-));
+vi.mock("react-select/creatable", () => ({
+  default: (props) => (
+    <button onClick={() => props.onChange([{ value: ["アリス", 0, 2] }])}>候補を選択</button>
+  ),
+}));
 
 test("forwards a regular player selection to the cell update callback", () => {
-  const onUpdate = jest.fn();
+  const onUpdate = vi.fn();
   render(<RoleSelect
     row={{ action_day1: [] }}
     dataField="action_day1"

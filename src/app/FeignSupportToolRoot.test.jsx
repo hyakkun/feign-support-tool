@@ -1,7 +1,7 @@
 import React from "react";
 import { act, fireEvent, render, screen } from "@testing-library/react";
 
-jest.mock("../board/table/BoardTable", () => {
+vi.mock("../board/table/BoardTable", () => {
   const React = require("react");
   return {
     BoardTable: ({ data, columns, onCellSave }) => {
@@ -38,7 +38,7 @@ import { FeignSupportToolRoot } from "./FeignSupportToolRoot";
 const createPopupWindow = () => ({
   closed: false,
   document: { readyState: "complete" },
-  postMessage: jest.fn(),
+  postMessage: vi.fn(),
 });
 
 describe("FeignSupportToolRoot integration", () => {
@@ -47,23 +47,23 @@ describe("FeignSupportToolRoot integration", () => {
   let confirmSpy;
 
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
     popupWindow = createPopupWindow();
-    openSpy = jest.spyOn(window, "open").mockReturnValue(popupWindow);
-    confirmSpy = jest.spyOn(window, "confirm").mockReturnValue(true);
+    openSpy = vi.spyOn(window, "open").mockReturnValue(popupWindow);
+    confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(true);
   });
 
   afterEach(() => {
     openSpy.mockRestore();
     confirmSpy.mockRestore();
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   test("updates the rendered board and popup snapshot after setting participant names", () => {
     render(<FeignSupportToolRoot />);
 
     fireEvent.click(screen.getByText("openDisplayWindow"));
-    act(() => jest.runOnlyPendingTimers());
+    act(() => vi.runOnlyPendingTimers());
     expect(popupWindow.postMessage).toHaveBeenCalledTimes(1);
 
     fireEvent.change(screen.getByPlaceholderText(/名前入力欄/), { target: { value: "アリス\nボブ" } });
@@ -84,7 +84,7 @@ describe("FeignSupportToolRoot integration", () => {
     render(<FeignSupportToolRoot />);
 
     fireEvent.click(screen.getByText("openDisplayWindow"));
-    act(() => jest.runOnlyPendingTimers());
+    act(() => vi.runOnlyPendingTimers());
     fireEvent.change(screen.getByPlaceholderText(/名前入力欄/), { target: { value: "アリス\nボブ" } });
     fireEvent.click(screen.getByText("setName"));
     fireEvent.click(screen.getByText("リセット"));
@@ -104,7 +104,7 @@ describe("FeignSupportToolRoot integration", () => {
     render(<FeignSupportToolRoot />);
 
     fireEvent.click(screen.getByText("openDisplayWindow"));
-    act(() => jest.runOnlyPendingTimers());
+    act(() => vi.runOnlyPendingTimers());
     fireEvent.click(screen.getByText("色を変更"));
 
     expect(screen.getByTestId("first-player-color")).toHaveTextContent("#123456");
@@ -120,7 +120,7 @@ describe("FeignSupportToolRoot integration", () => {
     render(<FeignSupportToolRoot />);
 
     fireEvent.click(screen.getByText("openDisplayWindow"));
-    act(() => jest.runOnlyPendingTimers());
+    act(() => vi.runOnlyPendingTimers());
     fireEvent.click(screen.getByText("自爆を記録"));
 
     expect(screen.getByTestId("first-player-dead-role")).toHaveTextContent("魔術師");
@@ -137,7 +137,7 @@ describe("FeignSupportToolRoot integration", () => {
     render(<FeignSupportToolRoot />);
 
     fireEvent.click(screen.getByText("openDisplayWindow"));
-    act(() => jest.runOnlyPendingTimers());
+    act(() => vi.runOnlyPendingTimers());
     fireEvent.click(screen.getByText("行動を記録"));
 
     expect(screen.getByTestId("first-player-action")).toHaveTextContent("トラッカ");

@@ -19,7 +19,7 @@ test("injects board display configuration into the table formatter", () => {
 });
 
 test("renders a death role animation without the findDOMNode fallback", () => {
-  const consoleError = jest.spyOn(console, "error").mockImplementation(() => {});
+  const consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
   const formatters = createBoardTableFormatters(formatterConfig);
   const cell = [["アリス", 0, 2], ["魔術師", 3, 1, 0]];
   const row = { id: -1, name: ["自爆"], target_day1: cell };

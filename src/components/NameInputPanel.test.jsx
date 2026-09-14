@@ -5,14 +5,14 @@ import { NameInputPanel } from "./NameInputPanel";
 test("forwards name, display, and toolbar actions through props", () => {
   const props = {
     nameText: "アリス",
-    onNameTextChange: jest.fn(),
-    onOpenPopup: jest.fn(),
+    onNameTextChange: vi.fn(),
+    onOpenPopup: vi.fn(),
     playerIsIcon: true,
     nameIsIcon: true,
-    onPlayerIconChange: jest.fn(),
-    onNameIconChange: jest.fn(),
-    onSetNames: jest.fn(),
-    onReset: jest.fn(),
+    onPlayerIconChange: vi.fn(),
+    onNameIconChange: vi.fn(),
+    onSetNames: vi.fn(),
+    onReset: vi.fn(),
   };
   render(<NameInputPanel {...props} />);
 

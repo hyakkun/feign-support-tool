@@ -14,6 +14,7 @@ feature/quality-foundation
 ├─ feature/quality-integration-tests  # 複数 UI をまたぐ回帰テスト
 ├─ chore/dependency-upgrade-plan       # 更新方針と互換性調査
 ├─ upgrade/react-18-test-stack         # React 18・テスト基盤更新
+├─ refactor/vite-build-migration       # Vite / Vitest への build 基盤移行
 ├─ refactor/legacy-runtime-boundary    # legacyBoardRuntime の縮小・撤去
 └─ feature/board-persistence           # 保存・共有を決めた後だけ作成
 ```
@@ -30,7 +31,7 @@ feature/quality-foundation
 
 1. `mise.toml` で固定している Node 24.14.0 を用意する。
 2. `npm ci` で lockfile どおりに依存関係を復元する。
-3. `CI=true npm test -- --watchAll=false` を実行する。
+3. `npm run test:run` を実行する。
 4. `npm run build` を実行する。
 
 完了条件は、workflow が GitHub 上で成功し、`quality-foundation` と将来の `master` / `gh-pages` 向け ruleset に必要な status check として設定できる状態になることとする。ruleset の UI 設定変更はリポジトリ内の workflow 追加とは別に扱う。
@@ -55,18 +56,18 @@ feature/quality-foundation
 
 ### `chore/dependency-upgrade-plan`
 
-`package.json` の React、`react-scripts` 5、周辺ライブラリを対象に、更新前に互換性調査と移行順序を文書化する。特に Node 24.14.0、テスト基盤、Sass、GitHub Pages のビルド・デプロイへの影響を確認する。
+`package.json` の React、build・test 基盤、周辺ライブラリを対象に、更新前に互換性調査と移行順序を文書化する。特に Node 24.14.0、テスト基盤、Sass、GitHub Pages のビルド・デプロイへの影響を確認する。
 
-このブランチでは依存パッケージを更新しない。次を決めるための調査・文書化だけを行う。
+計画策定では依存パッケージを更新せず、次を決めた。実際の更新は、計画後に目的別の派生ブランチで実施する。
 
-- `react-scripts` を維持する期間と、置換を検討する着手条件
+- CRA から Vite へ移行する条件と静的 asset / GitHub Pages base の扱い
 - React と React DOM の更新可能な組み合わせ
 - テストライブラリ、Sass、`gh-pages` の追従方針
-- build 時の Node 非推奨警告と Browserslist 更新通知の原因・対応順
+- CRA 由来の build 時の Node 非推奨警告と Browserslist 更新通知の扱い
 
 実際の更新は、依存グループごとに別ブランチへ分割する。各更新では `package-lock.json` を更新し、テスト・ビルド・ブラウザ確認を必須とする。
 
-**状態（2026-09-14）:** [依存関係更新計画](./dependency-upgrade-plan.md) に従い、直接依存の小規模更新と React 18 / テスト基盤更新を完了した。React 18.3.1 の `createRoot` 移行、Testing Library 15 / user-event 14 / jest-dom 6 への更新、死亡役職アニメーションの `findDOMNode` 警告解消を含む。全テスト・build と主要操作のブラウザ確認は成功している。次は `gh-pages` 6 のリリース方式を決めるか、Vite 移行の準備に進む。
+**状態（2026-09-14）:** [依存関係更新計画](./dependency-upgrade-plan.md) に従い、直接依存の小規模更新、React 18 / テスト基盤更新、CRA から Vite / Vitest への移行を完了した。React 18.3.1 の `createRoot` 移行、Testing Library 15 / user-event 14 / jest-dom 6 への更新、死亡役職アニメーションの `findDOMNode` 警告解消を含む。Vite は GitHub Pages 用の base と `dist` 出力を設定し、全テスト・build・主要操作のブラウザ確認も成功している。次は `gh-pages` 6 のリリース方式を決めるか、legacy 互換境界の縮小に進む。
 
 ## 優先度 3: legacy 互換境界の縮小
 
@@ -99,7 +100,7 @@ feature/quality-foundation
 
 派生ブランチでは、対象に応じて次を満たしてから `feature/quality-foundation` へ統合する。
 
-- 関連する単体・統合テストが追加または更新され、`CI=true npm test -- --watchAll=false` が成功する。
+- 関連する単体・統合テストが追加または更新され、`npm run test:run` が成功する。
 - `npm run build` が成功する。
 - DOM、セル編集、ポップアップ、依存関係に変更がある場合は、影響範囲をブラウザでも確認する。
 - [盤面状態アーキテクチャ](../design/board-state-architecture.md) と [モジュール責務とディレクトリ設計](../design/module-directory-design.md) の責務境界を守る。
