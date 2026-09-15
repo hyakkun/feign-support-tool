@@ -118,7 +118,8 @@ test("makes a death role prominent and joins multiple action results without sep
   const card = document.querySelector("article.player-window");
   expect(card.querySelector(".role-area")).toHaveClass("has-dead-role");
   expect(card.querySelector(".claimed-role")).toBeInTheDocument();
-  expect(card.querySelector(".prominent-dead-role")).toBeInTheDocument();
+  expect(card.querySelector(".dead-role-token")).toHaveClass("role-token", "primary-role-token");
+  expect(card.querySelector(".role-area > .dead-role-token")).toBeInTheDocument();
   const actionCell = card.querySelectorAll(".day-cell")[1];
   expect(actionCell).toHaveTextContent("成功失敗");
   expect(actionCell).not.toHaveTextContent("/");
