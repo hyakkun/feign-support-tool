@@ -165,9 +165,7 @@
     if (hasDeadRole) roleArea.classList.add("has-dead-role");
     appendRole(roleArea, player.role, "role-token claimed-role");
 
-    const deadRole = document.createElement("div");
-    deadRole.className = "dead-role";
-    if (appendRole(deadRole, player.deadRole, "dead-role-token prominent-dead-role")) roleArea.append(deadRole);
+    appendRole(roleArea, player.deadRole, "role-token dead-role-token primary-role-token");
     if (hasInsaneResult(player.role)) appendInsaneResultBadge(roleArea);
     playerWindow.append(roleArea);
 
