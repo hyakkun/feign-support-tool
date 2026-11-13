@@ -4,7 +4,7 @@
 
 この文書は、品質基盤を整備した後に行う依存関係更新の順序、判断基準、確認方法を定める。ここでは依存パッケージ、`package-lock.json`、Node の設定を変更しない。実際の更新は、リスク単位で別ブランチ・別 PR として実施する。
 
-対象は、React、Vite、Vitest、テスト基盤、Sass、`react-select`、`react-transition-group`、`gh-pages` と、その推移依存である。
+依存更新の対象は React、Vite、Vitest、テスト基盤、Sass、`react-select`、`react-transition-group` とその推移依存である。旧公開手段で使っていた `gh-pages` は、GitHub Actions deployment への切替に伴い削除した。
 
 ## 現状（2026-09-14）
 
@@ -13,7 +13,7 @@
 - Node は `mise.toml` と CI で **24.14.0** に固定している。現 lockfile で `npm ci`、`npm run test:run`、production build は成功している。
 - React / React DOM は 18.3.1、Vite は 8.3.0、`@vitejs/plugin-react` は 6.1.1、Vitest は 5.0.0、jsdom は 29.1.1、`react-select` は 5.10.2、`react-transition-group` は 4.4.5、Sass は 1.104.1 である。
 - Testing Library は React 18 と互換の `@testing-library/react` 15.0.7、`@testing-library/jest-dom` 6.9.1、`@testing-library/user-event` 14.6.7 を使用している。
-- `npm audit --omit=dev` は **0 vulnerabilities** を報告している。`gh-pages` 3 系の major 更新と公開手順は、別途互換性・リリース方式の検討を要する。
+- `npm audit --omit=dev` は **0 vulnerabilities** を報告している。旧 `gh-pages` 3 系の major 更新は行わず、公開を GitHub Actions artifact deployment に切り替える。
 
 ### ツールチェーンのリスク
 
@@ -86,19 +86,21 @@ Create React App は公式に新規利用非推奨となり、アクティブな
 - `CI=true npm test -- --watchAll=false` は 32 スイート・79 件、`npm run build` は成功した。bundle サイズに変化はない。テスト実行時のみの依存更新でアプリ実行コード・生成物に変更がないため、ブラウザ確認は追加していない。
 - `npm audit --omit=dev` の報告件数は 78 件から 74 件へ減少した。
 
-### 2. GitHub Pages リリース補助の更新
+### 2. GitHub Pages 公開
 
-候補ブランチ: `chore/gh-pages-v6`
+採用方式: **GitHub Actions の Pages artifact deployment**。`master` への push で Vite build を行い、`dist/` を Pages artifact として公開する。Actions の `GITHUB_TOKEN` で Pages deployment を作成するため、build 成果物を `gh-pages` branch へ直接 push しない。既存の branch protection と release PR 方針を保てる。
 
-`gh-pages` 3 系から 6 系への更新は major update として単独で扱う。現在の `deploy` は `gh-pages -d build` であり、同ライブラリは既定で公開対象ブランチへ push する。そのため、保護済み `gh-pages` に PR 経由のみを許す現行方針と衝突する可能性がある。[gh-pages README](https://github.com/tschaub/gh-pages/blob/main/readme.md)
+実装は `.github/workflows/deploy-pages.yml` に置いた。build job は Node 24.14.0 と lockfile を使い、`npm ci` と `npm run build` の後に `dist/` を upload する。deploy job だけに `pages: write` と `id-token: write` を付与し、`github-pages` environment から公開する。GitHub 公式も Pages custom workflow でこの artifact upload/deploy 方式と権限を案内している。[GitHub Pages custom workflows](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages)
 
-このブランチで先に決めること:
+Vite の `base: "/feign-support-tool/"` は repository site の asset path の唯一の定義として維持する。`gh-pages` package と `predeploy` / `deploy` scripts は不要になるため除去した。`gh-pages` branch は Actions source へ切替後は公開元として使わない。
 
-- 公開を GitHub Actions に集約するか、PR 用の release branch に build 成果物をコミットするか
-- Vite の `base` を GitHub Pages の repository path の唯一の定義として維持する方法
-- `gh-pages` package を残す必要があるか
+GitHub 側で必要な切替:
 
-実際に公開する検証は、`master` へ統合後、`gh-pages` の PR と GitHub Pages 実 URL で行う。GitHub Pages は branch を公開元にでき、外部 CI が `gh-pages` へ build 成果物を commit する運用も公式に案内されている。[GitHub Pages publishing source](https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site)
+1. Repository Settings → Pages → Build and deployment → Source を **GitHub Actions** にする。
+2. workflow を含む変更を `master` に統合する。
+3. `Deploy GitHub Pages` workflow の成功と `https://hyakkun.github.io/feign-support-tool/` でのトップ画面・role image・popup を確認する。
+
+このリポジトリでは default branch が現状 `gh-pages` である。Pages の source 切替後も branch へ build 成果物を push する方式には戻さず、`master` の push を公開の起点とする。GitHub Settings の更新と実 URL での公開確認はリポジトリ内から実行できないため、初回切替時の完了確認事項として残す。
 
 ### 3. React 18 とテスト基盤
 
@@ -140,14 +142,14 @@ CRA 依存を Vite に置き換える変更は完了した。実施内容と確�
 - `npm ci` 後に `npm run test:run`（32 ファイル・80 件）と `npm run build` が成功した。`http://127.0.0.1:5173/feign-support-tool/` で、盤面編集、自爆・道連れ、popup、リセット、翌日追加、メモ行、画像・スタイルをブラウザ確認済みである。
 - `npm audit --omit=dev` は 0 vulnerabilities を報告した。
 
-`gh-pages` package の更新や公開ブランチへの反映はこの変更に含めない。現行の `gh-pages` 3 系と保護済み release branch の整合は、次の GitHub Pages リリース補助更新で確認する。
+旧 `gh-pages` package の更新や公開 branch への build artifact push は行わない。公開には `.github/workflows/deploy-pages.yml` を使う。
 
 ## 着手判断
 
 | 作業 | 着手条件 | 優先度 |
 | --- | --- | --- |
 | 直接依存の patch / minor | 完了（2026-09-13） | - |
-| `gh-pages` 6 | リリース PR の作り方を合意済み | 中 |
+| GitHub Pages Actions deployment | Workflow 実装済み。Pages source の Actions 切替と初回実公開確認が残る | 高 |
 | React 18 | 完了（2026-09-14） | - |
 | Vite | 完了（2026-09-14） | - |
 | React 19 | React 18 を安定運用後 | 低 |
