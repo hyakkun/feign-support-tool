@@ -15,7 +15,7 @@ export const NameInputPanel = ({
     <div style={{ display: "flex" }}>
       <textarea cols="20" rows="12" value={nameText} onChange={onNameTextChange} style={{ display: "inline-block" }} placeholder="名前入力欄：参加者の名前（五文字以内）を改行区切りで入力" />
       <div style={{ display: "flex", flexDirection: "column" }}>
-        <a href="https://github.com/sawa90/feign-support-tool/blob/master/README.md" target="_blank" rel="noopener noreferrer" style={{ marginLeft: "1rem" }}>使い方</a>
+        <a href="https://github.com/hyakkun/feign-support-tool/blob/master/README.md" target="_blank" rel="noopener noreferrer" style={{ marginLeft: "1rem" }}>使い方</a>
         <div style={{ marginTop: "auto" }}>
           <div>
             <div style={{ margin: "1rem" }}>
