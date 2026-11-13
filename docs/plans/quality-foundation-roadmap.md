@@ -21,7 +21,7 @@ feature/quality-foundation
 
 各派生ブランチは `feature/quality-foundation` の最新 HEAD から作成し、完了後に同ブランチへ戻す。品質基盤の安定化が完了してから `master` へ統合し、公開が必要な変更だけを `gh-pages` のリリース手順へ進める。
 
-`feature/local-role-images-preview` はこの系列に含めない。暫定画像の利用条件が未確定であるため、[ローカル画像プレビューブランチの扱い](../policies/local-preview-branch-policy.md) に従う。
+新役職画像の追加は、役職カタログと表示コードの変更に画像ファイルを含めて一つの変更として扱う。画像の管理方針は[役職画像の管理方針](../policies/role-image-policy.md)に従う。
 
 ## 優先度 1: 継続的な検証
 
@@ -91,10 +91,6 @@ feature/quality-foundation
 盤面の保存・復元・共有、または legacy 形式では表せないドメイン機能を導入すると決めた場合にだけ作成する。その時点で [盤面データモデル](../design/domain-model.md) の `Board` と `BoardState.board` の相互変換、データのバージョン管理、既存盤面との互換性を設計する。
 
 現時点では外部の盤面データを扱わないため、変換層だけを先行実装しない。
-
-### 役職画像の正式対応
-
-新役職画像は、素材の利用許諾・出典・公開条件が確定した後に、`master` から通常の機能ブランチを作成して扱う。`feature/local-role-images-preview` の画像参照コードや未追跡素材をこの系列へ統合しない。
 
 ## 共通の完了条件
 

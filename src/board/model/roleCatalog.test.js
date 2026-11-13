@@ -60,6 +60,13 @@ describe("role catalog", () => {
       roletype: [true, true, false, false, true],
       actionType: 1,
     });
+    expect(options.find((option) => option.name === "トラッカ")).toMatchObject({ id: 14 });
+  });
+
+  test("places tracker between lookout and provoker in the selector catalog", () => {
+    expect(ROLE_CATALOG.slice(4, 7).map((role) => role.id)).toEqual([
+      "lookout", "tracker", "provoker",
+    ]);
   });
 
   test("creates a neutral legacy token for the magician", () => {

@@ -38,7 +38,7 @@ test("renders a compact player window and places a death event in the current da
   expect(card).toHaveStyle("--player-color: #123456");
   expect(card).toHaveTextContent("アリス");
   expect(card.querySelector(".name-icon")).toHaveAttribute("src", "/icon/test.png");
-  expect(card).toHaveTextContent("魔術師");
+  expect(card.querySelector(".claimed-role img")).toHaveAttribute("alt", "魔術師");
   expect(card).toHaveTextContent("1日:");
   expect(card.querySelector(".day-cell .player-icon")).toHaveAttribute("src", "/icon/bob.png");
   expect(card).toHaveTextContent("自爆");
@@ -97,6 +97,28 @@ test("uses role colors for role icon frames and keeps uncolored players as text"
   expect(card.querySelector(".role-token")).toHaveStyle("background: #8f8");
   expect(card.querySelector(".day-cell")).toHaveTextContent("色なし");
   expect(card.querySelectorAll(".day-cell img")[0]).toHaveAttribute("alt", "医者");
+});
+
+test("uses the local preview images for the added roles", () => {
+  loadPopup();
+
+  sendSnapshot({
+    day: 1,
+    colorNameDic: {},
+    tableData: [{
+      id: 0,
+      keyid: 0,
+      name: ["アリス", 19],
+      role: [["トラッカ", 1, 1], ["魔術師", 3, 1], ["ホーンタ", 3, 1]],
+    }],
+  });
+
+  expect(Array.from(document.querySelectorAll(".claimed-role img"))
+    .map((image) => image.getAttribute("alt")))
+    .toEqual(["トラッカ", "魔術師", "ホーンタ"]);
+  expect(Array.from(document.querySelectorAll(".claimed-role img"))
+    .map((image) => image.getAttribute("src")))
+    .toEqual(["./image/Tracker.png", "./image/Magician.png", "./image/Haunter.png"]);
 });
 
 test("makes a death role prominent and joins multiple action results without separators", () => {
