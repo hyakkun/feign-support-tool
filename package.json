@@ -21,13 +21,10 @@
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest",
-    "test:run": "vitest run",
-    "predeploy": "npm run build",
-    "deploy": "gh-pages -d dist"
+    "test:run": "vitest run"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^6.1.1",
-    "gh-pages": "^3.2.3",
     "jsdom": "^29.1.1",
     "vite": "^8.3.0",
     "vitest": "^5.0.0"

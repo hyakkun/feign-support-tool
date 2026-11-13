@@ -19,7 +19,7 @@ feature/quality-foundation
 └─ feature/board-persistence           # 保存・共有を決めた後だけ作成
 ```
 
-各派生ブランチは `feature/quality-foundation` の最新 HEAD から作成し、完了後に同ブランチへ戻す。品質基盤の安定化が完了してから `master` へ統合し、公開が必要な変更だけを `gh-pages` のリリース手順へ進める。
+各派生ブランチは `feature/quality-foundation` の最新 HEAD から作成し、完了後に同ブランチへ戻す。品質基盤の安定化が完了してから `master` へ統合する。GitHub Pages は `master` の push を起点に GitHub Actions が build artifact を公開する。`gh-pages` branch へ build 成果物を直接 push しない。
 
 新役職画像の追加は、役職カタログと表示コードの変更に画像ファイルを含めて一つの変更として扱う。画像の管理方針は[役職画像の管理方針](../policies/role-image-policy.md)に従う。
 
@@ -67,7 +67,7 @@ feature/quality-foundation
 
 実際の更新は、依存グループごとに別ブランチへ分割する。各更新では `package-lock.json` を更新し、テスト・ビルド・ブラウザ確認を必須とする。
 
-**状態（2026-09-14）:** [依存関係更新計画](./dependency-upgrade-plan.md) に従い、直接依存の小規模更新、React 18 / テスト基盤更新、CRA から Vite / Vitest への移行を完了した。React 18.3.1 の `createRoot` 移行、Testing Library 15 / user-event 14 / jest-dom 6 への更新、死亡役職アニメーションの `findDOMNode` 警告解消を含む。Vite は GitHub Pages 用の base と `dist` 出力を設定し、全テスト・build・主要操作のブラウザ確認も成功している。次は `gh-pages` 6 のリリース方式を決めるか、legacy 互換境界の縮小に進む。
+**状態（2026-11-14）:** [依存関係更新計画](./dependency-upgrade-plan.md) に従い、直接依存の小規模更新、React 18 / テスト基盤更新、CRA から Vite / Vitest への移行を完了した。React 18.3.1 の `createRoot` 移行、Testing Library 15 / user-event 14 / jest-dom 6 への更新、死亡役職アニメーションの `findDOMNode` 警告解消を含む。Vite は GitHub Pages 用の base と `dist` 出力を設定済み。GitHub Pages の公開方式は Actions artifact deployment とし、`master` push で公開する workflow を追加した。`gh-pages` package と deploy scripts は削除済み。GitHub repository settings の Pages source を Actions に切り替え、初回 deployment と実 URL を確認する作業が残る。legacy 互換境界の縮小は引き続き独立タスクとする。
 
 ## 優先度 3: legacy 互換境界の縮小
 
