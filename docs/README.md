@@ -16,6 +16,6 @@
 
 ## ポリシー (`policies/`)
 
-- [ローカル画像プレビューブランチの扱い](policies/local-preview-branch-policy.md): 暫定役職画像を含むローカル専用ブランチの必須ルールと正式取り込み条件。
+- [役職画像の管理方針](policies/role-image-policy.md): 役職画像の配置、コードとの同時管理、外部素材の確認事項。
 
 設計変更は `design/`、実施順・分岐・調査結果は `plans/`、継続的に守る運用ルールは `policies/` に置く。
