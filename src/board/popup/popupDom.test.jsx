@@ -4,6 +4,7 @@ import path from "path";
 const loadPopup = () => {
   document.body.innerHTML = '<p id="status"></p><section id="players"></section>';
   window.resizeTo = vi.fn();
+  if (!window.opener) Object.defineProperty(window, "opener", { configurable: true, value: window });
   const scriptPath = path.resolve(process.cwd(), "public/popup.js");
   window.eval(fs.readFileSync(scriptPath, "utf8"));
 };
@@ -11,6 +12,7 @@ const loadPopup = () => {
 const sendSnapshot = (snapshot) => {
   window.dispatchEvent(new MessageEvent("message", {
     origin: window.location.origin,
+    source: window.opener,
     data: { type: "feign-board-snapshot", ...snapshot },
   }));
 };

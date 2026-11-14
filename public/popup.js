@@ -206,8 +206,13 @@
 
   window.addEventListener("message", (event) => {
     if (event.origin !== window.location.origin) return;
+    if (event.source !== window.opener) return;
     if (event.data?.type !== "feign-board-snapshot") return;
     snapshot = event.data;
     render();
   });
+
+  if (window.opener) {
+    window.opener.postMessage({ type: "feign-popup-ready" }, window.location.origin);
+  }
 })();
