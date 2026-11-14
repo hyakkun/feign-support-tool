@@ -41,6 +41,12 @@ const createPopupWindow = () => ({
   postMessage: vi.fn(),
 });
 
+const notifyPopupReady = (popupWindow) => window.dispatchEvent(new MessageEvent("message", {
+  origin: window.location.origin,
+  source: popupWindow,
+  data: { type: "feign-popup-ready" },
+}));
+
 describe("FeignSupportToolRoot integration", () => {
   let popupWindow;
   let openSpy;
@@ -63,7 +69,7 @@ describe("FeignSupportToolRoot integration", () => {
     render(<FeignSupportToolRoot />);
 
     fireEvent.click(screen.getByText("openDisplayWindow"));
-    act(() => vi.runOnlyPendingTimers());
+    act(() => notifyPopupReady(popupWindow));
     expect(popupWindow.postMessage).toHaveBeenCalledTimes(1);
 
     fireEvent.change(screen.getByPlaceholderText(/名前入力欄/), { target: { value: "アリス\nボブ" } });
@@ -84,7 +90,7 @@ describe("FeignSupportToolRoot integration", () => {
     render(<FeignSupportToolRoot />);
 
     fireEvent.click(screen.getByText("openDisplayWindow"));
-    act(() => vi.runOnlyPendingTimers());
+    act(() => notifyPopupReady(popupWindow));
     fireEvent.change(screen.getByPlaceholderText(/名前入力欄/), { target: { value: "アリス\nボブ" } });
     fireEvent.click(screen.getByText("setName"));
     fireEvent.click(screen.getByText("リセット"));
@@ -104,7 +110,7 @@ describe("FeignSupportToolRoot integration", () => {
     render(<FeignSupportToolRoot />);
 
     fireEvent.click(screen.getByText("openDisplayWindow"));
-    act(() => vi.runOnlyPendingTimers());
+    act(() => notifyPopupReady(popupWindow));
     fireEvent.click(screen.getByText("色を変更"));
 
     expect(screen.getByTestId("first-player-color")).toHaveTextContent("#123456");
@@ -120,7 +126,7 @@ describe("FeignSupportToolRoot integration", () => {
     render(<FeignSupportToolRoot />);
 
     fireEvent.click(screen.getByText("openDisplayWindow"));
-    act(() => vi.runOnlyPendingTimers());
+    act(() => notifyPopupReady(popupWindow));
     fireEvent.click(screen.getByText("自爆を記録"));
 
     expect(screen.getByTestId("first-player-dead-role")).toHaveTextContent("魔術師");
@@ -137,7 +143,7 @@ describe("FeignSupportToolRoot integration", () => {
     render(<FeignSupportToolRoot />);
 
     fireEvent.click(screen.getByText("openDisplayWindow"));
-    act(() => vi.runOnlyPendingTimers());
+    act(() => notifyPopupReady(popupWindow));
     fireEvent.click(screen.getByText("行動を記録"));
 
     expect(screen.getByTestId("first-player-action")).toHaveTextContent("トラッカ");
@@ -145,6 +151,26 @@ describe("FeignSupportToolRoot integration", () => {
       day: 2,
       tableData: expect.arrayContaining([
         expect.objectContaining({ name: ["名前例", 19], action_day2: [["トラッカ", 1, 1]] }),
+      ]),
+    }), window.location.origin);
+  });
+
+  test("sends the latest board snapshot when the popup becomes ready after an edit", () => {
+    render(<FeignSupportToolRoot />);
+
+    fireEvent.click(screen.getByText("openDisplayWindow"));
+    fireEvent.change(screen.getByPlaceholderText(/名前入力欄/), { target: { value: "アリス\nボブ" } });
+    fireEvent.click(screen.getByText("setName"));
+    const callsBeforeReady = popupWindow.postMessage.mock.calls.length;
+
+    act(() => notifyPopupReady(popupWindow));
+
+    expect(popupWindow.postMessage).toHaveBeenCalledTimes(callsBeforeReady + 1);
+    expect(popupWindow.postMessage).toHaveBeenLastCalledWith(expect.objectContaining({
+      day: 1,
+      tableData: expect.arrayContaining([
+        expect.objectContaining({ name: ["アリス", 19] }),
+        expect.objectContaining({ name: ["ボブ", 19] }),
       ]),
     }), window.location.origin);
   });

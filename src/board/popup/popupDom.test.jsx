@@ -4,6 +4,7 @@ import path from "path";
 const loadPopup = () => {
   document.body.innerHTML = '<p id="status"></p><section id="players"></section>';
   window.resizeTo = vi.fn();
+  if (!window.opener) Object.defineProperty(window, "opener", { configurable: true, value: window });
   const scriptPath = path.resolve(process.cwd(), "public/popup.js");
   window.eval(fs.readFileSync(scriptPath, "utf8"));
 };
@@ -11,6 +12,7 @@ const loadPopup = () => {
 const sendSnapshot = (snapshot) => {
   window.dispatchEvent(new MessageEvent("message", {
     origin: window.location.origin,
+    source: window.opener,
     data: { type: "feign-board-snapshot", ...snapshot },
   }));
 };
@@ -97,6 +99,38 @@ test("uses role colors for role icon frames and keeps uncolored players as text"
   expect(card.querySelector(".role-token")).toHaveStyle("background: #8f8");
   expect(card.querySelector(".day-cell")).toHaveTextContent("色なし");
   expect(card.querySelectorAll(".day-cell img")[0]).toHaveAttribute("alt", "医者");
+});
+
+test("notifies the opener after registering the snapshot listener", () => {
+  const originalOpener = Object.getOwnPropertyDescriptor(window, "opener");
+  const opener = {
+    postMessage: vi.fn((message, targetOrigin) => {
+      window.dispatchEvent(new MessageEvent("message", {
+        origin: targetOrigin,
+        source: opener,
+        data: {
+          type: "feign-board-snapshot",
+          day: 1,
+          colorNameDic: {},
+          tableData: [{ id: 0, keyid: 0, name: ["アリス", 19] }],
+        },
+      }));
+    }),
+  };
+  Object.defineProperty(window, "opener", { configurable: true, value: opener });
+
+  try {
+    loadPopup();
+
+    expect(opener.postMessage).toHaveBeenCalledWith(
+      { type: "feign-popup-ready" },
+      window.location.origin,
+    );
+    expect(document.querySelector("article.player-window")).toHaveTextContent("アリス");
+  } finally {
+    if (originalOpener) Object.defineProperty(window, "opener", originalOpener);
+    else delete window.opener;
+  }
 });
 
 test("uses the local preview images for the added roles", () => {
