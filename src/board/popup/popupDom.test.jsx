@@ -99,6 +99,38 @@ test("uses role colors for role icon frames and keeps uncolored players as text"
   expect(card.querySelectorAll(".day-cell img")[0]).toHaveAttribute("alt", "医者");
 });
 
+test("notifies the opener after registering the snapshot listener", () => {
+  const originalOpener = Object.getOwnPropertyDescriptor(window, "opener");
+  const opener = {
+    postMessage: vi.fn((message, targetOrigin) => {
+      window.dispatchEvent(new MessageEvent("message", {
+        origin: targetOrigin,
+        source: opener,
+        data: {
+          type: "feign-board-snapshot",
+          day: 1,
+          colorNameDic: {},
+          tableData: [{ id: 0, keyid: 0, name: ["アリス", 19] }],
+        },
+      }));
+    }),
+  };
+  Object.defineProperty(window, "opener", { configurable: true, value: opener });
+
+  try {
+    loadPopup();
+
+    expect(opener.postMessage).toHaveBeenCalledWith(
+      { type: "feign-popup-ready" },
+      window.location.origin,
+    );
+    expect(document.querySelector("article.player-window")).toHaveTextContent("アリス");
+  } finally {
+    if (originalOpener) Object.defineProperty(window, "opener", originalOpener);
+    else delete window.opener;
+  }
+});
+
 test("uses the local preview images for the added roles", () => {
   loadPopup();
 
