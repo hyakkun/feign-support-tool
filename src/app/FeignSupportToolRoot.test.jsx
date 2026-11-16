@@ -68,12 +68,12 @@ describe("FeignSupportToolRoot integration", () => {
   test("updates the rendered board and popup snapshot after setting participant names", () => {
     render(<FeignSupportToolRoot />);
 
-    fireEvent.click(screen.getByText("openDisplayWindow"));
+    fireEvent.click(screen.getByText("表示用ウィンドウを開く"));
     act(() => notifyPopupReady(popupWindow));
     expect(popupWindow.postMessage).toHaveBeenCalledTimes(1);
 
     fireEvent.change(screen.getByPlaceholderText(/名前入力欄/), { target: { value: "アリス\nボブ" } });
-    fireEvent.click(screen.getByText("setName"));
+    fireEvent.click(screen.getByText("参加者名を設定"));
 
     expect(screen.getByTestId("player-names")).toHaveTextContent("アリス,ボブ");
     expect(popupWindow.postMessage).toHaveBeenLastCalledWith(expect.objectContaining({
@@ -89,10 +89,10 @@ describe("FeignSupportToolRoot integration", () => {
   test("sends the initial board snapshot when resetting an open popup", () => {
     render(<FeignSupportToolRoot />);
 
-    fireEvent.click(screen.getByText("openDisplayWindow"));
+    fireEvent.click(screen.getByText("表示用ウィンドウを開く"));
     act(() => notifyPopupReady(popupWindow));
     fireEvent.change(screen.getByPlaceholderText(/名前入力欄/), { target: { value: "アリス\nボブ" } });
-    fireEvent.click(screen.getByText("setName"));
+    fireEvent.click(screen.getByText("参加者名を設定"));
     fireEvent.click(screen.getByText("リセット"));
 
     expect(confirmSpy).toHaveBeenCalledWith("入力内容をリセットしますか？");
@@ -109,7 +109,7 @@ describe("FeignSupportToolRoot integration", () => {
   test("keeps a color change synchronized between the board and an open popup", () => {
     render(<FeignSupportToolRoot />);
 
-    fireEvent.click(screen.getByText("openDisplayWindow"));
+    fireEvent.click(screen.getByText("表示用ウィンドウを開く"));
     act(() => notifyPopupReady(popupWindow));
     fireEvent.click(screen.getByText("色を変更"));
 
@@ -125,7 +125,7 @@ describe("FeignSupportToolRoot integration", () => {
   test("records the magician death role when saving a self-destruct event", () => {
     render(<FeignSupportToolRoot />);
 
-    fireEvent.click(screen.getByText("openDisplayWindow"));
+    fireEvent.click(screen.getByText("表示用ウィンドウを開く"));
     act(() => notifyPopupReady(popupWindow));
     fireEvent.click(screen.getByText("自爆を記録"));
 
@@ -142,7 +142,7 @@ describe("FeignSupportToolRoot integration", () => {
   test("saves a role-select result through the root reducer and popup snapshot", () => {
     render(<FeignSupportToolRoot />);
 
-    fireEvent.click(screen.getByText("openDisplayWindow"));
+    fireEvent.click(screen.getByText("表示用ウィンドウを開く"));
     act(() => notifyPopupReady(popupWindow));
     fireEvent.click(screen.getByText("行動を記録"));
 
@@ -158,9 +158,9 @@ describe("FeignSupportToolRoot integration", () => {
   test("sends the latest board snapshot when the popup becomes ready after an edit", () => {
     render(<FeignSupportToolRoot />);
 
-    fireEvent.click(screen.getByText("openDisplayWindow"));
+    fireEvent.click(screen.getByText("表示用ウィンドウを開く"));
     fireEvent.change(screen.getByPlaceholderText(/名前入力欄/), { target: { value: "アリス\nボブ" } });
-    fireEvent.click(screen.getByText("setName"));
+    fireEvent.click(screen.getByText("参加者名を設定"));
     const callsBeforeReady = popupWindow.postMessage.mock.calls.length;
 
     act(() => notifyPopupReady(popupWindow));

@@ -76,7 +76,7 @@ export class RoleSelect extends React.Component {
     const typeButton = (optionProps) => {
       if (optionProps.data.value?.length >= 2 && optionProps.data.value[2] !== actionType.name) {
         if (optionProps.data.value[0] === LEGACY_SELECTOR.FACTION) {
-          return <div style={{ display: "flex" }}><button className="roleButton crew" onClick={() => toggleRoleTypeNum(1)}>crew</button><button className="roleButton imp" onClick={() => toggleRoleTypeNum(2)}>imp</button><button className="roleButton neutral" onClick={() => toggleRoleTypeNum(3)}>neutral</button><button className="roleButton unknown" onClick={() => toggleRoleTypeNum(0)}>none</button></div>;
+          return <div style={{ display: "flex" }}><button className="roleButton crew" onClick={() => toggleRoleTypeNum(1)}>緑</button><button className="roleButton imp" onClick={() => toggleRoleTypeNum(2)}>赤</button><button className="roleButton neutral" onClick={() => toggleRoleTypeNum(3)}>青</button><button className="roleButton unknown" onClick={() => toggleRoleTypeNum(0)}>不明</button></div>;
         }
         if (optionProps.data.value[0] === "hr") return <hr style={{ display: "block" }} />;
         if (optionProps.data.value[0] === "br") return <br />;

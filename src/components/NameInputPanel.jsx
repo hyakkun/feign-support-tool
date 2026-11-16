@@ -13,13 +13,13 @@ export const NameInputPanel = ({
 }) => (
   <div>
     <div style={{ display: "flex" }}>
-      <textarea cols="20" rows="12" value={nameText} onChange={onNameTextChange} style={{ display: "inline-block" }} placeholder="名前入力欄：参加者の名前（五文字以内）を改行区切りで入力" />
+      <textarea cols="20" rows="12" value={nameText} onChange={onNameTextChange} style={{ display: "inline-block", border: "solid #ddd" }} placeholder={"名前入力欄\n参加者の名前を改行区切りで入力"} />
       <div style={{ display: "flex", flexDirection: "column" }}>
         <a href="https://github.com/hyakkun/feign-support-tool/blob/master/README.md" target="_blank" rel="noopener noreferrer" style={{ marginLeft: "1rem" }}>使い方</a>
         <div style={{ marginTop: "auto" }}>
           <div>
             <div style={{ margin: "1rem" }}>
-              <button onClick={onOpenPopup}>openDisplayWindow</button>
+              <button onClick={onOpenPopup}>表示用ウィンドウを開く</button>
             </div>
             <label>
               <input type="checkbox" checked={playerIsIcon} onChange={onPlayerIconChange} id="iconCheckBox" style={{ marginLeft: "1rem" }} />
@@ -34,7 +34,7 @@ export const NameInputPanel = ({
       </div>
     </div>
     <div>
-      <button onClick={onSetNames}>setName</button>
+      <button onClick={onSetNames}>参加者名を設定</button>
       <button onClick={onReset} style={{ marginLeft: "1rem" }}>リセット</button>
     </div>
   </div>

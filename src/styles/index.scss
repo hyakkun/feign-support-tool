@@ -186,32 +186,7 @@ img {
 .iconContainer {
     display: inline-block;
     width: 1.5rem;
-    height: 1.7rem;
-    position: relative;
-}
-.iconTextContainer {
-    position: absolute;
-    display: inline-block;
-    top: 0.55rem;
-    left: -1.85rem;
-    width: 5.2rem;
-    transform: scale(0.4);
-    padding: 0;
-    margin: 0;
-    text-align: center;
-}
-
-.iconText {
-    display: inline-block;
-    font-size: 1rem;
-    font-weight: bold;
-    height: fit-content;
-    width: fit-content;
-    min-width: 3.5rem;
-    background-color: #fff;
-    border-radius: 0.2rem;
-    border: 0.1rem solid #000;
-    box-sizing: border-box;
+    height: 1.5rem;
 }
 .revive {
     position:absolute;

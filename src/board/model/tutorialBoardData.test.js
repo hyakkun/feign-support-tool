@@ -8,7 +8,7 @@ test("keeps the tutorial players and event examples as static board data", () =>
 
   expect(playerRows.map((row) => row.name[0])).toEqual([
     "名前例", "名前は", "最初に", "ページ下部", "入力欄に", "改行区切り",
-    "で入力", "setName", "で設定", "詳細は", "入力欄横", "使い方参照",
+    "で入力", "参加者名を設定", "で設定", "詳細は", "入力欄横", "使い方参照",
   ]);
   expect(exileRow.target_day1).toEqual([["入力欄に", 0, 2]]);
   expect(TUTORIAL_ROWS.filter((row) => row.id < 0).map((row) => row.name[0])).toEqual(

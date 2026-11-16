@@ -19,8 +19,8 @@ test("forwards name, display, and toolbar actions through props", () => {
   fireEvent.change(screen.getByPlaceholderText(/名前入力欄/), { target: { value: "ボブ" } });
   fireEvent.click(screen.getByLabelText("アイコン"));
   fireEvent.click(screen.getByLabelText("名前欄アイコン"));
-  fireEvent.click(screen.getByText("openDisplayWindow"));
-  fireEvent.click(screen.getByText("setName"));
+  fireEvent.click(screen.getByText("表示用ウィンドウを開く"));
+  fireEvent.click(screen.getByText("参加者名を設定"));
   fireEvent.click(screen.getByText("リセット"));
 
   expect(props.onNameTextChange).toHaveBeenCalledTimes(1);
