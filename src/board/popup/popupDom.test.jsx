@@ -76,7 +76,50 @@ test("places an earlier day death event in that day's action cell", () => {
 
   const dayRows = document.querySelectorAll("article.player-window .day-row");
   expect(dayRows[0]).toHaveTextContent("道連れ");
-  expect(dayRows[1]).toHaveTextContent("罠");
+  expect(dayRows[1].querySelector(".action-icon-token img"))
+    .toHaveAttribute("alt", "罠");
+  expect(dayRows[1].querySelector(".action-icon-token img"))
+    .toHaveAttribute("src", "./image/Trapper.png");
+});
+
+test("shows the doctor icon and revive badge beside revived players' day labels", () => {
+  loadPopup();
+
+  sendSnapshot({
+    day: 1,
+    colorNameDic: {},
+    tableData: [
+      {
+        id: 0,
+        keyid: 0,
+        name: ["アリス", 19],
+        action_day1: [["蘇生", 0, 0]],
+      },
+      {
+        id: 1,
+        keyid: 1,
+        name: ["ボブ", 19],
+      },
+      {
+        id: -6,
+        keyid: -6,
+        name: ["医者", 19],
+        action_day1: [["ボブ", 0, 2], ["蘇生", 0, 4]],
+      },
+    ],
+  });
+
+  const alice = document.querySelector('article.player-window[data-id="0"]');
+  const aliceDayLabel = alice.querySelector(".day-label");
+  expect(aliceDayLabel.querySelector(".day-doctor-icon"))
+    .toHaveAttribute("src", "./image/Doctor.png");
+  expect(aliceDayLabel.querySelector(".day-revive-badge"))
+    .toHaveAttribute("src", "./image/Revive.png");
+  expect(alice.querySelectorAll(".day-cell")[1]).not.toHaveTextContent("蘇生");
+
+  const bob = document.querySelector('article.player-window[data-id="1"]');
+  expect(bob.querySelector(".day-label .day-revive-badge"))
+    .toHaveAttribute("alt", "蘇生");
 });
 
 test("uses role colors for role icon frames and keeps uncolored players as text", () => {
