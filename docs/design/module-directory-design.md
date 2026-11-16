@@ -32,6 +32,13 @@ src/index.js ──> app
 テストファイルは実装ファイルに隣接して置く。以下のツリーでは `.test.*` を省略する。
 
 ```text
+docs/
+├─ README.md                           # ドキュメント索引
+├─ images/
+│  └─ readme/                          # README 掲載画像
+├─ design/                             # 恒久的な設計資料
+├─ plans/                              # 作業計画・調査記録
+└─ policies/                           # 継続的な運用方針
 src/
 ├─ index.js                           # Vite entry document から読む起動モジュール
 ├─ index.test.jsx                     # entry point を通す統合テスト
