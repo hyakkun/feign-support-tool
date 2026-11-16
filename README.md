@@ -1,5 +1,9 @@
 # Feign 盤面整理支援ツール
 
+このツールはFork元であるsawa90さんのfeign-support-toolを改修したものです。  
+元ツール : https://sawa90.github.io/feign-support-tool/  
+リポジトリ : https://github.com/sawa90/feign-support-tool  
+
 ## 使用方法（概要）
 
 1. ページの下部でプレイヤー全員の名前を入力して設定
