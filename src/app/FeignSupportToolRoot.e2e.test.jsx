@@ -26,7 +26,7 @@ describe("FeignSupportToolRoot end-to-end cell editing", () => {
     render(<FeignSupportToolRoot />);
 
     fireEvent.change(screen.getByPlaceholderText(/名前入力欄/), { target: { value: "アリス\nボブ" } });
-    fireEvent.click(screen.getByRole("button", { name: "setName" }));
+    fireEvent.click(screen.getByRole("button", { name: "参加者名を設定" }));
 
     const selfDestructRow = findRowByLabel("自爆");
     expect(selfDestructRow).toBeDefined();
@@ -44,7 +44,7 @@ describe("FeignSupportToolRoot end-to-end cell editing", () => {
     render(<FeignSupportToolRoot />);
 
     fireEvent.change(screen.getByPlaceholderText(/名前入力欄/), { target: { value: "ボブ\nアリス" } });
-    fireEvent.click(screen.getByRole("button", { name: "setName" }));
+    fireEvent.click(screen.getByRole("button", { name: "参加者名を設定" }));
     fireEvent.click(screen.getByRole("columnheader", { name: "名前" }));
 
     expect(playerNamesInRenderedOrder()).toEqual(["アリス", "ボブ"]);

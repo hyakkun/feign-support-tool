@@ -60,7 +60,7 @@ export const createTableFormatters = ({
         }
         if (item[0] in roleImage) return <img key={item + index} className={roletype[item[1]]} src={roleImage[item[0]]} alt={item[0]} />;
       } else if (getPlayerIsIcon() && item[0] in getColorNameDictionary()) {
-        return <span key={item + index} className="iconContainer"><img src={getColorNameDictionary()[item[0]][0]} alt={item[0]} /><span className="iconTextContainer"><span className="iconText">{item[0]}</span></span></span>;
+        return <span key={item + index} className="iconContainer"><img src={getColorNameDictionary()[item[0]][0]} alt={item[0]} /></span>;
       }
       if (directionColumn && item[2] === actionType.name) return <span key={item + index} className="name"><span className={roletype[item[1]]}>{item[0]}</span></span>;
       return <span key={item + index} className={roletype[item[1]]}>{item[0]}</span>;

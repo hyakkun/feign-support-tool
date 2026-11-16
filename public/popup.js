@@ -20,6 +20,12 @@
     シーフ: "Thief.png",
     サバイバ: "Survivor.png",
   };
+  const actionIconFiles = {
+    成功: "Success.png",
+    失敗: "Failure.png",
+    罠: "Trapper.png",
+    補導: "Police.png",
+  };
   const roleBackgroundColors = ["#ddd", "#8f8", "#f88", "#88f", "#ff8", "#8ff"];
   let snapshot;
   let order = [];
@@ -39,6 +45,7 @@
     item.className = className;
     const label = token[0];
     const playerImage = token[2] === 2 ? snapshot.colorNameDic?.[label]?.[0] : undefined;
+    const actionIcon = actionIconFiles[label];
     const roleImage = roleImageFiles[label];
 
     if (playerImage) {
@@ -48,6 +55,12 @@
       imageElement.alt = label;
       item.append(imageElement);
       item.title = label;
+    } else if (actionIcon) {
+      const imageElement = document.createElement("img");
+      imageElement.src = `./image/${actionIcon}`;
+      imageElement.alt = label;
+      item.classList.add("action-icon-token");
+      item.append(imageElement);
     } else if (roleImage) {
       const imageElement = document.createElement("img");
       imageElement.src = `./image/${roleImage}`;
@@ -103,13 +116,52 @@
     container.append(badge);
   };
 
-  const createDayRow = (player, day) => {
+  const revivedPlayersForDay = (day) => {
+    const revivedPlayers = new Set();
+    snapshot.tableData.forEach((row) => {
+      const actionTokens = Array.isArray(row[`action_day${day}`]) ? row[`action_day${day}`] : [];
+      actionTokens.forEach((token, index) => {
+        if (!Array.isArray(token) || token[0] !== "蘇生") return;
+        if (token[2] === 4) {
+          const target = actionTokens.slice(0, index).reverse()
+            .find((item) => Array.isArray(item) && item[2] === 2);
+          if (target) revivedPlayers.add(target[0]);
+        } else if (row.id >= 0 && row.name?.[0]) {
+          revivedPlayers.add(row.name[0]);
+        }
+      });
+    });
+    return revivedPlayers;
+  };
+
+  const createDayRow = (player, day, revivedPlayers) => {
     const row = document.createElement("div");
     row.className = "day-row";
 
     const label = document.createElement("span");
     label.className = "day-label";
-    label.textContent = `${day}日:`;
+    const labelText = document.createElement("span");
+    labelText.textContent = `${day}日:`;
+    label.append(labelText);
+    if (revivedPlayers.has(player.name?.[0])) {
+      label.classList.add("has-revive");
+      const reviveIndicator = document.createElement("span");
+      reviveIndicator.className = "revive-indicator";
+
+      const doctorIcon = document.createElement("img");
+      doctorIcon.className = "day-doctor-icon";
+      doctorIcon.src = "./image/Doctor.png";
+      doctorIcon.alt = "医者";
+
+      const reviveBadge = document.createElement("img");
+      reviveBadge.className = "day-revive-badge";
+      reviveBadge.src = "./image/Revive.png";
+      reviveBadge.alt = "蘇生";
+      reviveBadge.title = "蘇生";
+
+      reviveIndicator.append(doctorIcon, reviveBadge);
+      label.append(reviveIndicator);
+    }
     row.append(label);
 
     const target = document.createElement("span");
@@ -130,13 +182,15 @@
       action.textContent = events.join(" / ");
       action.classList.add("event-token");
     } else {
-      appendTokens(action, visibleTokens(player[`action_day${day}`]), "cell-token action-token");
+      const actionTokens = visibleTokens(player[`action_day${day}`])
+        .filter((token) => token[0] !== "蘇生");
+      appendTokens(action, actionTokens, "cell-token action-token");
     }
     row.append(action);
     return row;
   };
 
-  const createPlayerWindow = (player) => {
+  const createPlayerWindow = (player, revivedPlayersByDay) => {
     const playerWindow = document.createElement("article");
     const color = snapshot.colorNameDic[player.name?.[0]]?.[1] || "#eeeeee";
     const dead = visibleTokens(player.deadRole).length > 0;
@@ -174,7 +228,9 @@
 
     const dayList = document.createElement("div");
     dayList.className = "day-list";
-    for (let day = 1; day <= snapshot.day; day += 1) dayList.append(createDayRow(player, day));
+    for (let day = 1; day <= snapshot.day; day += 1) {
+      dayList.append(createDayRow(player, day, revivedPlayersByDay.get(day)));
+    }
     playerWindow.append(dayList);
 
     playerWindow.addEventListener("dragstart", () => {
@@ -196,8 +252,12 @@
 
   const render = () => {
     const players = orderedPlayers();
+    const revivedPlayersByDay = new Map();
+    for (let day = 1; day <= snapshot.day; day += 1) {
+      revivedPlayersByDay.set(day, revivedPlayersForDay(day));
+    }
     status.textContent = `${snapshot.day}日目の表示。プレイヤー枠はドラッグして並べ替えられます。`;
-    playersElement.replaceChildren(...players.map(createPlayerWindow));
+    playersElement.replaceChildren(...players.map((player) => createPlayerWindow(player, revivedPlayersByDay)));
     if (!hasResizedToContent) {
       resizeWidthToContent();
       hasResizedToContent = true;
