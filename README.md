@@ -9,3 +9,7 @@
 ![説明2](docs/images/readme/readme_2.png)
 3. 盤面情報を記録（役職、行き先、行動結果など）  
 ![説明3](docs/images/readme/readme_3.png)
+
+## 機能詳細
+
+![説明詳細](docs/images/readme/readme_detail.png)
